@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-
 	"reflect"
 
 	"github.com/mattn/go-shellwords"
@@ -21,6 +20,12 @@ mappings:
 
   - git a ... :
       hub add ...
+
+  - git ci ... :
+      hub commit ...
+
+  - git ps ... :
+      hub push ...
 
   - git st :
       hub status
