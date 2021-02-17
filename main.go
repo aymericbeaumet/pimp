@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
+	"sync"
 )
 
 func main() {
@@ -15,33 +15,18 @@ func main() {
 	}
 
 	name := os.Args[1]
-
 	var args []string
 	if len(os.Args) >= 3 {
 		args = os.Args[2:]
 	}
 
-	fmt.Println(name, args)
+	name, args = remap(name, args)
 
+	var wg sync.WaitGroup
 	cmd := exec.CommandContext(context.Background(), name, args...)
-
-	stdin, err := cmd.StdinPipe()
-	if err != nil {
-		panic(err)
-	}
-	go io.Copy(stdin, os.Stdin)
-
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		panic(err)
-	}
-	go io.Copy(os.Stdout, stdout)
-
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		panic(err)
-	}
-	go io.Copy(os.Stderr, stderr)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
 	if err := cmd.Start(); err != nil {
 		panic(err)
@@ -52,5 +37,13 @@ func main() {
 		panic(err)
 	}
 
+	wg.Wait()
 	os.Exit(state.ExitCode())
+}
+
+func remap(name string, args []string) (string, []string) {
+	if len(args) == 0 {
+		return "hub", []string{"status", "-sb"}
+	}
+	return "hub", args
 }
