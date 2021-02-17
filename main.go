@@ -16,17 +16,20 @@ import (
 var configStr = `
 mappings:
 
-  git :
-    hub status -sb
+  - git :
+      hub status -sb
 
-  git st :
-    hub status
+  - git a ... :
+      hub add ...
 
-  git co ... :
-    hub checkout ...
+  - git st :
+      hub status
 
-  git ... :
-    hub ...
+  - git co ... :
+      hub checkout ...
+
+  - git ... :
+      hub ...
 `
 
 func main() {
@@ -41,7 +44,7 @@ func main() {
 	}
 
 	env, args := engine.Map(os.Environ(), os.Args[1:])
-	fmt.Println(env, args)
+	fmt.Println("DEBUG", args)
 	cmd := exec.CommandContext(context.Background(), args[0], args[1:]...)
 	cmd.Env = env
 	cmd.Stdin = os.Stdin
@@ -60,7 +63,7 @@ func main() {
 }
 
 type Config struct {
-	Mappings map[string]string
+	Mappings []map[string]string
 }
 
 type Engine struct {
@@ -81,20 +84,22 @@ func NewEngineFromString(configString string) (*Engine, error) {
 		return nil, err
 	}
 
-	for fromString, toString := range config.Mappings {
-		from, err := shellwords.Parse(fromString)
-		if err != nil {
-			panic(err)
+	for _, mapping := range config.Mappings {
+		for fromString, toString := range mapping {
+			from, err := shellwords.Parse(fromString)
+			if err != nil {
+				panic(err)
+			}
+			env, to, err := shellwords.ParseWithEnvs(toString)
+			if err != nil {
+				panic(err)
+			}
+			engine.mappings = append(engine.mappings, &Mapping{
+				from: from,
+				to:   to,
+				env:  env,
+			})
 		}
-		env, to, err := shellwords.ParseWithEnvs(toString)
-		if err != nil {
-			panic(err)
-		}
-		engine.mappings = append(engine.mappings, &Mapping{
-			from: from,
-			to:   to,
-			env:  env,
-		})
 	}
 
 	return engine, nil
@@ -106,12 +111,12 @@ func (e *Engine) Map(env []string, args []string) ([]string, []string) {
 			from := mapping.from[:len(mapping.from)-1]
 			if reflect.DeepEqual(args[:len(from)], from) {
 				to := append(mapping.to[:len(mapping.to)-1], args[len(from):]...)
-				return append(env, mapping.env...), to
+				return append(env[:], mapping.env...), to
 			}
 		}
 
 		if reflect.DeepEqual(args, mapping.from) {
-			return append(env, mapping.env...), mapping.to
+			return append(env[:], mapping.env...), mapping.to
 		}
 	}
 
