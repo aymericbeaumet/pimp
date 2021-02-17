@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"sync"
 )
 
 func main() {
@@ -22,7 +21,6 @@ func main() {
 
 	name, args = remap(name, args)
 
-	var wg sync.WaitGroup
 	cmd := exec.CommandContext(context.Background(), name, args...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -36,8 +34,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	wg.Wait()
 	os.Exit(state.ExitCode())
 }
 
