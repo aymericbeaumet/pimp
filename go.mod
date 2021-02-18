@@ -1,4 +1,4 @@
-module github.com/aymericbeaumet/prox
+module github.com/aymericbeaumet/pimp
 
 go 1.15
 

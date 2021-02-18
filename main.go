@@ -60,7 +60,7 @@ mappings:
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: prox [option]... cmd [arg]...")
+		fmt.Println("Usage: pimp [option]... cmd [arg]...")
 		return
 	}
 
@@ -134,7 +134,7 @@ func NewEngineFromString(configString string) (*Engine, error) {
 					panic("shebang must be an absolute path")
 				}
 
-				file, err := ioutil.TempFile("", "prox")
+				file, err := ioutil.TempFile("", "pimp")
 				if err != nil {
 					panic(err)
 				}

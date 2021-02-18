@@ -1,6 +1,6 @@
-# prox
+# pimp
 
 ```
-alias g='./prox git'
+alias g='./pimp git'
 go build .; g status
 ```
