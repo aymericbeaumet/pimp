@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -16,8 +17,15 @@ func init() {
 
 func main() {
 	flags, args, err := ParseFlagsArgs()
-	if err != nil {
-		panic(err)
+	if err != nil || len(args) == 0 || flags.Help {
+		fmt.Printf("Usage: pimp [OPTION]... CMD [ARG]...\n\nOptions:\n")
+		flag.PrintDefaults()
+		return
+	}
+
+	if flags.Version {
+		fmt.Println("pimp v0.0.1")
+		return
 	}
 
 	engine, err := NewEngineFromHomeConfig()
