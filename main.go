@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -94,7 +95,7 @@ func NewEngineFromReader(r io.Reader) (*Engine, error) {
 		for fromString, toString := range mapping {
 			from, err := shellwords.Parse(fromString)
 			if err != nil {
-				panic(err)
+				return nil, err
 			}
 
 			var env []string
@@ -102,30 +103,30 @@ func NewEngineFromReader(r io.Reader) (*Engine, error) {
 			// multiline script (with shebang)
 			if newLineIndex := strings.IndexRune(toString, '\n'); newLineIndex > -1 {
 				if !strings.HasPrefix(toString, SHEBANG) {
-					panic("invalid shebang")
+					return nil, errors.New("invalid shebang")
 				}
 
 				to, err = shellwords.Parse(toString[len(SHEBANG):newLineIndex])
 				if err != nil {
-					panic(err)
+					return nil, err
 				}
 				if len(to) == 0 || !strings.HasPrefix(to[0], "/") {
-					panic("shebang must be an absolute path")
+					return nil, errors.New("shebang must be an absolute path")
 				}
 
 				file, err := ioutil.TempFile("", "pimp")
 				if err != nil {
-					panic(err)
+					return nil, err
 				}
 				to = append(to, file.Name())
 
 				if _, err := file.WriteString(toString); err != nil {
-					panic(err)
+					return nil, err
 				}
 			} else { // single line command
 				env, to, err = shellwords.ParseWithEnvs(toString)
 				if err != nil {
-					panic(err)
+					return nil, err
 				}
 			}
 
