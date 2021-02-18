@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -36,6 +37,14 @@ func main() {
 	if err := cmd.Start(); err != nil {
 		panic(err)
 	}
+
+	signalC := make(chan os.Signal, 32)
+	signal.Notify(signalC)
+	go func() {
+		for signal := range signalC {
+			_ = cmd.Process.Signal(signal)
+		}
+	}()
 
 	state, err := cmd.Process.Wait()
 	if err != nil {
