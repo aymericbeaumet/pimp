@@ -18,23 +18,23 @@ mappings:
   - git :
       hub status -sb
 
-  - git a ... :
-      hub add ...
+  - git a {...} :
+      hub add {...}
 
-  - git ci ... :
-      hub commit ...
+  - git ci {...} :
+      hub commit {...}
 
-  - git ps ... :
-      hub push ...
+  - git ps {...} :
+      hub push {...}
 
   - git st :
       hub status
 
-  - git co ... :
-      hub checkout ...
+  - git co {...} :
+      hub checkout {...}
 
-  - git ... :
-      hub ...
+  - git {...} :
+      hub {...}
 `
 
 func main() {
@@ -49,7 +49,6 @@ func main() {
 	}
 
 	env, args := engine.Map(os.Environ(), os.Args[1:])
-	fmt.Println("DEBUG", args)
 	cmd := exec.CommandContext(context.Background(), args[0], args[1:]...)
 	cmd.Env = env
 	cmd.Stdin = os.Stdin
@@ -112,7 +111,7 @@ func NewEngineFromString(configString string) (*Engine, error) {
 
 func (e *Engine) Map(env []string, args []string) ([]string, []string) {
 	for _, mapping := range e.mappings {
-		if mapping.from[len(mapping.from)-1] == "..." {
+		if mapping.from[len(mapping.from)-1] == "{...}" {
 			from := mapping.from[:len(mapping.from)-1]
 			if reflect.DeepEqual(args[:len(from)], from) {
 				to := append(mapping.to[:len(mapping.to)-1], args[len(from):]...)
