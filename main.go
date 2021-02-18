@@ -151,8 +151,12 @@ func (e *Engine) Map(env []string, args []string) ([]string, []string) {
 	for _, mapping := range e.mappings {
 		if mapping.from[len(mapping.from)-1] == "..." {
 			from := mapping.from[:len(mapping.from)-1]
-			if reflect.DeepEqual(from, args[:len(from)]) {
-				return append(env[:], mapping.env...), append(mapping.to[:], args[len(from):]...)
+			lim := len(from)
+			if lim > len(args) {
+				lim = len(args)
+			}
+			if reflect.DeepEqual(from, args[:lim]) {
+				return append(env[:], mapping.env...), append(mapping.to[:], args[lim:]...)
 			}
 		}
 
