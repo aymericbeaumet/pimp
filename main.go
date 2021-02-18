@@ -11,11 +11,17 @@ import (
 	"os/signal"
 	"path/filepath"
 	"reflect"
+	"runtime/debug"
 	"strings"
 
 	"github.com/mattn/go-shellwords"
 	"gopkg.in/yaml.v3"
 )
+
+func init() {
+	// Disable garbage collection for such a short lived program
+	debug.SetGCPercent(-1)
+}
 
 func main() {
 	if len(os.Args) < 2 {
