@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"reflect"
 	"strings"
 
@@ -13,58 +15,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// TODO: load from config file
-var configStr = `
-mappings:
-  - git: hub status -sb
-
-  - git a ...: hub add
-
-  - git ci ...: hub commit
-
-  - git co ...: hub checkout
-
-  - git df ...: hub diff
-
-  - git dfc ...: hub diff --cached
-
-  - git l ...: hub log
-
-  - git plps: |
-      #!/bin/sh
-      git pull && git push
-
-  - git ps ...: hub push
-
-  - git st ...: hub status
-
-  - git _bash ...: |
-      #!/bin/bash
-      echo "Hello Bash! $@"
-
-  - git _cat: |
-      #!/bin/cat
-      Hello Cat!
-
-  - git _python ...: |
-      #!/usr/bin/python
-      import sys
-      print("Hello Python!", sys.argv)
-
-  - git _ruby ...: |
-      #!/usr/bin/ruby
-      puts "Hello Ruby!", ARGV
-
-  - git ...: hub
-`
-
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: pimp [option]... cmd [arg]...")
 		return
 	}
 
-	engine, err := NewEngineFromString(configStr)
+	engine, err := NewEngineFromHomeConfig()
 	if err != nil {
 		panic(err)
 	}
@@ -103,11 +60,24 @@ type Mapping struct {
 
 const SHEBANG = "#!"
 
-func NewEngineFromString(configString string) (*Engine, error) {
+func NewEngineFromHomeConfig() (*Engine, error) {
+	configPath := filepath.Join(os.Getenv("HOME"), ".pimprc")
+	return NewEngineFromConfig(configPath)
+}
+
+func NewEngineFromConfig(configPath string) (*Engine, error) {
+	file, err := os.Open(configPath)
+	if err != nil {
+		return nil, err
+	}
+	return NewEngineFromReader(file)
+}
+
+func NewEngineFromReader(r io.Reader) (*Engine, error) {
 	engine := &Engine{}
 
 	var config Config
-	if err := yaml.Unmarshal([]byte(configString), &config); err != nil {
+	if err := yaml.NewDecoder(r).Decode(&config); err != nil {
 		return nil, err
 	}
 
