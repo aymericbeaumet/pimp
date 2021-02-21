@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/mattn/go-shellwords"
@@ -119,4 +120,19 @@ func (e *Engine) Map(env []string, args []string) ([]string, []string) {
 	}
 
 	return env, args
+}
+
+func (e *Engine) Executables() []string {
+	set := map[string]struct{}{}
+	for _, m := range e.mappings {
+		set[m.from[0]] = struct{}{}
+	}
+
+	out := make([]string, 0, len(set))
+	for entry := range set {
+		out = append(out, entry)
+	}
+	sort.Strings(out)
+
+	return out
 }
