@@ -98,6 +98,33 @@ var FuncMap = template.FuncMap{
 		return out
 	},
 
+	"GitRemotes": func(values ...interface{}) []string {
+		path, err := os.Getwd()
+		if err != nil {
+			panic(err)
+		}
+
+		repo, err := git.PlainOpen(path)
+		if err != nil {
+			panic(err)
+		}
+
+		out := []string{}
+
+		remotes, err := repo.Remotes()
+		if err != nil {
+			panic(err)
+		}
+
+		for _, remote := range remotes {
+			out = append(out, remote.Config().Name)
+		}
+
+		sort.Strings(out)
+
+		return out
+	},
+
 	"Head": func(values ...interface{}) string {
 		rows := getArray(values...)
 		return rows[0]
