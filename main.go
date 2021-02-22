@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -72,19 +73,11 @@ func main() {
 		}
 
 		if flags.DryRun {
-			for i, arg := range args {
-				if i > 0 {
-					if _, err := os.Stdout.Write([]byte{' '}); err != nil {
-						panic(err)
-					}
-				}
-				if _, err := fmt.Fprintf(os.Stdout, "%#v", arg); err != nil {
-					panic(err)
-				}
-			}
-			if _, err := os.Stdout.Write([]byte{'\n'}); err != nil {
+			out, err := json.MarshalIndent(args, "  ", "  ")
+			if err != nil {
 				panic(err)
 			}
+			fmt.Println(string(out))
 			return
 		}
 

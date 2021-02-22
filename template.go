@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/signal"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -16,8 +18,6 @@ import (
 
 var FuncMap = template.FuncMap{
 	"FZF": func(values ...interface{}) string {
-		input := fmt.Sprintf("%s", values[len(values)-1])
-
 		cmd := exec.CommandContext(context.Background(), "fzf")
 		cmd.Stderr = os.Stderr
 
@@ -44,7 +44,7 @@ var FuncMap = template.FuncMap{
 		}()
 
 		go func() {
-			if _, err := stdin.Write([]byte(input)); err != nil {
+			if _, err := stdin.Write([]byte(getString(values...))); err != nil {
 				panic(err)
 			}
 		}()
@@ -66,7 +66,7 @@ var FuncMap = template.FuncMap{
 		return strings.TrimSpace(string(out))
 	},
 
-	"GitBranches": func(values ...interface{}) string {
+	"GitBranches": func(values ...interface{}) []string {
 		path, err := os.Getwd()
 		if err != nil {
 			panic(err)
@@ -77,23 +77,63 @@ var FuncMap = template.FuncMap{
 			panic(err)
 		}
 
-		var sb strings.Builder
+		out := []string{}
+
 		iter, err := repo.Branches()
 		if err != nil {
 			panic(err)
 		}
 		if err := iter.ForEach(func(branch *plumbing.Reference) error {
-			if _, err := sb.WriteString(branch.Name().Short()); err != nil {
-				return err
-			}
-			if _, err := sb.WriteRune('\n'); err != nil {
-				return err
-			}
+			out = append(out, branch.Name().Short())
 			return nil
 		}); err != nil {
 			panic(err)
 		}
 
-		return sb.String()
+		sort.Strings(out)
+
+		return out
 	},
+
+	"Head": func(values ...interface{}) string {
+		rows := getArray(values...)
+		return rows[0]
+	},
+
+	"JSON": func(values ...interface{}) string {
+		out, err := json.Marshal(get(values...))
+		if err != nil {
+			panic(err)
+		}
+		return string(out)
+	},
+}
+
+func get(values ...interface{}) interface{} {
+	if len(values) != 1 {
+		panic("expect exactly one arg")
+	}
+	return values[0]
+}
+
+func getArray(values ...interface{}) []string {
+	switch value := get(values...).(type) {
+	case []string:
+		return value
+	case string:
+		return strings.Split(value, "\n")
+	default:
+		return strings.Split(fmt.Sprintf("%s", value), "\n")
+	}
+}
+
+func getString(values ...interface{}) string {
+	switch value := get(values...).(type) {
+	case string:
+		return value
+	case []string:
+		return strings.Join(value, "\n")
+	default:
+		return fmt.Sprintf("%s", value)
+	}
 }
