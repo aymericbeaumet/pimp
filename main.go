@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"os/signal"
 	"runtime/debug"
+	"strings"
+	"text/template"
 )
 
 func init() {
@@ -54,6 +56,23 @@ func main() {
 			return
 		}
 
+		for i, arg := range args {
+			if !strings.HasPrefix(arg, "{{") {
+				continue
+			}
+			var sb strings.Builder
+			t, err := template.New("").Funcs(FuncMap).Parse(arg)
+			if err != nil {
+				panic(err)
+			}
+			if err := t.Execute(&sb, map[string]interface{}{
+				"GitBranches": "master\nfoo\nbar\n",
+			}); err != nil {
+				panic(err)
+			}
+			args[i] = sb.String()
+		}
+
 		if flags.DryRun {
 			for i, arg := range args {
 				if i > 0 {
@@ -93,6 +112,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+
 		os.Exit(state.ExitCode())
 	}
 }
