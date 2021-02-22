@@ -21,11 +21,11 @@ func main() {
 	}
 
 	switch {
-	case flags.Version:
-		fmt.Println("0.0.1")
-		return
 	case flags.Help:
 		PrintUsage()
+		return
+	case flags.Version:
+		fmt.Println("0.0.1")
 		return
 	}
 
