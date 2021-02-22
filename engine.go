@@ -22,6 +22,9 @@ type Config struct {
 
 type Engine struct {
 	mappings []*Mapping
+
+	// used to cache calls to the Executables() method
+	executables []string
 }
 
 type Mapping struct {
@@ -123,6 +126,10 @@ func (e *Engine) Map(env []string, args []string) ([]string, []string) {
 }
 
 func (e *Engine) Executables() []string {
+	if e.executables != nil {
+		return e.executables
+	}
+
 	set := map[string]struct{}{}
 	for _, m := range e.mappings {
 		set[m.from[0]] = struct{}{}
@@ -134,5 +141,6 @@ func (e *Engine) Executables() []string {
 	}
 	sort.Strings(out)
 
+	e.executables = out
 	return out
 }
