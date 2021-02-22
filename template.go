@@ -47,6 +47,9 @@ var FuncMap = template.FuncMap{
 			if _, err := stdin.Write([]byte(getString(values...))); err != nil {
 				panic(err)
 			}
+			if _, err := stdin.Write([]byte{'\n'}); err != nil {
+				panic(err)
+			}
 		}()
 
 		state, err := cmd.Process.Wait()
@@ -107,6 +110,11 @@ var FuncMap = template.FuncMap{
 		}
 		return string(out)
 	},
+
+	"Tail": func(values ...interface{}) string {
+		rows := getArray(values...)
+		return rows[len(rows)-1]
+	},
 }
 
 func get(values ...interface{}) interface{} {
@@ -118,10 +126,10 @@ func get(values ...interface{}) interface{} {
 
 func getArray(values ...interface{}) []string {
 	switch value := get(values...).(type) {
-	case []string:
-		return value
 	case string:
 		return strings.Split(value, "\n")
+	case []string:
+		return value
 	default:
 		return strings.Split(fmt.Sprintf("%s", value), "\n")
 	}
