@@ -73,13 +73,13 @@ func NewEngineFromReader(r io.Reader) (*Engine, error) {
 	}
 
 	for _, mapping := range config.Mappings {
-		for fromString, toString := range mapping {
-			pattern, err := shellwords.Parse(fromString)
+		for rawPattern, rawCommand := range mapping {
+			pattern, err := shellwords.Parse(rawPattern)
 			if err != nil {
 				return nil, err
 			}
 
-			env, command, err := parseToEnvCommand(toString)
+			env, command, err := parseToEnvCommand(rawCommand)
 			if err != nil {
 				return nil, err
 			}
