@@ -35,6 +35,12 @@ func main() {
 	}
 
 	switch {
+	case flags.Dump:
+		if err := engine.Dump(os.Stdout); err != nil {
+			panic(err)
+		}
+		return
+
 	case flags.Zsh:
 		for _, executable := range engine.Executables() {
 			fmt.Printf("alias %#v=%#v\n", executable, "pimp "+executable)
