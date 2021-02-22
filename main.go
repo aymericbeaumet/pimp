@@ -65,9 +65,7 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			if err := t.Execute(&sb, map[string]interface{}{
-				"GitBranches": "master\nfoo\nbar\n",
-			}); err != nil {
+			if err := t.Execute(&sb, nil); err != nil {
 				panic(err)
 			}
 			args[i] = sb.String()

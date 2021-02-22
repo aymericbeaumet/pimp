@@ -9,6 +9,9 @@ import (
 	"os/signal"
 	"strings"
 	"text/template"
+
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 )
 
 var FuncMap = template.FuncMap{
@@ -61,5 +64,36 @@ var FuncMap = template.FuncMap{
 		}
 
 		return strings.TrimSpace(string(out))
+	},
+
+	"GitBranches": func(values ...interface{}) string {
+		path, err := os.Getwd()
+		if err != nil {
+			panic(err)
+		}
+
+		repo, err := git.PlainOpen(path)
+		if err != nil {
+			panic(err)
+		}
+
+		var sb strings.Builder
+		iter, err := repo.Branches()
+		if err != nil {
+			panic(err)
+		}
+		if err := iter.ForEach(func(branch *plumbing.Reference) error {
+			if _, err := sb.WriteString(branch.Name().Short()); err != nil {
+				return err
+			}
+			if _, err := sb.WriteRune('\n'); err != nil {
+				return err
+			}
+			return nil
+		}); err != nil {
+			panic(err)
+		}
+
+		return sb.String()
 	},
 }
