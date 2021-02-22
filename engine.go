@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -158,8 +159,21 @@ func (e *Engine) Executables() []string {
 	return out
 }
 
+var templateRegexp = regexp.MustCompile(`{{[^}]+}}`)
+
 func parseToEnvCommand(input string) ([]string, []string, error) {
 	const SHEBANG = "#!"
+
+	// replace templates by placeholders
+	templatesByPlaceholder := map[string]string{}
+	input = templateRegexp.ReplaceAllStringFunc(input, func(template string) string {
+		placeholder := fmt.Sprintf("___pimp_%d___", len(templatesByPlaceholder))
+		templatesByPlaceholder[placeholder] = template
+		return placeholder
+	})
+
+	var env, command []string
+	var err error
 
 	// multiline script (with shebang)
 	if newLineIndex := strings.IndexRune(input, '\n'); newLineIndex > -1 {
@@ -167,7 +181,7 @@ func parseToEnvCommand(input string) ([]string, []string, error) {
 			return nil, nil, errors.New("invalid shebang")
 		}
 
-		command, err := shellwords.Parse(input[len(SHEBANG):newLineIndex])
+		command, err = shellwords.Parse(input[len(SHEBANG):newLineIndex])
 		if err != nil {
 			return nil, nil, err
 		}
@@ -184,9 +198,19 @@ func parseToEnvCommand(input string) ([]string, []string, error) {
 		if _, err := file.WriteString(input); err != nil {
 			return nil, nil, err
 		}
-
-		return nil, command, nil
+	} else {
+		env, command, err = shellwords.ParseWithEnvs(input)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
-	return shellwords.ParseWithEnvs(input)
+	// replace placeholders by templates
+	for i, c := range command {
+		if template, ok := templatesByPlaceholder[c]; ok {
+			command[i] = template
+		}
+	}
+
+	return env, command, nil
 }
