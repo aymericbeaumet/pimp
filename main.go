@@ -22,7 +22,7 @@ func main() {
 
 	switch {
 	case flags.Version:
-		fmt.Println("pimp v0.0.1")
+		fmt.Println("0.0.1")
 		return
 
 	case flags.Help:
@@ -30,7 +30,7 @@ func main() {
 		return
 	}
 
-	engine, err := NewEngineFromHomeConfig()
+	engine, err := NewEngineFromFile(flags.Config)
 	if err != nil {
 		panic(err)
 	}

@@ -5,7 +5,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"reflect"
 	"sort"
 	"strings"
@@ -33,16 +32,13 @@ type Mapping struct {
 	env  []string
 }
 
-func NewEngineFromHomeConfig() (*Engine, error) {
-	configPath := filepath.Join(os.Getenv("HOME"), ".pimprc")
-	return NewEngineFromConfig(configPath)
-}
-
-func NewEngineFromConfig(configPath string) (*Engine, error) {
-	file, err := os.Open(configPath)
+func NewEngineFromFile(name string) (*Engine, error) {
+	file, err := os.Open(name)
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
+
 	return NewEngineFromReader(file)
 }
 
