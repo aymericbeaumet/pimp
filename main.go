@@ -24,7 +24,6 @@ func main() {
 	case flags.Version:
 		fmt.Println("0.0.1")
 		return
-
 	case flags.Help:
 		PrintUsage()
 		return
@@ -52,13 +51,17 @@ func main() {
 		if flags.DryRun {
 			for i, arg := range args {
 				if i > 0 {
-					os.Stdout.Write([]byte{' '})
+					if _, err := os.Stdout.Write([]byte{' '}); err != nil {
+						panic(err)
+					}
 				}
 				if _, err := fmt.Fprintf(os.Stdout, "%#v", arg); err != nil {
 					panic(err)
 				}
 			}
-			os.Stdout.Write([]byte{'\n'})
+			if _, err := os.Stdout.Write([]byte{'\n'}); err != nil {
+				panic(err)
+			}
 			return
 		}
 
