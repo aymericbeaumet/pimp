@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -21,25 +22,23 @@ type Config struct {
 }
 
 type Engine struct {
-	sources  map[string]*Source
-	mappings []*Mapping
+	Sources  map[string]*Source `json:"sources"`
+	Mappings []*Mapping         `json:"mappings"`
 
 	// used to cache calls to the Executables() method
 	executables []string
 }
 
 type Source struct {
-	id string
-	//
-	env     []string
-	command []string
+	ID   string   `json:"id"`
+	Env  []string `json:"env"`
+	Args []string `json:"args"`
 }
 
 type Mapping struct {
-	pattern []string
-	//
-	env     []string
-	command []string
+	Pattern []string `json:"pattern"`
+	Env     []string `json:"env"`
+	Args    []string `json:"args"`
 }
 
 func NewEngineFromFile(name string) (*Engine, error) {
@@ -60,35 +59,35 @@ func NewEngineFromReader(r io.Reader) (*Engine, error) {
 		return nil, err
 	}
 
-	engine.sources = make(map[string]*Source, len(config.Sources))
-	for id, rawCommand := range config.Sources {
-		env, command, err := parseToEnvCommand(rawCommand)
+	engine.Sources = make(map[string]*Source, len(config.Sources))
+	for id, raw := range config.Sources {
+		env, args, err := parseEnvArgs(raw)
 		if err != nil {
 			return nil, err
 		}
-		engine.sources[id] = &Source{
-			id:      id,
-			env:     env,
-			command: command,
+		engine.Sources[id] = &Source{
+			ID:   id,
+			Env:  env,
+			Args: args,
 		}
 	}
 
 	for _, mapping := range config.Mappings {
-		for rawPattern, rawCommand := range mapping {
+		for rawPattern, raw := range mapping {
 			pattern, err := shellwords.Parse(rawPattern)
 			if err != nil {
 				return nil, err
 			}
 
-			env, command, err := parseToEnvCommand(rawCommand)
+			env, args, err := parseEnvArgs(raw)
 			if err != nil {
 				return nil, err
 			}
 
-			engine.mappings = append(engine.mappings, &Mapping{
-				pattern: pattern,
-				env:     env,
-				command: command,
+			engine.Mappings = append(engine.Mappings, &Mapping{
+				Pattern: pattern,
+				Env:     env,
+				Args:    args,
 			})
 		}
 	}
@@ -97,20 +96,20 @@ func NewEngineFromReader(r io.Reader) (*Engine, error) {
 }
 
 func (e *Engine) Map(env []string, args []string) ([]string, []string) {
-	for _, mapping := range e.mappings {
-		if mapping.pattern[len(mapping.pattern)-1] == "..." {
-			pattern := mapping.pattern[:len(mapping.pattern)-1]
+	for _, mapping := range e.Mappings {
+		if mapping.Pattern[len(mapping.Pattern)-1] == "..." {
+			pattern := mapping.Pattern[:len(mapping.Pattern)-1]
 			lim := len(pattern)
 			if lim > len(args) {
 				lim = len(args)
 			}
 			if reflect.DeepEqual(pattern, args[:lim]) {
-				return append(env[:], mapping.env...), append(mapping.command[:], args[lim:]...)
+				return append(env[:], mapping.Env...), append(mapping.Args[:], args[lim:]...)
 			}
 		}
 
-		if reflect.DeepEqual(mapping.pattern, args) {
-			return append(env[:], mapping.env...), mapping.command
+		if reflect.DeepEqual(mapping.Pattern, args) {
+			return append(env[:], mapping.Env...), mapping.Args
 		}
 	}
 
@@ -118,25 +117,7 @@ func (e *Engine) Map(env []string, args []string) ([]string, []string) {
 }
 
 func (e *Engine) Dump(w io.Writer) error {
-	if _, err := fmt.Fprintf(w, "Sources:\n"); err != nil {
-		return err
-	}
-	for _, source := range e.sources {
-		if _, err := fmt.Fprintf(w, "  - %s: %#v\n", source.id, source.command); err != nil {
-			return err
-		}
-	}
-
-	if _, err := fmt.Fprintf(w, "\nMappings:\n"); err != nil {
-		return err
-	}
-	for _, mapping := range e.mappings {
-		if _, err := fmt.Fprintf(w, "  - %#v => %#v\n", mapping.pattern, mapping.command); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return json.NewEncoder(w).Encode(e)
 }
 
 func (e *Engine) Executables() []string {
@@ -145,8 +126,8 @@ func (e *Engine) Executables() []string {
 	}
 
 	set := map[string]struct{}{}
-	for _, m := range e.mappings {
-		set[m.pattern[0]] = struct{}{}
+	for _, m := range e.Mappings {
+		set[m.Pattern[0]] = struct{}{}
 	}
 
 	out := make([]string, 0, len(set))
@@ -161,7 +142,7 @@ func (e *Engine) Executables() []string {
 
 var templateRegexp = regexp.MustCompile(`{{[^}]+}}`)
 
-func parseToEnvCommand(input string) ([]string, []string, error) {
+func parseEnvArgs(input string) ([]string, []string, error) {
 	const SHEBANG = "#!"
 
 	// replace templates by placeholders
@@ -172,7 +153,7 @@ func parseToEnvCommand(input string) ([]string, []string, error) {
 		return placeholder
 	})
 
-	var env, command []string
+	var env, args []string
 	var err error
 
 	// multiline script (with shebang)
@@ -181,11 +162,11 @@ func parseToEnvCommand(input string) ([]string, []string, error) {
 			return nil, nil, errors.New("invalid shebang")
 		}
 
-		command, err = shellwords.Parse(input[len(SHEBANG):newLineIndex])
+		args, err = shellwords.Parse(input[len(SHEBANG):newLineIndex])
 		if err != nil {
 			return nil, nil, err
 		}
-		if len(command) == 0 || !strings.HasPrefix(command[0], "/") {
+		if len(args) == 0 || !strings.HasPrefix(args[0], "/") {
 			return nil, nil, errors.New("shebang must be an absolute path")
 		}
 
@@ -193,24 +174,24 @@ func parseToEnvCommand(input string) ([]string, []string, error) {
 		if err != nil {
 			return nil, nil, err
 		}
-		command = append(command, file.Name())
+		args = append(args, file.Name())
 
 		if _, err := file.WriteString(input); err != nil {
 			return nil, nil, err
 		}
 	} else {
-		env, command, err = shellwords.ParseWithEnvs(input)
+		env, args, err = shellwords.ParseWithEnvs(input)
 		if err != nil {
 			return nil, nil, err
 		}
 	}
 
 	// replace placeholders by templates
-	for i, c := range command {
+	for i, c := range args {
 		if template, ok := templatesByPlaceholder[c]; ok {
-			command[i] = template
+			args[i] = template
 		}
 	}
 
-	return env, command, nil
+	return env, args, nil
 }
