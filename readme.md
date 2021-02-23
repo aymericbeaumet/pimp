@@ -14,5 +14,5 @@ go install .
 # add to ~/.zshrc
 eval "$(pimp --zsh)"
 
-pimp git co
+pimp --dry-run git co
 ```
