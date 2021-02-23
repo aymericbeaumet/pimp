@@ -107,8 +107,8 @@ var FuncMap = template.FuncMap{
 		}
 
 		out := []string{}
-		if err := iter.ForEach(func(branch *plumbing.Reference) error {
-			out = append(out, branch.Name().Short())
+		if err := iter.ForEach(func(reference *plumbing.Reference) error {
+			out = append(out, reference.Name().Short())
 			return nil
 		}); err != nil {
 			panic(err)
