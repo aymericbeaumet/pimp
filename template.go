@@ -3,11 +3,14 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/signal"
+	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 	"text/template"
@@ -69,13 +72,8 @@ var FuncMap = template.FuncMap{
 		return strings.TrimSpace(string(out))
 	},
 
-	"GitBranches": func(values ...interface{}) []string {
-		path, err := os.Getwd()
-		if err != nil {
-			panic(err)
-		}
-
-		repo, err := git.PlainOpen(path)
+	"GitLocalBranches": func(values ...interface{}) []string {
+		repo, err := openGitRepo()
 		if err != nil {
 			panic(err)
 		}
@@ -99,12 +97,7 @@ var FuncMap = template.FuncMap{
 	},
 
 	"GitRemotes": func(values ...interface{}) []string {
-		path, err := os.Getwd()
-		if err != nil {
-			panic(err)
-		}
-
-		repo, err := git.PlainOpen(path)
+		repo, err := openGitRepo()
 		if err != nil {
 			panic(err)
 		}
@@ -171,4 +164,23 @@ func getString(values ...interface{}) string {
 	default:
 		return fmt.Sprintf("%s", value)
 	}
+}
+
+func openGitRepo(segments ...string) (*git.Repository, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	segments = append([]string{wd}, segments...)
+	repopath := filepath.Join(segments...)
+
+	for len(repopath) > 0 {
+		repo, err := git.PlainOpen(repopath)
+		if err == nil {
+			return repo, nil
+		}
+		repopath = strings.TrimRight(path.Dir(repopath), "/")
+	}
+
+	return nil, errors.New("cannot find a git repo")
 }
