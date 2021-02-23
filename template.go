@@ -95,6 +95,29 @@ var FuncMap = template.FuncMap{
 		return out
 	},
 
+	"GitReferences": func(values ...interface{}) []string {
+		repo, err := openGitRepo()
+		if err != nil {
+			panic(err)
+		}
+
+		iter, err := repo.References()
+		if err != nil {
+			panic(err)
+		}
+
+		out := []string{}
+		if err := iter.ForEach(func(branch *plumbing.Reference) error {
+			out = append(out, branch.Name().Short())
+			return nil
+		}); err != nil {
+			panic(err)
+		}
+		sort.Strings(out)
+
+		return out
+	},
+
 	"GitRemotes": func(values ...interface{}) []string {
 		repo, err := openGitRepo()
 		if err != nil {
