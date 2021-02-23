@@ -3,13 +3,14 @@
 ## Development (local)
 
 ```
-alias g='./pimp git'
-go build .; g status
+go run . --dry-run git co
 ```
 
 ## Development (system-wide)
 
 ```
-alias g=`pimp git` # in ~/.zshrc
 go install .
+
+# add to ~/.zshrc
+eval "$(pimp --zsh)"
 ```
