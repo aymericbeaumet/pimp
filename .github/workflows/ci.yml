@@ -21,5 +21,8 @@ jobs:
           go mod tidy
           [ -z "$(git status --porcelain)" ] || exit 1
 
+      - name: Build the project
+        run: go build ./...
+
       - name: Run tests
         run: go test -v ./...
