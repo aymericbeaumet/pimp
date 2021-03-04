@@ -9,6 +9,9 @@ import (
 	"runtime/debug"
 	"strings"
 	"text/template"
+
+	"github.com/aymericbeaumet/pimp/funcmap"
+	fmerrors "github.com/aymericbeaumet/pimp/funcmap/errors"
 )
 
 func init() {
@@ -61,12 +64,26 @@ func main() {
 				continue
 			}
 			var sb strings.Builder
-			t, err := template.New("").Funcs(FuncMap).Parse(arg)
+			t, err := template.New(arg).Funcs(funcmap.FuncMap()).Parse(arg)
 			if err != nil {
 				panic(err)
 			}
 			if err := t.Execute(&sb, nil); err != nil {
-				panic(err)
+				if e, ok := err.(template.ExecError); ok {
+					// TODO: wait for this issue to be fixed upstream so that Unwrap()
+					// returns the actual error that was returned (probably in Go 1.17).
+					// In the meantime we cannot access the underlying error to cleanly
+					// write to stderr + exit with the proper status code, so we panic.
+					// https://github.com/golang/go/issues/34201
+					err = e.Unwrap()
+				}
+				switch e := err.(type) {
+				case *fmerrors.FatalError:
+					os.Stderr.WriteString(e.Error())
+					os.Exit(e.ExitCode())
+				default:
+					panic(e)
+				}
 			}
 			args[i] = sb.String()
 		}
@@ -88,12 +105,13 @@ func main() {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 
+		signalC := make(chan os.Signal, 32)
+		signal.Notify(signalC)
+
 		if err := cmd.Start(); err != nil {
 			panic(err)
 		}
 
-		signalC := make(chan os.Signal, 32)
-		signal.Notify(signalC)
 		go func() {
 			for signal := range signalC {
 				_ = cmd.Process.Signal(signal)
