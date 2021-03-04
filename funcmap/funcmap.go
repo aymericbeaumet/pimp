@@ -6,6 +6,7 @@ import (
 
 	"github.com/Masterminds/sprig"
 	"github.com/aymericbeaumet/pimp/funcmap/git"
+	"github.com/aymericbeaumet/pimp/funcmap/kubernetes"
 	"github.com/aymericbeaumet/pimp/funcmap/marshal"
 	"github.com/aymericbeaumet/pimp/funcmap/misc"
 )
@@ -18,6 +19,9 @@ func FuncMap() template.FuncMap {
 		"GitReferences":     git.GitReferences,
 		"GitRemoteBranches": git.GitRemoteBranches,
 		"GitRemotes":        git.GitRemotes,
+
+		// kubernetes
+		"KubernetesNamespaces": kubernetes.Namespaces,
 
 		// marshal
 		"JSON": marshal.JSON,
@@ -34,7 +38,7 @@ func FuncMap() template.FuncMap {
 	// sprig
 	for k, v := range sprig.TxtFuncMap() {
 		if _, ok := fm[k]; ok {
-			panic(fmt.Errorf("Function `%s` from sprig already existy in the FuncMap", k))
+			panic(fmt.Errorf("function `%s` from sprig already existy in the FuncMap", k))
 		}
 		fm[k] = v
 	}

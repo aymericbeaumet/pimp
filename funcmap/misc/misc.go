@@ -3,16 +3,28 @@ package misc
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/signal"
+	"reflect"
 	"strings"
 
 	fmerrors "github.com/aymericbeaumet/pimp/funcmap/errors"
 )
 
-func FZF(input string) (string, error) {
+func FZF(input interface{}) (string, error) {
+	var s string
+	switch i := input.(type) {
+	case string:
+		s = i
+	case []string:
+		s = strings.Join(i, "\n")
+	default:
+		return "", fmt.Errorf("unsupported type %v", reflect.TypeOf(input))
+	}
+
 	cmd := exec.CommandContext(context.Background(), "fzf")
 
 	stdin, err := cmd.StdinPipe()
@@ -40,7 +52,7 @@ func FZF(input string) (string, error) {
 		}
 	}()
 
-	if _, err := stdin.Write([]byte(input)); err != nil {
+	if _, err := stdin.Write([]byte(s)); err != nil {
 		return "", err
 	}
 	if _, err := stdin.Write([]byte{'\n'}); err != nil {
