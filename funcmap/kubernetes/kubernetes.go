@@ -2,22 +2,34 @@ package kubernetes
 
 import (
 	"context"
-	"os"
-	"path/filepath"
-	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/tools/clientcmd/api"
 )
 
-func Namespaces() ([]string, error) {
-	k, err := newK8s()
+func KubernetesContexts() ([]string, error) {
+	_, config, err := newK8s()
 	if err != nil {
 		return nil, err
 	}
 
-	namespaces, err := k.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+	var out []string
+	for name := range config.Contexts {
+		out = append(out, name)
+	}
+
+	return out, nil
+}
+
+func KubernetesNamespaces() ([]string, error) {
+	client, _, err := newK8s()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaces, err := client.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -30,22 +42,26 @@ func Namespaces() ([]string, error) {
 	return out, nil
 }
 
-func newK8s() (*kubernetes.Clientset, error) {
-	kubeconfigs := strings.Split(os.Getenv("KUBECONFIG"), ":")
+func newK8s() (*kubernetes.Clientset, *api.Config, error) {
+	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		clientcmd.NewDefaultClientConfigLoadingRules(),
+		&clientcmd.ConfigOverrides{},
+	)
 
-	var kubeconfig string
-	if len(kubeconfigs) > 0 {
-		kubeconfig = kubeconfigs[0]
-	}
-
-	if len(kubeconfig) == 0 {
-		kubeconfig = filepath.Join(os.Getenv("HOME"), ".kube", "config")
-	}
-
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	config, err := kubeConfig.RawConfig()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return kubernetes.NewForConfig(config)
+	clientConfig, err := kubeConfig.ClientConfig()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	client, err := kubernetes.NewForConfig(clientConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return client, &config, nil
 }

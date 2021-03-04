@@ -21,7 +21,8 @@ func FuncMap() template.FuncMap {
 		"GitRemotes":        git.GitRemotes,
 
 		// kubernetes
-		"KubernetesNamespaces": kubernetes.Namespaces,
+		"KubernetesContexts":   kubernetes.KubernetesContexts,
+		"KubernetesNamespaces": kubernetes.KubernetesNamespaces,
 
 		// marshal
 		"JSON": marshal.JSON,
