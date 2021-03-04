@@ -141,6 +141,7 @@ func (e *Engine) Executables() []string {
 }
 
 var templateRegexp = regexp.MustCompile(`{{[^}]+}}`)
+var placeholderRegexp = regexp.MustCompile(`___pimp_[0-9]+___`)
 
 func parseEnvArgs(input string) ([]string, []string, error) {
 	const SHEBANG = "#!"
@@ -187,10 +188,10 @@ func parseEnvArgs(input string) ([]string, []string, error) {
 	}
 
 	// replace placeholders by templates
-	for i, c := range args {
-		if template, ok := templatesByPlaceholder[c]; ok {
-			args[i] = template
-		}
+	for i := range args {
+		args[i] = placeholderRegexp.ReplaceAllStringFunc(args[i], func(placeholder string) string {
+			return templatesByPlaceholder[placeholder]
+		})
 	}
 
 	return env, args, nil

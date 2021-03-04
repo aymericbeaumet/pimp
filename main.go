@@ -60,7 +60,7 @@ func main() {
 		}
 
 		for i, arg := range args {
-			if !strings.HasPrefix(arg, "{{") {
+			if !strings.Contains(arg, "{{") {
 				continue
 			}
 			var sb strings.Builder
