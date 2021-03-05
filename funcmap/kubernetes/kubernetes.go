@@ -10,7 +10,7 @@ import (
 )
 
 func KubernetesContexts() ([]string, error) {
-	_, config, err := newK8s()
+	_, config, err := createClientAndConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +24,7 @@ func KubernetesContexts() ([]string, error) {
 }
 
 func KubernetesNamespaces() ([]string, error) {
-	client, _, err := newK8s()
+	client, _, err := createClientAndConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func KubernetesNamespaces() ([]string, error) {
 	return out, nil
 }
 
-func newK8s() (*kubernetes.Clientset, *api.Config, error) {
+func createClientAndConfig() (*kubernetes.Clientset, *api.Config, error) {
 	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 		clientcmd.NewDefaultClientConfigLoadingRules(),
 		&clientcmd.ConfigOverrides{},
@@ -57,7 +57,6 @@ func newK8s() (*kubernetes.Clientset, *api.Config, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-
 	client, err := kubernetes.NewForConfig(clientConfig)
 	if err != nil {
 		return nil, nil, err
