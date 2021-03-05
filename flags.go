@@ -11,21 +11,21 @@ import (
 
 type Flags struct {
 	Config  string
-	Dump    bool
 	DryRun  bool
+	Dump    bool
 	Help    bool
+	Shell   bool
 	Version bool
-	Zsh     bool
 }
 
 func ParseFlagsArgs() (*Flags, []string, error) {
 	var flags Flags
-	flag.StringVar(&flags.Config, "config", "~/.pimprc", "Provide a different config file")
-	flag.BoolVar(&flags.Dump, "dump", false, "Dump the config on stdout and exit with status code 0")
 	flag.BoolVar(&flags.DryRun, "dry-run", false, "Print the command to be executed and exit with status code 0")
+	flag.BoolVar(&flags.Dump, "dump", false, "Dump the config on stdout and exit with status code 0")
 	flag.BoolVar(&flags.Help, "help", false, "Print the help and exit with status code 0")
+	flag.BoolVar(&flags.Shell, "shell", false, "Output shell config (bash, zsh, fish, ...)")
 	flag.BoolVar(&flags.Version, "version", false, "Print the version and exit with status code 0")
-	flag.BoolVar(&flags.Zsh, "zsh", false, "Output Zsh config")
+	flag.StringVar(&flags.Config, "config", "~/.pimprc", "Provide a different config file")
 
 	var flagsSlice []string
 	argsSlice := os.Args[1:]

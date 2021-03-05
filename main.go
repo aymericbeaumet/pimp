@@ -46,7 +46,7 @@ func main() {
 		}
 		return
 
-	case flags.Zsh:
+	case flags.Shell:
 		for _, executable := range engine.Executables() {
 			fmt.Printf("alias %#v=%#v\n", executable, "pimp "+executable)
 		}

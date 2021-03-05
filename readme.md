@@ -16,8 +16,8 @@ go run . --dry-run git co
 ```
 go install .
 
-# add to ~/.zshrc
-eval "$(pimp --zsh)"
+# add to ~/.bashrc, ~/.zshrc or ~/.config/fish/config.fish
+eval "$(pimp --shell)"
 
 git co
 pimp --dry-run git co
