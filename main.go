@@ -71,9 +71,9 @@ func main() {
 						if err := command.Run(c); err != nil {
 							_, _ = fmt.Fprintf(c.App.ErrWriter, "Command %s failed: %s\n\n", commandName, err)
 							_ = cli.ShowAppHelp(c)
-							return err // abort the process
+							syscall.Exit(1)
 						}
-						return nil
+						syscall.Exit(0)
 					}
 				}
 			}
