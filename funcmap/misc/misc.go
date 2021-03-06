@@ -11,12 +11,74 @@ import (
 	"reflect"
 	"strings"
 	"text/template"
+	"time"
 
 	fmerrors "github.com/aymericbeaumet/pimp/funcmap/errors"
 )
 
 func FuncMap() template.FuncMap {
 	return template.FuncMap{
+		"At": func(selector string, input interface{}) (interface{}, error) {
+			switch i := input.(type) {
+			case map[string]interface{}:
+				return i[selector], nil
+			default:
+				return nil, fmt.Errorf("don't know how to apply selector `%s` on input %#v", selector, input)
+			}
+		},
+
+		"Exec": func(bin string, args ...string) (map[string]interface{}, error) {
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+
+			cmd := exec.CommandContext(ctx, bin, args...)
+
+			stdout, err := cmd.StdoutPipe()
+			if err != nil {
+				return nil, err
+			}
+
+			stderr, err := cmd.StderrPipe()
+			if err != nil {
+				return nil, err
+			}
+
+			signalC := make(chan os.Signal, 32)
+			signal.Notify(signalC)
+
+			if err := cmd.Start(); err != nil {
+				return nil, err
+			}
+
+			go func() {
+				for signal := range signalC {
+					_ = cmd.Process.Signal(signal)
+				}
+			}()
+
+			state, err := cmd.Process.Wait()
+			if err != nil {
+				return nil, err
+			}
+
+			outbytes, err := ioutil.ReadAll(stdout)
+			if err != nil {
+				return nil, err
+			}
+
+			errbytes, err := ioutil.ReadAll(stderr)
+			if err != nil {
+				return nil, err
+			}
+
+			return map[string]interface{}{
+				"pid":    state.Pid(),
+				"status": state.ExitCode(),
+				"stdout": string(outbytes),
+				"stderr": string(errbytes),
+			}, nil
+		},
+
 		"FZF": func(input interface{}) (string, error) {
 			var s string
 			switch i := input.(type) {
@@ -28,7 +90,10 @@ func FuncMap() template.FuncMap {
 				return "", fmt.Errorf("unsupported type %v", reflect.TypeOf(input))
 			}
 
-			cmd := exec.CommandContext(context.Background(), "fzf")
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+
+			cmd := exec.CommandContext(ctx, "fzf")
 
 			stdin, err := cmd.StdinPipe()
 			if err != nil {
