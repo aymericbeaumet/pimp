@@ -27,10 +27,11 @@ func main() {
 		Version:     "0.0.1", // TODO: use -ldflags to embed the git commit hash
 		Description: "Command expander. Shipped with a template engine, and more. Providing no COMMAND is the default and most common behavior, in this case BIN will be executed and given ARG as parameters.",
 
-		Reader:          os.Stdin,
-		Writer:          os.Stdout,
-		ErrWriter:       os.Stderr,
-		HideHelpCommand: true,
+		Reader:               os.Stdin,
+		Writer:               os.Stdout,
+		ErrWriter:            os.Stderr,
+		HideHelpCommand:      true,
+		EnableBashCompletion: true,
 
 		Before: func(c *cli.Context) error {
 			for _, flagName := range []string{"config", "input", "output"} {
@@ -63,7 +64,7 @@ func main() {
 
 			// see the corresponding flags (not commands) if you want to know why we
 			// need this
-			for _, flagName := range []string{"dump", "render", "shell"} {
+			for _, flagName := range []string{"dump", "render", "shell", "bash", "zsh"} {
 				if c.IsSet(flagName) {
 					commandName := "--" + flagName
 					if command := c.App.Command(commandName); command != nil {
@@ -208,7 +209,7 @@ func main() {
 
 			{
 				Name:  "--shell",
-				Usage: "Print the shell config (bash, zsh, fish, ...) and exit",
+				Usage: "Print the shell config and exit (aliases only)",
 				Action: func(c *cli.Context) error {
 					eng, err := engine.NewFromFile(c.String("config"))
 					if err != nil {
@@ -220,14 +221,77 @@ func main() {
 					return nil
 				},
 			},
+
+			{
+				Name:  "--bash",
+				Usage: "Print the Bash config and exit (aliases and completion)",
+				Action: func(c *cli.Context) error {
+					if err := c.App.Command("--shell").Run(c); err != nil {
+						return err
+					}
+					fmt.Fprintln(c.App.Writer, `
+_pimp() {
+  if [[ "${COMP_WORDS[0]}" != "source" ]]; then
+    local cur opts base
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    if [[ "$cur" == "-"* ]]; then
+      opts=$( ${COMP_WORDS[@]:0:$COMP_CWORD} ${cur} --generate-bash-completion )
+    else
+      opts=$( ${COMP_WORDS[@]:0:$COMP_CWORD} --generate-bash-completion )
+    fi
+    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+    return 0
+  fi
+}
+
+complete -o bashdefault -o default -o nospace -F _pimp pimp`)
+					return nil
+				},
+			},
+
+			{
+				Name:  "--zsh",
+				Usage: "Print the Zsh config and exit (aliases and completion)",
+				Action: func(c *cli.Context) error {
+					if err := c.App.Command("--shell").Run(c); err != nil {
+						return err
+					}
+					fmt.Fprintln(c.App.Writer, `
+_pimp() {
+  local -a opts
+  local cur
+  cur=${words[-1]}
+  if [[ "$cur" == "-"* ]]; then
+    opts=("${(@f)$(_CLI_ZSH_AUTOCOMPLETE_HACK=1 ${words[@]:0:#words[@]-1} ${cur} --generate-bash-completion)}")
+  else
+    opts=("${(@f)$(_CLI_ZSH_AUTOCOMPLETE_HACK=1 ${words[@]:0:#words[@]-1} --generate-bash-completion)}")
+  fi
+
+  if [[ "${opts[1]}" != "" ]]; then
+    _describe 'values' opts
+  else
+    _files
+  fi
+
+  return
+}
+
+compdef _pimp pimp`)
+					return nil
+				},
+			},
 		},
 
 		Flags: []cli.Flag{
-			// Register hidden flags that are used to trigger the --dump, --render and --shell commands
-			// This is needed as --[commands] are not supported by the parser
+			// Register hidden flags that are used to trigger the corresponding
+			// commands as --[command] is not supported by the parser except for
+			// flags
 			&cli.BoolFlag{Name: "dump", Value: false, Hidden: true},
 			&cli.StringFlag{Name: "render", Value: "", Hidden: true},
 			&cli.BoolFlag{Name: "shell", Value: false, Hidden: true},
+			&cli.BoolFlag{Name: "bash", Value: false, Hidden: true},
+			&cli.BoolFlag{Name: "zsh", Value: false, Hidden: true},
 
 			&cli.StringFlag{
 				Name:    "config",
