@@ -180,13 +180,10 @@ func doPlaceholders(input string) (string, map[string]string) {
 func undoPlaceholders(args []string, templatesByPlaceholder map[string]string) []string {
 	out := make([]string, 0, len(args))
 
-	for i := range args {
-		out = append(
-			out,
-			placeholderRegexp.ReplaceAllStringFunc(args[i], func(placeholder string) string {
-				return templatesByPlaceholder[placeholder]
-			}),
-		)
+	for _, arg := range args {
+		out = append(out, placeholderRegexp.ReplaceAllStringFunc(arg, func(placeholder string) string {
+			return templatesByPlaceholder[placeholder]
+		}))
 	}
 
 	return out
