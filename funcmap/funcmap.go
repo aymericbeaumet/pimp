@@ -13,42 +13,27 @@ import (
 )
 
 func FuncMap() template.FuncMap {
-	fm := template.FuncMap{
-		// git
-		"GitBranches":       git.GitBranches,
-		"GitLocalBranches":  git.GitLocalBranches,
-		"GitReferences":     git.GitReferences,
-		"GitRemoteBranches": git.GitRemoteBranches,
-		"GitRemotes":        git.GitRemotes,
+	return merge(
+		git.FuncMap(),
+		http.FuncMap(),
+		kubernetes.FuncMap(),
+		marshal.FuncMap(),
+		misc.FuncMap(),
+		sprig.TxtFuncMap(),
+	)
+}
 
-		// http
-		"HttpGet":     http.HttpGet,
-		"QueryString": http.QueryString,
-		"URL":         http.URL,
+func merge(fms ...template.FuncMap) template.FuncMap {
+	out := template.FuncMap{}
 
-		// kubernetes
-		"KubernetesContexts":   kubernetes.KubernetesContexts,
-		"KubernetesNamespaces": kubernetes.KubernetesNamespaces,
-
-		// marshal
-		"JSON": marshal.JSON,
-		"TOML": marshal.TOML,
-		"XML":  marshal.XML,
-		"YAML": marshal.YAML,
-
-		// miscellaneous
-		"FZF":  misc.FZF,
-		"Head": misc.Head,
-		"Tail": misc.Tail,
-	}
-
-	// sprig
-	for k, v := range sprig.TxtFuncMap() {
-		if _, ok := fm[k]; ok {
-			panic(fmt.Errorf("function `%s` from sprig already existy in the FuncMap", k))
+	for _, fm := range fms {
+		for k, v := range fm {
+			if _, ok := out[k]; ok {
+				panic(fmt.Errorf("implementation error: duplicate FuncMap function `%s`", k))
+			}
+			out[k] = v
 		}
-		fm[k] = v
 	}
 
-	return fm
+	return out
 }
