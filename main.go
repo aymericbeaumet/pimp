@@ -154,7 +154,7 @@ func main() {
 		Commands: []*cli.Command{
 			{
 				Name:  "--dump",
-				Usage: "Dump the config as JSON and exit",
+				Usage: "Dump the engine as JSON and exit",
 				Action: func(c *cli.Context) error {
 					eng, err := engine.NewFromFile(c.String("config"))
 					if err != nil {
