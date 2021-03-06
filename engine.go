@@ -17,9 +17,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type Config struct {
-	Mappings []map[string]string `yaml:"mappings"`
-}
+type Config yaml.MapSlice
 
 type Engine struct {
 	Mappings []*Mapping `json:"mappings"`
@@ -30,9 +28,9 @@ type Engine struct {
 
 type Mapping struct {
 	Pattern []string          `json:"pattern"`
-	Env     []string          `json:"env"`
+	Env     []string          `json:"env,omitempty"`
 	Args    []string          `json:"args"`
-	Files   map[string]string `json:"files"`
+	Files   map[string]string `json:"files,omitempty"`
 }
 
 func NewEngineFromFile(name string) (*Engine, error) {
@@ -53,25 +51,23 @@ func NewEngineFromReader(r io.Reader) (*Engine, error) {
 		return nil, err
 	}
 
-	for _, mapping := range config.Mappings {
-		for rawPattern, raw := range mapping {
-			pattern, err := shellwords.Parse(rawPattern)
-			if err != nil {
-				return nil, err
-			}
-
-			env, args, files, err := parseEnvArgs(raw)
-			if err != nil {
-				return nil, err
-			}
-
-			engine.Mappings = append(engine.Mappings, &Mapping{
-				Pattern: pattern,
-				Env:     env,
-				Args:    args,
-				Files:   files,
-			})
+	for _, item := range config {
+		pattern, err := shellwords.Parse(item.Key.(string))
+		if err != nil {
+			return nil, err
 		}
+
+		env, args, files, err := parseEnvArgs(item.Value.(string))
+		if err != nil {
+			return nil, err
+		}
+
+		engine.Mappings = append(engine.Mappings, &Mapping{
+			Pattern: pattern,
+			Env:     env,
+			Args:    args,
+			Files:   files,
+		})
 	}
 
 	return engine, nil
@@ -126,7 +122,7 @@ func parseEnvArgs(input string) ([]string, []string, map[string]string, error) {
 	const SHEBANG = "#!"
 
 	var env, args []string
-	files := map[string]string{}
+	var files map[string]string
 	var err error
 
 	// multiline script (with shebang)
@@ -135,15 +131,16 @@ func parseEnvArgs(input string) ([]string, []string, map[string]string, error) {
 			return nil, nil, nil, errors.New("invalid shebang")
 		}
 
+		filename := filepath.Join(os.TempDir(), fmt.Sprintf("pimp-%d", time.Now().UTC().UnixNano()))
+
 		s, ph := doPlaceholders(input[len(SHEBANG):newLineIndex])
 		args, err = shellwords.Parse(s)
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		args = undoPlaceholders(args, ph)
+		args = append(undoPlaceholders(args, ph), filename)
 
-		filename := filepath.Join(os.TempDir(), fmt.Sprintf("pimp-%d", time.Now().UTC().UnixNano()))
-		args = append(args, filename)
+		files = map[string]string{}
 		files[filename] = input
 	} else {
 		s, ph := doPlaceholders(input)
