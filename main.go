@@ -34,6 +34,16 @@ func main() {
 		return
 	}
 
+	input := os.Stdin
+	if len(flags.Input) > 0 {
+		f, err := os.Open(flags.Input)
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+		input = f
+	}
+
 	output := os.Stdout
 	if len(flags.Output) > 0 {
 		f, err := os.OpenFile(flags.Output, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
@@ -115,7 +125,7 @@ func main() {
 
 		cmd := exec.CommandContext(context.Background(), args[0], args[1:]...)
 		cmd.Env = env
-		cmd.Stdin = os.Stdin
+		cmd.Stdin = input
 		cmd.Stdout = output
 		cmd.Stderr = os.Stderr
 

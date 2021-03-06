@@ -15,6 +15,7 @@ type Flags struct {
 	Dump    bool
 	Expand  bool
 	Help    bool
+	Input   string
 	Output  string
 	Render  string
 	Shell   bool
@@ -27,6 +28,7 @@ func ParseFlagsArgs() (*Flags, []string, error) {
 	flag.BoolVar(&flags.Dump, "dump", false, "Dump the config on stdout and exit with status code 0")
 	flag.BoolVar(&flags.Expand, "expand", false, "Expand the command and exit with status code 0")
 	flag.BoolVar(&flags.Help, "help", false, "Print the help and exit with status code 0")
+	flag.StringVar(&flags.Input, "input", "", "Read from the input file instead of stdin")
 	flag.StringVar(&flags.Output, "output", "", "Write the output to this file instead of stdout")
 	flag.StringVar(&flags.Render, "render", "", "Run the template and print to stdout")
 	flag.BoolVar(&flags.Shell, "shell", false, "Output shell config (bash, zsh, fish, ...)")
@@ -53,6 +55,13 @@ func ParseFlagsArgs() (*Flags, []string, error) {
 		return nil, nil, err
 	}
 	flags.Config = config
+
+	// Expand input path
+	input, err := expand(flags.Input)
+	if err != nil {
+		return nil, nil, err
+	}
+	flags.Input = input
 
 	// Expand output path
 	output, err := expand(flags.Output)
