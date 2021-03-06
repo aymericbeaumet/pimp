@@ -20,7 +20,7 @@ import (
 type Config yaml.MapSlice
 
 type Engine struct {
-	Mappings []*Mapping `json:"mappings"`
+	MappingsByArg0 map[string][]*Mapping `json:"mappings"`
 
 	// used to cache calls to the Executables() method
 	executables []string
@@ -44,7 +44,9 @@ func NewEngineFromFile(name string) (*Engine, error) {
 }
 
 func NewEngineFromReader(r io.Reader) (*Engine, error) {
-	engine := &Engine{}
+	engine := &Engine{
+		MappingsByArg0: map[string][]*Mapping{},
+	}
 
 	var config Config
 	if err := yaml.NewDecoder(r).Decode(&config); err != nil {
@@ -62,7 +64,7 @@ func NewEngineFromReader(r io.Reader) (*Engine, error) {
 			return nil, err
 		}
 
-		engine.Mappings = append(engine.Mappings, &Mapping{
+		engine.MappingsByArg0[args[0]] = append(engine.MappingsByArg0[args[0]], &Mapping{
 			Pattern: pattern,
 			Env:     env,
 			Args:    args,
@@ -74,7 +76,12 @@ func NewEngineFromReader(r io.Reader) (*Engine, error) {
 }
 
 func (e *Engine) Map(env []string, args []string) ([]string, []string, map[string]string) {
-	for _, mapping := range e.Mappings {
+	mappings, ok := e.MappingsByArg0[args[0]]
+	if !ok {
+		return env, args, nil
+	}
+
+	for _, mapping := range mappings {
 		if mapping.Pattern[len(mapping.Pattern)-1] == "..." {
 			pattern := mapping.Pattern[:len(mapping.Pattern)-1]
 			lim := len(pattern)
@@ -103,14 +110,9 @@ func (e *Engine) Executables() []string {
 		return e.executables
 	}
 
-	set := map[string]struct{}{}
-	for _, m := range e.Mappings {
-		set[m.Pattern[0]] = struct{}{}
-	}
-
-	out := make([]string, 0, len(set))
-	for entry := range set {
-		out = append(out, entry)
+	out := make([]string, 0, len(e.MappingsByArg0))
+	for arg0 := range e.MappingsByArg0 {
+		out = append(out, arg0)
 	}
 	sort.Strings(out)
 
