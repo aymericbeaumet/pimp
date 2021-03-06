@@ -76,6 +76,10 @@ func NewEngineFromReader(r io.Reader) (*Engine, error) {
 }
 
 func (e *Engine) Map(env []string, args []string) ([]string, []string, map[string]string) {
+	if len(args) == 0 {
+		return env, args, nil
+	}
+
 	mappings, ok := e.Mappings[args[0]]
 	if !ok {
 		return env, args, nil
