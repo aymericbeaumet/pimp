@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -61,12 +61,12 @@ func FuncMap() template.FuncMap {
 				return nil, err
 			}
 
-			outbytes, err := ioutil.ReadAll(stdout)
+			outbytes, err := io.ReadAll(stdout)
 			if err != nil {
 				return nil, err
 			}
 
-			errbytes, err := ioutil.ReadAll(stderr)
+			errbytes, err := io.ReadAll(stderr)
 			if err != nil {
 				return nil, err
 			}
@@ -136,7 +136,7 @@ func FuncMap() template.FuncMap {
 				return "", fmerrors.NewFatalError(ec, "")
 			}
 
-			out, err := ioutil.ReadAll(stdout)
+			out, err := io.ReadAll(stdout)
 			if err != nil {
 				return "", err
 			}
