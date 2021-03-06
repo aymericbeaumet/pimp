@@ -6,6 +6,7 @@ import (
 
 	"github.com/Masterminds/sprig"
 	"github.com/aymericbeaumet/pimp/funcmap/git"
+	"github.com/aymericbeaumet/pimp/funcmap/http"
 	"github.com/aymericbeaumet/pimp/funcmap/kubernetes"
 	"github.com/aymericbeaumet/pimp/funcmap/marshal"
 	"github.com/aymericbeaumet/pimp/funcmap/misc"
@@ -19,6 +20,11 @@ func FuncMap() template.FuncMap {
 		"GitReferences":     git.GitReferences,
 		"GitRemoteBranches": git.GitRemoteBranches,
 		"GitRemotes":        git.GitRemotes,
+
+		// http
+		"HttpGet":     http.HttpGet,
+		"QueryString": http.QueryString,
+		"URL":         http.URL,
 
 		// kubernetes
 		"KubernetesContexts":   kubernetes.KubernetesContexts,
