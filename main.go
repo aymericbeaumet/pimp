@@ -26,21 +26,19 @@ func main() {
 		Version:     "0.0.1", // TODO: use -ldflags to embed the git commit hash
 		Description: "Command expander. Shipped with a template engine, and more. Providing no COMMAND is the default and most common behavior, in this case BIN will be executed and given ARG as parameters.",
 
-		Reader:    os.Stdin,
-		Writer:    os.Stdout,
-		ErrWriter: os.Stderr,
-
-		HideHelpCommand:        true,
-		UseShortOptionHandling: true,
+		Reader:          os.Stdin,
+		Writer:          os.Stdout,
+		ErrWriter:       os.Stderr,
+		HideHelpCommand: true,
 
 		Before: func(c *cli.Context) error {
-			for _, flag := range []string{"config", "input", "output"} {
-				if s := c.String(flag); len(s) > 0 {
+			for _, flagName := range []string{"config", "input", "output"} {
+				if s := c.String(flagName); len(s) > 0 {
 					expanded, err := expand(s)
 					if err != nil {
 						return err
 					}
-					if err := c.Set(flag, expanded); err != nil {
+					if err := c.Set(flagName, expanded); err != nil {
 						return err
 					}
 				}
@@ -64,9 +62,9 @@ func main() {
 
 			// see the corresponding flags (not commands) if you want to know why we
 			// need this
-			for _, commandAsFlag := range []string{"dump", "render", "shell"} {
-				if c.IsSet(commandAsFlag) {
-					commandName := "--" + commandAsFlag
+			for _, flagName := range []string{"dump", "render", "shell"} {
+				if c.IsSet(flagName) {
+					commandName := "--" + flagName
 					if command := c.App.Command(commandName); command != nil {
 						if err := command.Run(c); err != nil {
 							_, _ = fmt.Fprintf(c.App.ErrWriter, "Command %s failed: %s\n\n", commandName, err)
@@ -75,6 +73,7 @@ func main() {
 						}
 						syscall.Exit(0)
 					}
+					panic(fmt.Errorf("implementation error: command %s is missing", commandName))
 				}
 			}
 
@@ -167,21 +166,33 @@ func main() {
 				Name:  "--render",
 				Usage: "Render the template and exit",
 				Action: func(c *cli.Context) error {
-					if len(os.Args) != 3 {
-						return errors.New("expecting exactly 1 parameter containing the path to the template")
+					renderFilepath := c.String("render")
+					if len(renderFilepath) == 0 {
+						return errors.New("expect one parameter")
 					}
 
-					arg0, err := expand(os.Args[2])
+					renderFilepath, err := expand(renderFilepath)
 					if err != nil {
 						return err
 					}
 
-					data, err := os.ReadFile(arg0)
+					data, err := os.ReadFile(renderFilepath)
 					if err != nil {
 						return err
 					}
 
-					rendered, err := render(string(data))
+					s := string(data)
+
+					// strip shebang if found
+					if strings.HasPrefix(s, "#!") {
+						if newlineIndex := strings.IndexRune(s, '\n'); newlineIndex > -1 {
+							s = s[newlineIndex+1:]
+						} else {
+							s = ""
+						}
+					}
+
+					rendered, err := render(s)
 					if err != nil {
 						return err
 					}
@@ -214,7 +225,7 @@ func main() {
 			// Register hidden flags that are used to trigger the --dump, --render and --shell commands
 			// This is needed as --[commands] are not supported by the parser
 			&cli.BoolFlag{Name: "dump", Value: false, Hidden: true},
-			&cli.BoolFlag{Name: "render", Value: false, Hidden: true},
+			&cli.StringFlag{Name: "render", Value: "", Hidden: true},
 			&cli.BoolFlag{Name: "shell", Value: false, Hidden: true},
 
 			&cli.StringFlag{
