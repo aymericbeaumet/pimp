@@ -1,4 +1,4 @@
-package main
+package engine
 
 import (
 	"encoding/json"
@@ -33,17 +33,17 @@ type Mapping struct {
 	Files   map[string]string `json:"files,omitempty"`
 }
 
-func NewEngineFromFile(name string) (*Engine, error) {
+func NewFromFile(name string) (*Engine, error) {
 	file, err := os.Open(name)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	return NewEngineFromReader(file)
+	return NewFromReader(file)
 }
 
-func NewEngineFromReader(r io.Reader) (*Engine, error) {
+func NewFromReader(r io.Reader) (*Engine, error) {
 	engine := &Engine{
 		Mappings: map[string][]*Mapping{},
 	}

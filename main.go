@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"text/template"
 
+	"github.com/aymericbeaumet/pimp/engine"
 	"github.com/aymericbeaumet/pimp/funcmap"
 	fmerrors "github.com/aymericbeaumet/pimp/funcmap/errors"
 	"github.com/mitchellh/go-homedir"
@@ -81,12 +82,12 @@ func main() {
 		},
 
 		Action: func(c *cli.Context) error {
-			engine, err := NewEngineFromFile(c.String("config"))
+			eng, err := engine.NewFromFile(c.String("config"))
 			if err != nil {
 				return err
 			}
 
-			env, args, files := engine.Map(os.Environ(), c.Args().Slice())
+			env, args, files := eng.Map(os.Environ(), c.Args().Slice())
 			if len(args) == 0 {
 				_ = cli.ShowAppHelp(c)
 				return nil
@@ -154,11 +155,11 @@ func main() {
 				Name:  "--dump",
 				Usage: "Dump the config as JSON and exit",
 				Action: func(c *cli.Context) error {
-					engine, err := NewEngineFromFile(c.String("config"))
+					eng, err := engine.NewFromFile(c.String("config"))
 					if err != nil {
 						return err
 					}
-					return engine.JSON(c.App.Writer)
+					return eng.JSON(c.App.Writer)
 				},
 			},
 
@@ -209,11 +210,11 @@ func main() {
 				Name:  "--shell",
 				Usage: "Print the shell config (bash, zsh, fish, ...) and exit",
 				Action: func(c *cli.Context) error {
-					engine, err := NewEngineFromFile(c.String("config"))
+					eng, err := engine.NewFromFile(c.String("config"))
 					if err != nil {
 						return err
 					}
-					for _, executable := range engine.Executables() {
+					for _, executable := range eng.Executables() {
 						fmt.Fprintf(c.App.Writer, "alias %#v=%#v\n", executable, "pimp "+executable)
 					}
 					return nil
