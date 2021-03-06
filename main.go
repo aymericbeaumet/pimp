@@ -38,10 +38,12 @@ func main() {
 				if s := c.String(flagName); len(s) > 0 {
 					expanded, err := expand(s)
 					if err != nil {
-						return err
+						_, _ = fmt.Fprintf(c.App.ErrWriter, "error for `%s` flag: %v\n", flagName, err)
+						syscall.Exit(1)
 					}
 					if err := c.Set(flagName, expanded); err != nil {
-						return err
+						_, _ = fmt.Fprintf(c.App.ErrWriter, "error for `%s` flag: %v\n", flagName, err)
+						syscall.Exit(1)
 					}
 				}
 			}
@@ -49,7 +51,8 @@ func main() {
 			if filename := c.String("input"); len(filename) > 0 {
 				f, err := os.Open(filename)
 				if err != nil {
-					return err
+					_, _ = fmt.Fprintf(c.App.ErrWriter, "error for `input` flag: %v", err)
+					syscall.Exit(1)
 				}
 				c.App.Reader = f
 			}
@@ -57,7 +60,8 @@ func main() {
 			if filename := c.String("output"); len(filename) > 0 {
 				f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 				if err != nil {
-					return err
+					_, _ = fmt.Fprintf(c.App.ErrWriter, "error for `output` flag: %v", err)
+					syscall.Exit(1)
 				}
 				c.App.Writer = f
 			}
