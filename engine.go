@@ -5,40 +5,34 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/mattn/go-shellwords"
 	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
-	Sources  map[string]string   `yaml:"sources"`
 	Mappings []map[string]string `yaml:"mappings"`
 }
 
 type Engine struct {
-	Sources  map[string]*Source `json:"sources"`
-	Mappings []*Mapping         `json:"mappings"`
+	Mappings []*Mapping `json:"mappings"`
 
 	// used to cache calls to the Executables() method
 	executables []string
 }
 
-type Source struct {
-	ID   string   `json:"id"`
-	Env  []string `json:"env"`
-	Args []string `json:"args"`
-}
-
 type Mapping struct {
-	Pattern []string `json:"pattern"`
-	Env     []string `json:"env"`
-	Args    []string `json:"args"`
+	Pattern []string          `json:"pattern"`
+	Env     []string          `json:"env"`
+	Args    []string          `json:"args"`
+	Files   map[string]string `json:"files"`
 }
 
 func NewEngineFromFile(name string) (*Engine, error) {
@@ -59,19 +53,6 @@ func NewEngineFromReader(r io.Reader) (*Engine, error) {
 		return nil, err
 	}
 
-	engine.Sources = make(map[string]*Source, len(config.Sources))
-	for id, raw := range config.Sources {
-		env, args, err := parseEnvArgs(raw)
-		if err != nil {
-			return nil, err
-		}
-		engine.Sources[id] = &Source{
-			ID:   id,
-			Env:  env,
-			Args: args,
-		}
-	}
-
 	for _, mapping := range config.Mappings {
 		for rawPattern, raw := range mapping {
 			pattern, err := shellwords.Parse(rawPattern)
@@ -79,7 +60,7 @@ func NewEngineFromReader(r io.Reader) (*Engine, error) {
 				return nil, err
 			}
 
-			env, args, err := parseEnvArgs(raw)
+			env, args, files, err := parseEnvArgs(raw)
 			if err != nil {
 				return nil, err
 			}
@@ -88,6 +69,7 @@ func NewEngineFromReader(r io.Reader) (*Engine, error) {
 				Pattern: pattern,
 				Env:     env,
 				Args:    args,
+				Files:   files,
 			})
 		}
 	}
@@ -95,7 +77,7 @@ func NewEngineFromReader(r io.Reader) (*Engine, error) {
 	return engine, nil
 }
 
-func (e *Engine) Map(env []string, args []string) ([]string, []string) {
+func (e *Engine) Map(env []string, args []string) ([]string, []string, map[string]string) {
 	for _, mapping := range e.Mappings {
 		if mapping.Pattern[len(mapping.Pattern)-1] == "..." {
 			pattern := mapping.Pattern[:len(mapping.Pattern)-1]
@@ -104,16 +86,16 @@ func (e *Engine) Map(env []string, args []string) ([]string, []string) {
 				lim = len(args)
 			}
 			if reflect.DeepEqual(pattern, args[:lim]) {
-				return append(env[:], mapping.Env...), append(mapping.Args[:], args[lim:]...)
+				return append(env[:], mapping.Env...), append(mapping.Args[:], args[lim:]...), mapping.Files
 			}
 		}
 
 		if reflect.DeepEqual(mapping.Pattern, args) {
-			return append(env[:], mapping.Env...), mapping.Args
+			return append(env[:], mapping.Env...), mapping.Args, mapping.Files
 		}
 	}
 
-	return env, args
+	return env, args, nil
 }
 
 func (e *Engine) Dump(w io.Writer) error {
@@ -140,59 +122,72 @@ func (e *Engine) Executables() []string {
 	return out
 }
 
-var templateRegexp = regexp.MustCompile(`{{[^}]+}}`)
-var placeholderRegexp = regexp.MustCompile(`___pimp_[0-9]+___`)
-
-func parseEnvArgs(input string) ([]string, []string, error) {
+func parseEnvArgs(input string) ([]string, []string, map[string]string, error) {
 	const SHEBANG = "#!"
 
-	// replace templates by placeholders
-	templatesByPlaceholder := map[string]string{}
-	input = templateRegexp.ReplaceAllStringFunc(input, func(template string) string {
-		placeholder := fmt.Sprintf("___pimp_%d___", len(templatesByPlaceholder))
-		templatesByPlaceholder[placeholder] = template
-		return placeholder
-	})
-
 	var env, args []string
+	files := map[string]string{}
 	var err error
 
 	// multiline script (with shebang)
 	if newLineIndex := strings.IndexRune(input, '\n'); newLineIndex > -1 {
 		if !strings.HasPrefix(input, SHEBANG) {
-			return nil, nil, errors.New("invalid shebang")
+			return nil, nil, nil, errors.New("invalid shebang")
 		}
 
-		args, err = shellwords.Parse(input[len(SHEBANG):newLineIndex])
+		s, ph := doPlaceholders(input[len(SHEBANG):newLineIndex])
+		args, err = shellwords.Parse(s)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, err
 		}
-		if len(args) == 0 || !strings.HasPrefix(args[0], "/") {
-			return nil, nil, errors.New("shebang must be an absolute path")
-		}
+		args = undoPlaceholders(args, ph)
 
-		file, err := ioutil.TempFile("", "pimp")
-		if err != nil {
-			return nil, nil, err
-		}
-		args = append(args, file.Name())
-
-		if _, err := file.WriteString(input); err != nil {
-			return nil, nil, err
-		}
+		filename := filepath.Join(os.TempDir(), fmt.Sprintf("pimp-%d", time.Now().UTC().UnixNano()))
+		args = append(args, filename)
+		files[filename] = input
 	} else {
-		env, args, err = shellwords.ParseWithEnvs(input)
+		s, ph := doPlaceholders(input)
+		env, args, err = shellwords.ParseWithEnvs(s)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, err
 		}
+		args = undoPlaceholders(args, ph)
 	}
 
-	// replace placeholders by templates
+	return env, args, files, nil
+}
+
+// shellwords.Parse and shellwords.ParseWithEnvs do not play nicely with Go
+// templates {{ and }}. So we apply a little bit of dark magic to make
+// everything work as expected. The idea is to replace {{ ... }} with
+// ___pimp_X___ placeholders, parse the line, then to replace back.
+
+var templateRegexp = regexp.MustCompile(`{{[^}]+}}`)
+var placeholderRegexp = regexp.MustCompile(`___pimp_[0-9]+___`)
+
+func doPlaceholders(input string) (string, map[string]string) {
+	templatesByPlaceholder := map[string]string{}
+
+	out := templateRegexp.ReplaceAllStringFunc(input, func(template string) string {
+		placeholder := fmt.Sprintf("___pimp_%d___", len(templatesByPlaceholder))
+		templatesByPlaceholder[placeholder] = template
+		return placeholder
+	})
+
+	return out, templatesByPlaceholder
+}
+
+func undoPlaceholders(args []string, templatesByPlaceholder map[string]string) []string {
+	out := make([]string, 0, len(args))
+
 	for i := range args {
-		args[i] = placeholderRegexp.ReplaceAllStringFunc(args[i], func(placeholder string) string {
-			return templatesByPlaceholder[placeholder]
-		})
+		out = append(
+			out,
+			placeholderRegexp.ReplaceAllStringFunc(args[i], func(placeholder string) string {
+				return templatesByPlaceholder[placeholder]
+			}),
+		)
 	}
 
-	return env, args, nil
+	return out
 }

@@ -53,39 +53,19 @@ func main() {
 		return
 
 	default:
-		env, args := engine.Map(os.Environ(), args)
+		env, args, files := engine.Map(os.Environ(), args)
 		if len(args) == 0 {
 			PrintUsage()
 			return
 		}
 
+		fm := funcmap.FuncMap()
+
 		for i, arg := range args {
-			if !strings.Contains(arg, "{{") {
-				continue
-			}
-			var sb strings.Builder
-			t, err := template.New(arg).Funcs(funcmap.FuncMap()).Parse(arg)
+			args[i], err = renderTemplate(arg, fm)
 			if err != nil {
 				panic(err)
 			}
-			if err := t.Execute(&sb, nil); err != nil {
-				if e, ok := err.(template.ExecError); ok {
-					// TODO: wait for this issue to be fixed upstream so that Unwrap()
-					// returns the actual error that was returned (probably in Go 1.17).
-					// In the meantime we cannot access the underlying error to cleanly
-					// write to stderr + exit with the proper status code, so we panic.
-					// https://github.com/golang/go/issues/34201
-					err = e.Unwrap()
-				}
-				switch e := err.(type) {
-				case *fmerrors.FatalError:
-					os.Stderr.WriteString(e.Error())
-					os.Exit(e.ExitCode())
-				default:
-					panic(e)
-				}
-			}
-			args[i] = sb.String()
 		}
 
 		if flags.DryRun {
@@ -97,6 +77,17 @@ func main() {
 			}
 			fmt.Print("\n")
 			return
+		}
+
+		for name, data := range files {
+			rendered, err := renderTemplate(data, fm)
+			if err != nil {
+				panic(err)
+			}
+			if err := os.WriteFile(name, []byte(rendered), 0400); err != nil {
+				panic(err)
+			}
+			defer os.Remove(name)
 		}
 
 		cmd := exec.CommandContext(context.Background(), args[0], args[1:]...)
@@ -125,4 +116,33 @@ func main() {
 
 		os.Exit(state.ExitCode())
 	}
+}
+
+func renderTemplate(text string, fm template.FuncMap) (string, error) {
+	var sb strings.Builder
+
+	t, err := template.New(text).Funcs(fm).Parse(text)
+	if err != nil {
+		return "", err
+	}
+
+	if err := t.Execute(&sb, nil); err != nil {
+		if e, ok := err.(template.ExecError); ok {
+			// TODO: wait for this issue to be fixed upstream so that Unwrap()
+			// returns the actual error that was returned (probably in Go 1.17).
+			// In the meantime we cannot access the underlying error to cleanly
+			// write to stderr + exit with the proper status code, so we panic.
+			// https://github.com/golang/go/issues/34201
+			err = e.Unwrap()
+		}
+		switch e := err.(type) {
+		case *fmerrors.FatalError:
+			os.Stderr.WriteString(e.Error())
+			os.Exit(e.ExitCode())
+		default:
+			return "", err
+		}
+	}
+
+	return sb.String(), nil
 }
