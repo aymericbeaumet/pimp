@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -20,6 +21,9 @@ func init() {
 }
 
 func main() {
+	var w io.Writer
+	w = os.Stdout
+
 	flags, args, err := ParseFlagsArgs()
 	if err != nil {
 		panic(err)
@@ -31,6 +35,30 @@ func main() {
 		return
 	case flags.Version:
 		fmt.Println("0.0.1")
+		return
+	}
+
+	if len(flags.Output) > 0 {
+		f, err := os.OpenFile(flags.Output, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+		w = f
+	}
+
+	if len(flags.Render) > 0 {
+		data, err := os.ReadFile(flags.Render)
+		if err != nil {
+			panic(err)
+		}
+		rendered, err := renderTemplate(string(data))
+		if err != nil {
+			panic(err)
+		}
+		if _, err := w.Write([]byte(rendered)); err != nil {
+			panic(err)
+		}
 		return
 	}
 
@@ -59,10 +87,8 @@ func main() {
 			return
 		}
 
-		fm := funcmap.FuncMap()
-
 		for i, arg := range args {
-			args[i], err = renderTemplate(arg, fm)
+			args[i], err = renderTemplate(arg)
 			if err != nil {
 				panic(err)
 			}
@@ -80,7 +106,7 @@ func main() {
 		}
 
 		for name, data := range files {
-			rendered, err := renderTemplate(data, fm)
+			rendered, err := renderTemplate(data)
 			if err != nil {
 				panic(err)
 			}
@@ -93,7 +119,7 @@ func main() {
 		cmd := exec.CommandContext(context.Background(), args[0], args[1:]...)
 		cmd.Env = env
 		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
+		cmd.Stdout = w
 		cmd.Stderr = os.Stderr
 
 		signalC := make(chan os.Signal, 32)
@@ -118,7 +144,9 @@ func main() {
 	}
 }
 
-func renderTemplate(text string, fm template.FuncMap) (string, error) {
+var fm = funcmap.FuncMap()
+
+func renderTemplate(text string) (string, error) {
 	var sb strings.Builder
 
 	t, err := template.New(text).Funcs(fm).Parse(text)
