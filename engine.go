@@ -20,7 +20,7 @@ import (
 type Config yaml.MapSlice
 
 type Engine struct {
-	MappingsByArg0 map[string][]*Mapping `json:"mappings"`
+	Mappings map[string][]*Mapping `json:"mappings"`
 
 	// used to cache calls to the Executables() method
 	executables []string
@@ -45,7 +45,7 @@ func NewEngineFromFile(name string) (*Engine, error) {
 
 func NewEngineFromReader(r io.Reader) (*Engine, error) {
 	engine := &Engine{
-		MappingsByArg0: map[string][]*Mapping{},
+		Mappings: map[string][]*Mapping{},
 	}
 
 	var config Config
@@ -64,7 +64,7 @@ func NewEngineFromReader(r io.Reader) (*Engine, error) {
 			return nil, err
 		}
 
-		engine.MappingsByArg0[args[0]] = append(engine.MappingsByArg0[args[0]], &Mapping{
+		engine.Mappings[pattern[0]] = append(engine.Mappings[pattern[0]], &Mapping{
 			Pattern: pattern,
 			Env:     env,
 			Args:    args,
@@ -76,7 +76,7 @@ func NewEngineFromReader(r io.Reader) (*Engine, error) {
 }
 
 func (e *Engine) Map(env []string, args []string) ([]string, []string, map[string]string) {
-	mappings, ok := e.MappingsByArg0[args[0]]
+	mappings, ok := e.Mappings[args[0]]
 	if !ok {
 		return env, args, nil
 	}
@@ -110,9 +110,9 @@ func (e *Engine) Executables() []string {
 		return e.executables
 	}
 
-	out := make([]string, 0, len(e.MappingsByArg0))
-	for arg0 := range e.MappingsByArg0 {
-		out = append(out, arg0)
+	out := make([]string, 0, len(e.Mappings))
+	for executable := range e.Mappings {
+		out = append(out, executable)
 	}
 	sort.Strings(out)
 
