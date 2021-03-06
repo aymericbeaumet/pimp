@@ -16,18 +16,16 @@ import (
 	fmerrors "github.com/aymericbeaumet/pimp/funcmap/errors"
 )
 
+type ExecRet struct {
+	Pid    int
+	Status int
+	Stdout string
+	Stderr string
+}
+
 func FuncMap() template.FuncMap {
 	return template.FuncMap{
-		"At": func(selector string, input interface{}) (interface{}, error) {
-			switch i := input.(type) {
-			case map[string]interface{}:
-				return i[selector], nil
-			default:
-				return nil, fmt.Errorf("don't know how to apply selector `%s` on input %#v", selector, input)
-			}
-		},
-
-		"Exec": func(bin string, args ...string) (map[string]interface{}, error) {
+		"Exec": func(bin string, args ...string) (*ExecRet, error) {
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 
@@ -71,11 +69,11 @@ func FuncMap() template.FuncMap {
 				return nil, err
 			}
 
-			return map[string]interface{}{
-				"pid":    state.Pid(),
-				"status": state.ExitCode(),
-				"stdout": string(outbytes),
-				"stderr": string(errbytes),
+			return &ExecRet{
+				Pid:    state.Pid(),
+				Status: state.ExitCode(),
+				Stdout: string(outbytes),
+				Stderr: string(errbytes),
 			}, nil
 		},
 
