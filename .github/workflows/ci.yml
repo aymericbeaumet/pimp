@@ -21,10 +21,10 @@ jobs:
           go mod tidy
           [ -z "$(git status --porcelain)" ] || exit 1
 
-      - name: Build the project and install
-        run: go build -o /usr/local/bin/pimp .
+      - name: Build and install pimp
+        run: go install .
 
-      - name: Check the `pimp generate-readme` command has been run
+      - name: Check the readme is up to date
         run: |
           pimp --config=.pimprc generate-readme
           [ -z "$(git status --porcelain)" ] || exit 1
