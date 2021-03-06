@@ -13,6 +13,7 @@ require (
 	github.com/mitchellh/copystructure v1.1.1 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pelletier/go-toml v1.8.1
+	github.com/urfave/cli/v2 v2.3.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.20.4
 	k8s.io/client-go v0.20.4

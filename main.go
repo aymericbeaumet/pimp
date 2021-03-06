@@ -2,158 +2,256 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"os/signal"
-	"runtime/debug"
+	"path/filepath"
 	"strings"
+	"syscall"
 	"text/template"
 
 	"github.com/aymericbeaumet/pimp/funcmap"
 	fmerrors "github.com/aymericbeaumet/pimp/funcmap/errors"
+	"github.com/mitchellh/go-homedir"
+	"github.com/urfave/cli/v2"
 )
 
-func init() {
-	// Disable garbage collection for such a short lived program
-	debug.SetGCPercent(-1)
-}
-
 func main() {
-	flags, args, err := ParseFlagsArgs()
-	if err != nil {
-		panic(err)
-	}
+	app := &cli.App{
+		Name:        "pimp",
+		Usage:       "Command line expander",
+		UsageText:   "pimp [COMMAND] [OPTION]... [--] [BIN [ARG]...]",
+		Version:     "0.0.1", // TODO: use -ldflags to embed the git commit hash
+		Description: "Command expander. Shipped with a template engine, and more. Providing no COMMAND is the default and most common behavior, in this case BIN will be executed and given ARG as parameters.",
 
-	switch {
-	case flags.Help:
-		PrintUsage()
-		return
-	case flags.Version:
-		fmt.Println("0.0.1")
-		return
-	}
+		Reader:    os.Stdin,
+		Writer:    os.Stdout,
+		ErrWriter: os.Stderr,
 
-	input := os.Stdin
-	if len(flags.Input) > 0 {
-		f, err := os.Open(flags.Input)
-		if err != nil {
-			panic(err)
-		}
-		defer f.Close()
-		input = f
-	}
+		HideHelpCommand:        true,
+		UseShortOptionHandling: true,
 
-	output := os.Stdout
-	if len(flags.Output) > 0 {
-		f, err := os.OpenFile(flags.Output, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
-		if err != nil {
-			panic(err)
-		}
-		defer f.Close()
-		output = f
-	}
-
-	if len(flags.Render) > 0 {
-		data, err := os.ReadFile(flags.Render)
-		if err != nil {
-			panic(err)
-		}
-		rendered, err := renderTemplate(string(data))
-		if err != nil {
-			panic(err)
-		}
-		if _, err := output.Write([]byte(rendered)); err != nil {
-			panic(err)
-		}
-		return
-	}
-
-	engine, err := NewEngineFromFile(flags.Config)
-	if err != nil {
-		panic(err)
-	}
-
-	switch {
-	case flags.Dump:
-		if err := engine.Dump(os.Stdout); err != nil {
-			panic(err)
-		}
-		return
-
-	case flags.Shell:
-		for _, executable := range engine.Executables() {
-			fmt.Printf("alias %#v=%#v\n", executable, "pimp "+executable)
-		}
-		return
-
-	default:
-		env, args, files := engine.Map(os.Environ(), args)
-		if len(args) == 0 {
-			PrintUsage()
-			return
-		}
-
-		for i, arg := range args {
-			args[i], err = renderTemplate(arg)
-			if err != nil {
-				panic(err)
-			}
-		}
-
-		if flags.Expand {
-			for i, arg := range args {
-				if i > 0 {
-					fmt.Print(" ")
+		Before: func(c *cli.Context) error {
+			for _, flag := range []string{"config", "input", "output"} {
+				if s := c.String(flag); len(s) > 0 {
+					expanded, err := expand(s)
+					if err != nil {
+						return err
+					}
+					if err := c.Set(flag, expanded); err != nil {
+						return err
+					}
 				}
-				fmt.Printf("%#v", arg)
 			}
-			fmt.Print("\n")
-			return
-		}
 
-		for name, data := range files {
-			rendered, err := renderTemplate(data)
+			if filename := c.String("input"); len(filename) > 0 {
+				f, err := os.Open(filename)
+				if err != nil {
+					return err
+				}
+				c.App.Reader = f
+			}
+
+			if filename := c.String("output"); len(filename) > 0 {
+				f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+				if err != nil {
+					return err
+				}
+				c.App.Writer = f
+			}
+
+			// see the corresponding flags (not commands) if you want to know why we
+			// need this
+			for _, commandAsFlag := range []string{"dump", "render", "shell"} {
+				if c.IsSet(commandAsFlag) {
+					commandName := "--" + commandAsFlag
+					if command := c.App.Command(commandName); command != nil {
+						if err := command.Run(c); err != nil {
+							_, _ = fmt.Fprintf(c.App.ErrWriter, "Command %s failed: %s\n\n", commandName, err)
+							_ = cli.ShowAppHelp(c)
+							return err // abort the process
+						}
+						return nil
+					}
+				}
+			}
+
+			return nil
+		},
+
+		Action: func(c *cli.Context) error {
+			engine, err := NewEngineFromFile(c.String("config"))
 			if err != nil {
-				panic(err)
+				return err
 			}
-			if err := os.WriteFile(name, []byte(rendered), 0400); err != nil {
-				panic(err)
+
+			env, args, files := engine.Map(os.Environ(), c.Args().Slice())
+			if len(args) == 0 {
+				_ = cli.ShowAppHelp(c)
+				return nil
 			}
-			defer os.Remove(name)
-		}
 
-		cmd := exec.CommandContext(context.Background(), args[0], args[1:]...)
-		cmd.Env = env
-		cmd.Stdin = input
-		cmd.Stdout = output
-		cmd.Stderr = os.Stderr
-
-		signalC := make(chan os.Signal, 32)
-		signal.Notify(signalC)
-
-		if err := cmd.Start(); err != nil {
-			panic(err)
-		}
-
-		go func() {
-			for signal := range signalC {
-				_ = cmd.Process.Signal(signal)
+			for i, arg := range args {
+				args[i], err = render(arg)
+				if err != nil {
+					return err
+				}
 			}
-		}()
 
-		state, err := cmd.Process.Wait()
-		if err != nil {
-			panic(err)
-		}
+			if c.IsSet("expand") {
+				for i, arg := range args {
+					if i > 0 {
+						fmt.Print(" ")
+					}
+					fmt.Printf("%#v", arg)
+				}
+				fmt.Print("\n")
+				return nil
+			}
 
-		os.Exit(state.ExitCode())
+			for filename, data := range files {
+				rendered, err := render(data)
+				if err != nil {
+					return err
+				}
+				if err := os.WriteFile(filename, []byte(rendered), 0400); err != nil {
+					return err
+				}
+				defer os.Remove(filename)
+			}
+
+			cmd := exec.CommandContext(c.Context, args[0], args[1:]...)
+			cmd.Env = env
+			cmd.Stdin = c.App.Reader
+			cmd.Stdout = c.App.Writer
+			cmd.Stderr = os.Stderr
+
+			signalC := make(chan os.Signal, 32)
+			signal.Notify(signalC)
+
+			if err := cmd.Start(); err != nil {
+				return err
+			}
+
+			go func() {
+				for signal := range signalC {
+					_ = cmd.Process.Signal(signal)
+				}
+			}()
+
+			state, err := cmd.Process.Wait()
+			if err != nil {
+				return err
+			}
+
+			syscall.Exit(state.ExitCode())
+			return nil
+		},
+
+		Commands: []*cli.Command{
+			{
+				Name:  "--dump",
+				Usage: "Dump the config as JSON and exit",
+				Action: func(c *cli.Context) error {
+					engine, err := NewEngineFromFile(c.String("config"))
+					if err != nil {
+						return err
+					}
+					return engine.JSON(c.App.Writer)
+				},
+			},
+
+			{
+				Name:  "--render",
+				Usage: "Render the template and exit",
+				Action: func(c *cli.Context) error {
+					if len(os.Args) != 3 {
+						return errors.New("expecting exactly 1 parameter containing the path to the template")
+					}
+
+					arg0, err := expand(os.Args[2])
+					if err != nil {
+						return err
+					}
+
+					data, err := os.ReadFile(arg0)
+					if err != nil {
+						return err
+					}
+
+					rendered, err := render(string(data))
+					if err != nil {
+						return err
+					}
+
+					if _, err := c.App.Writer.Write([]byte(rendered)); err != nil {
+						return err
+					}
+
+					return nil
+				},
+			},
+
+			{
+				Name:  "--shell",
+				Usage: "Print the shell config (bash, zsh, fish, ...) and exit",
+				Action: func(c *cli.Context) error {
+					engine, err := NewEngineFromFile(c.String("config"))
+					if err != nil {
+						return err
+					}
+					for _, executable := range engine.Executables() {
+						fmt.Fprintf(c.App.Writer, "alias %#v=%#v\n", executable, "pimp "+executable)
+					}
+					return nil
+				},
+			},
+		},
+
+		Flags: []cli.Flag{
+			// Register hidden flags that are used to trigger the --dump, --render and --shell commands
+			// This is needed as --[commands] are not supported by the parser
+			&cli.BoolFlag{Name: "dump", Value: false, Hidden: true},
+			&cli.BoolFlag{Name: "render", Value: false, Hidden: true},
+			&cli.BoolFlag{Name: "shell", Value: false, Hidden: true},
+
+			&cli.StringFlag{
+				Name:    "config",
+				Aliases: []string{"c"},
+				Value:   "~/.pimprc",
+				Usage:   "Provide a different config `FILE`",
+				EnvVars: []string{"PIMP_CONFIG"},
+			},
+
+			&cli.BoolFlag{
+				Name:  "expand",
+				Value: false,
+				Usage: "Expand and print the command instead of running it",
+			},
+
+			&cli.StringFlag{
+				Name:  "input",
+				Value: "",
+				Usage: "Read the input from `FILE` instead of stdin",
+			},
+
+			&cli.StringFlag{
+				Name:    "output",
+				Aliases: []string{"o"},
+				Value:   "",
+				Usage:   "Write the output to `FILE` instead of stdout",
+			},
+		},
 	}
+
+	_ = app.RunContext(context.Background(), os.Args)
 }
 
 var fm = funcmap.FuncMap()
 
-func renderTemplate(text string) (string, error) {
+func render(text string) (string, error) {
 	var sb strings.Builder
 
 	t, err := template.New(text).Funcs(fm).Parse(text)
@@ -173,11 +271,31 @@ func renderTemplate(text string) (string, error) {
 		switch e := err.(type) {
 		case *fmerrors.FatalError:
 			os.Stderr.WriteString(e.Error())
-			os.Exit(e.ExitCode())
+			syscall.Exit(e.ExitCode())
 		default:
 			return "", err
 		}
 	}
 
 	return sb.String(), nil
+}
+
+func expand(input string) (string, error) {
+	if len(input) == 0 {
+		return "", nil
+	}
+
+	expanded, err := homedir.Expand(input)
+	if err != nil {
+		return "", err
+	}
+	if strings.HasPrefix(expanded, "/") {
+		return expanded, nil
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(wd, expanded), nil
 }

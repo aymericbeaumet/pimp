@@ -105,7 +105,7 @@ func (e *Engine) Map(env []string, args []string) ([]string, []string, map[strin
 	return env, args, nil
 }
 
-func (e *Engine) Dump(w io.Writer) error {
+func (e *Engine) JSON(w io.Writer) error {
 	return json.NewEncoder(w).Encode(e)
 }
 
