@@ -22,7 +22,12 @@ jobs:
           [ -z "$(git status --porcelain)" ] || exit 1
 
       - name: Build the project
-        run: go build ./...
+        run: go build .
+
+      - name: Check the `pimp generate-readme` command has been run
+        run: |
+          ./pimp --config=.pimprc generate-readme
+          [ -z "$(git status --porcelain)" ] || exit 1
 
       - name: Run tests
         run: go test -v ./...
