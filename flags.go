@@ -11,8 +11,8 @@ import (
 
 type Flags struct {
 	Config  string
-	DryRun  bool
 	Dump    bool
+	Expand  bool
 	Help    bool
 	Shell   bool
 	Version bool
@@ -20,8 +20,8 @@ type Flags struct {
 
 func ParseFlagsArgs() (*Flags, []string, error) {
 	var flags Flags
-	flag.BoolVar(&flags.DryRun, "dry-run", false, "Print the command to be executed and exit with status code 0")
 	flag.BoolVar(&flags.Dump, "dump", false, "Dump the config on stdout and exit with status code 0")
+	flag.BoolVar(&flags.Expand, "expand", false, "Expand the command and exit with status code 0")
 	flag.BoolVar(&flags.Help, "help", false, "Print the help and exit with status code 0")
 	flag.BoolVar(&flags.Shell, "shell", false, "Output shell config (bash, zsh, fish, ...)")
 	flag.BoolVar(&flags.Version, "version", false, "Print the version and exit with status code 0")

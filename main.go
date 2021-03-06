@@ -68,7 +68,7 @@ func main() {
 			}
 		}
 
-		if flags.DryRun {
+		if flags.Expand {
 			for i, arg := range args {
 				if i > 0 {
 					fmt.Print(" ")
