@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -21,9 +20,6 @@ func init() {
 }
 
 func main() {
-	var w io.Writer
-	w = os.Stdout
-
 	flags, args, err := ParseFlagsArgs()
 	if err != nil {
 		panic(err)
@@ -38,13 +34,14 @@ func main() {
 		return
 	}
 
+	output := os.Stdout
 	if len(flags.Output) > 0 {
 		f, err := os.OpenFile(flags.Output, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 		if err != nil {
 			panic(err)
 		}
 		defer f.Close()
-		w = f
+		output = f
 	}
 
 	if len(flags.Render) > 0 {
@@ -56,7 +53,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		if _, err := w.Write([]byte(rendered)); err != nil {
+		if _, err := output.Write([]byte(rendered)); err != nil {
 			panic(err)
 		}
 		return
@@ -119,7 +116,7 @@ func main() {
 		cmd := exec.CommandContext(context.Background(), args[0], args[1:]...)
 		cmd.Env = env
 		cmd.Stdin = os.Stdin
-		cmd.Stdout = w
+		cmd.Stdout = output
 		cmd.Stderr = os.Stderr
 
 		signalC := make(chan os.Signal, 32)
