@@ -59,7 +59,7 @@ func NewFromReader(r io.Reader) (*Engine, error) {
 			return nil, err
 		}
 
-		env, args, files, err := parseEnvArgs(item.Value.(string))
+		env, args, files, err := parseEnvArgs(item.Value)
 		if err != nil {
 			return nil, err
 		}
@@ -124,37 +124,55 @@ func (e *Engine) Executables() []string {
 	return out
 }
 
-func parseEnvArgs(input string) ([]string, []string, map[string]string, error) {
+func parseEnvArgs(input interface{}) ([]string, []string, map[string]string, error) {
 	const SHEBANG = "#!"
 
 	var env, args []string
 	var files map[string]string
 	var err error
 
-	// multiline script (with shebang)
-	if newLineIndex := strings.IndexRune(input, '\n'); newLineIndex > -1 {
-		if !strings.HasPrefix(input, SHEBANG) {
-			return nil, nil, nil, errors.New("invalid shebang")
+	switch input := input.(type) {
+
+	case []string:
+		args = make([]string, 0, len(input))
+		args = append(args, input...)
+
+	case []interface{}:
+		args = make([]string, 0, len(input))
+		for _, i := range input {
+			args = append(args, i.(string))
 		}
 
-		filename := filepath.Join(os.TempDir(), fmt.Sprintf("pimp-%d", time.Now().UTC().UnixNano()))
+	case string:
+		// multiline script (with shebang)
+		if newLineIndex := strings.IndexRune(input, '\n'); newLineIndex > -1 {
+			if !strings.HasPrefix(input, SHEBANG) {
+				return nil, nil, nil, errors.New("invalid shebang")
+			}
 
-		s, ph := doPlaceholders(input[len(SHEBANG):newLineIndex])
-		args, err = shellwords.Parse(s)
-		if err != nil {
-			return nil, nil, nil, err
-		}
-		args = append(undoPlaceholders(args, ph), filename)
+			filename := filepath.Join(os.TempDir(), fmt.Sprintf("pimp-%d", time.Now().UTC().UnixNano()))
 
-		files = map[string]string{}
-		files[filename] = input
-	} else {
-		s, ph := doPlaceholders(input)
-		env, args, err = shellwords.ParseWithEnvs(s)
-		if err != nil {
-			return nil, nil, nil, err
+			s, ph := doPlaceholders(input[len(SHEBANG):newLineIndex])
+			args, err = shellwords.Parse(s)
+			if err != nil {
+				return nil, nil, nil, err
+			}
+			args = append(undoPlaceholders(args, ph), filename)
+
+			files = map[string]string{}
+			files[filename] = input
+		} else {
+			s, ph := doPlaceholders(input)
+			env, args, err = shellwords.ParseWithEnvs(s)
+			if err != nil {
+				return nil, nil, nil, err
+			}
+			args = undoPlaceholders(args, ph)
 		}
-		args = undoPlaceholders(args, ph)
+
+	default:
+		return nil, nil, nil, fmt.Errorf("unsupported mapping value: %#v", input)
+
 	}
 
 	return env, args, files, nil
