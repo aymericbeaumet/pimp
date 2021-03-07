@@ -1,0 +1,41 @@
+project_name: pimp
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+
+archives:
+  - name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+
+release:
+  github:
+    owner: aymericbeaumet
+    name: pimp
+  prerelease: auto
+  name_template: '{{ .Tag }}'
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^chore:'
+      - '^docs:'
+      - '^test:'
