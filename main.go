@@ -35,14 +35,19 @@ func main() {
 
 		Before: func(c *cli.Context) error {
 			for _, flagName := range []string{"config", "input", "output"} {
-				if s := c.String(flagName); len(s) > 0 {
-					expanded, err := expand(s)
-					if err != nil {
-						_, _ = fmt.Fprintf(c.App.ErrWriter, "error for `%s` flag: %v\n", flagName, err)
-						syscall.Exit(1)
-					}
-					if err := c.Set(flagName, expanded); err != nil {
-						_, _ = fmt.Fprintf(c.App.ErrWriter, "error for `%s` flag: %v\n", flagName, err)
+				if c.IsSet(flagName) {
+					if s := c.String(flagName); len(s) > 0 {
+						expanded, err := expand(s)
+						if err != nil {
+							_, _ = fmt.Fprintf(c.App.ErrWriter, "error for `%s` flag: %v\n", flagName, err)
+							syscall.Exit(1)
+						}
+						if err := c.Set(flagName, expanded); err != nil {
+							_, _ = fmt.Fprintf(c.App.ErrWriter, "error for `%s` flag: %v\n", flagName, err)
+							syscall.Exit(1)
+						}
+					} else {
+						_, _ = fmt.Fprintf(c.App.ErrWriter, "error for `%s` flag: empty\n", flagName)
 						syscall.Exit(1)
 					}
 				}
