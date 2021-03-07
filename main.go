@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -38,12 +39,10 @@ func main() {
 				if s := c.String(flagName); len(s) > 0 {
 					expanded, err := expand(s)
 					if err != nil {
-						_, _ = fmt.Fprintf(c.App.ErrWriter, "error for `%s` flag: %v\n", flagName, err)
-						syscall.Exit(1)
+						return fmt.Errorf("error for `%s` flag: %v", flagName, err)
 					}
 					if err := c.Set(flagName, expanded); err != nil {
-						_, _ = fmt.Fprintf(c.App.ErrWriter, "error for `%s` flag: %v\n", flagName, err)
-						syscall.Exit(1)
+						return fmt.Errorf("error for `%s` flag: %v", flagName, err)
 					}
 				}
 			}
@@ -51,8 +50,7 @@ func main() {
 			if filename := c.String("input"); len(filename) > 0 {
 				f, err := os.Open(filename)
 				if err != nil {
-					_, _ = fmt.Fprintf(c.App.ErrWriter, "error for `input` flag: %v", err)
-					syscall.Exit(1)
+					return fmt.Errorf("error for `input` flag: %v", err)
 				}
 				c.App.Reader = f
 			}
@@ -60,8 +58,7 @@ func main() {
 			if filename := c.String("output"); len(filename) > 0 {
 				f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 				if err != nil {
-					_, _ = fmt.Fprintf(c.App.ErrWriter, "error for `output` flag: %v", err)
-					syscall.Exit(1)
+					return fmt.Errorf("error for `output` flag: %v", err)
 				}
 				c.App.Writer = f
 			}
@@ -73,9 +70,7 @@ func main() {
 					commandName := "--" + flagName
 					if command := c.App.Command(commandName); command != nil {
 						if err := command.Run(c); err != nil {
-							_, _ = fmt.Fprintf(c.App.ErrWriter, "Command %s failed: %s\n\n", commandName, err)
-							_ = cli.ShowAppHelp(c)
-							syscall.Exit(1)
+							return fmt.Errorf("command %s failed: %s", commandName, err)
 						}
 						syscall.Exit(0)
 					}
@@ -326,7 +321,9 @@ compdef _pimp pimp`)
 		},
 	}
 
-	_ = app.RunContext(context.Background(), os.Args)
+	if err := app.RunContext(context.Background(), os.Args); err != nil {
+		log.Fatal(err)
+	}
 }
 
 var fm = funcmap.FuncMap()
