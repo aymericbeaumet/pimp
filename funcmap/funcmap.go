@@ -10,6 +10,7 @@ import (
 	"github.com/aymericbeaumet/pimp/funcmap/kubernetes"
 	"github.com/aymericbeaumet/pimp/funcmap/marshal"
 	"github.com/aymericbeaumet/pimp/funcmap/misc"
+	"github.com/aymericbeaumet/pimp/funcmap/semver"
 )
 
 func FuncMap() template.FuncMap {
@@ -19,6 +20,7 @@ func FuncMap() template.FuncMap {
 		kubernetes.FuncMap(),
 		marshal.FuncMap(),
 		misc.FuncMap(),
+		semver.FuncMap(),
 		sprig.TxtFuncMap(),
 	)
 }
