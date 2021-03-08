@@ -33,11 +33,10 @@ COMMAND is the default and most common behavior, in this case BIN will be
 executed and given ARG as parameters.
     `),
 
-		Reader:               os.Stdin,
-		Writer:               os.Stdout,
-		ErrWriter:            os.Stderr,
-		HideHelpCommand:      true,
-		EnableBashCompletion: true,
+		Reader:          os.Stdin,
+		Writer:          os.Stdout,
+		ErrWriter:       os.Stderr,
+		HideHelpCommand: true,
 
 		Before: func(c *cli.Context) error {
 			for _, flagName := range []string{"config", "file", "input", "output"} {
@@ -68,10 +67,32 @@ executed and given ARG as parameters.
 				c.App.Writer = f
 			}
 
-			// see the corresponding flags (not commands) if you want to know why we
-			// need this
+			if c.Bool("zsh-completion") {
+				word := os.Args[len(os.Args)-1]
+
+				fmt.Fprintln(c.App.Writer, "local -a flags")
+				for _, flag := range c.App.Flags {
+					for _, name := range flag.Names() {
+						var prefixedFlag string
+						if len(name) == 1 {
+							prefixedFlag = "-" + name
+						} else {
+							prefixedFlag = "--" + name
+						}
+						if strings.HasPrefix(prefixedFlag, word) && prefixedFlag != word {
+							fmt.Fprintf(c.App.Writer, "flags+=(%#v)\n", prefixedFlag)
+						}
+					}
+				}
+				fmt.Fprintln(c.App.Writer, "_describe flags flags")
+
+				fmt.Fprintln(c.App.Writer, "_files")
+
+				syscall.Exit(0)
+			}
+
 			for _, flagName := range []string{"dump", "render", "shell", "bash", "zsh"} {
-				if c.IsSet(flagName) {
+				if c.Bool(flagName) {
 					commandName := "--" + flagName
 					if command := c.App.Command(commandName); command != nil {
 						if err := command.Run(c); err != nil {
@@ -221,36 +242,12 @@ executed and given ARG as parameters.
 						return err
 					}
 					for _, executable := range eng.Executables() {
-						fmt.Fprintf(c.App.Writer, "alias %#v=%#v\n", executable, "pimp "+executable)
+						if _, err := fmt.Fprintf(
+							c.App.Writer, "alias %#v=%#v\n", executable, "pimp "+executable,
+						); err != nil {
+							return err
+						}
 					}
-					return nil
-				},
-			},
-
-			{
-				Name:  "--bash",
-				Usage: "Print the Bash config and exit (aliases and completion)",
-				Action: func(c *cli.Context) error {
-					if err := c.App.Command("--shell").Run(c); err != nil {
-						return err
-					}
-					fmt.Fprintln(c.App.Writer, `
-_pimp() {
-  if [[ "${COMP_WORDS[0]}" != "source" ]]; then
-    local cur opts base
-    COMPREPLY=()
-    cur="${COMP_WORDS[COMP_CWORD]}"
-    if [[ "$cur" == "-"* ]]; then
-      opts=$( ${COMP_WORDS[@]:0:$COMP_CWORD} ${cur} --generate-bash-completion )
-    else
-      opts=$( ${COMP_WORDS[@]:0:$COMP_CWORD} --generate-bash-completion )
-    fi
-    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-    return 0
-  fi
-}
-
-complete -o bashdefault -o default -o nospace -F _pimp pimp`)
 					return nil
 				},
 			},
@@ -262,28 +259,14 @@ complete -o bashdefault -o default -o nospace -F _pimp pimp`)
 					if err := c.App.Command("--shell").Run(c); err != nil {
 						return err
 					}
-					fmt.Fprintln(c.App.Writer, `
-_pimp() {
-  local -a opts
-  local cur
-  cur=${words[-1]}
-  if [[ "$cur" == "-"* ]]; then
-    opts=("${(@f)$(_CLI_ZSH_AUTOCOMPLETE_HACK=1 ${words[@]:0:#words[@]-1} ${cur} --generate-bash-completion)}")
-  else
-    opts=("${(@f)$(_CLI_ZSH_AUTOCOMPLETE_HACK=1 ${words[@]:0:#words[@]-1} --generate-bash-completion)}")
-  fi
+					_, err := fmt.Fprintln(c.App.Writer, `
+            _pimp() {
+              eval "$(pimp --zsh-completion -- "${words[@]}")"
+            }
 
-  if [[ "${opts[1]}" != "" ]]; then
-    _describe 'values' opts
-  else
-    _files
-  fi
-
-  return
-}
-
-compdef _pimp pimp`)
-					return nil
+            compdef _pimp pimp
+          `)
+					return err
 				},
 			},
 		},
@@ -297,6 +280,7 @@ compdef _pimp pimp`)
 			&cli.BoolFlag{Name: "shell", Value: false, Hidden: true},
 			&cli.BoolFlag{Name: "bash", Value: false, Hidden: true},
 			&cli.BoolFlag{Name: "zsh", Value: false, Hidden: true},
+			&cli.BoolFlag{Name: "zsh-completion", Value: false, Hidden: true},
 
 			&cli.StringFlag{
 				Name:    "config",
