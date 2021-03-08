@@ -1,3 +1,7 @@
+major: "{{$version := GitTags | Major}} git tag -a {{$version}} -m {{$version}}"
+minor: "{{$version := GitTags | Minor}} git tag -a {{$version}} -m {{$version}}"
+patch: "{{$version := GitTags | Patch}} git tag -a {{$version}} -m {{$version}}"
+
 generate-readme: |
   #!/usr/bin/env pimp --output=readme.md --render
   {{ $repository := "aymericbeaumet/pimp" -}}
