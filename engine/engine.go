@@ -184,13 +184,13 @@ func parseEnvArgs(input interface{}) ([]string, []string, map[string]string, err
 // ___pimp_X___ placeholders, parse the line, then to replace back.
 
 var templateRegexp = regexp.MustCompile(`{{[^}]+}}`)
-var placeholderRegexp = regexp.MustCompile(`___pimp_[0-9]+___`)
+var placeholderRegexp = regexp.MustCompile("\x00pimp[0-9]+\x00")
 
 func doPlaceholders(input string) (string, map[string]string) {
 	templatesByPlaceholder := map[string]string{}
 
 	out := templateRegexp.ReplaceAllStringFunc(input, func(template string) string {
-		placeholder := fmt.Sprintf("___pimp_%d___", len(templatesByPlaceholder))
+		placeholder := fmt.Sprintf("\x00pimp%d\x00", len(templatesByPlaceholder))
 		templatesByPlaceholder[placeholder] = template
 		return placeholder
 	})
