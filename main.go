@@ -24,7 +24,7 @@ func main() {
 	app := &cli.App{
 		Name:      "pimp",
 		Usage:     "Command line expander",
-		UsageText: "pimp [COMMAND] [OPTION]... [--] [BIN [ARG]...]",
+		UsageText: "pimp [OPTION]... [--] BIN [ARG]...\n   pimp [OPTION]... [COMMAND]",
 		Version:   "0.0.1", // TODO: use -ldflags to embed the git commit hash
 		Description: strings.TrimSpace(`
 Command expander. Shipped with a template engine, and more. Providing no
