@@ -37,7 +37,7 @@ func main() {
 		Before: func(c *cli.Context) error {
 			for _, flagName := range []string{"config", "input", "output"} {
 				if s := c.String(flagName); len(s) > 0 {
-					expanded, err := expand(s)
+					expanded, err := expandPath(s)
 					if err != nil {
 						return fmt.Errorf("error for `%s` flag: %v", flagName, err)
 					}
@@ -93,23 +93,11 @@ func main() {
 				return nil
 			}
 
-			for i, arg := range args {
-				args[i], err = render(arg)
-				if err != nil {
-					return err
-				}
+			args, err = renderStrings(args)
+			if err != nil {
+				return err
 			}
-
-			if c.IsSet("expand") {
-				for i, arg := range args {
-					if i > 0 {
-						fmt.Print(" ")
-					}
-					fmt.Printf("%#v", arg)
-				}
-				fmt.Print("\n")
-				return nil
-			}
+			args = filterEmptyStrings(args)
 
 			for filename, data := range files {
 				rendered, err := render(data)
@@ -119,7 +107,20 @@ func main() {
 				if err := os.WriteFile(filename, []byte(rendered), 0400); err != nil {
 					return err
 				}
-				defer os.Remove(filename)
+				if !c.Bool("keep") {
+					defer os.Remove(filename)
+				}
+			}
+
+			if c.Bool("expand") {
+				for i, arg := range args {
+					if i > 0 {
+						fmt.Print(" ")
+					}
+					fmt.Printf("%#v", arg)
+				}
+				fmt.Print("\n")
+				return nil
 			}
 
 			cmd := exec.CommandContext(c.Context, args[0], args[1:]...)
@@ -172,7 +173,7 @@ func main() {
 						return errors.New("expect one parameter")
 					}
 
-					renderFilepath, err := expand(renderFilepath)
+					renderFilepath, err := expandPath(renderFilepath)
 					if err != nil {
 						return err
 					}
@@ -312,6 +313,12 @@ compdef _pimp pimp`)
 				Usage: "Read the input from `FILE` instead of stdin",
 			},
 
+			&cli.BoolFlag{
+				Name:  "keep",
+				Value: false,
+				Usage: "Keep the temporary files",
+			},
+
 			&cli.StringFlag{
 				Name:    "output",
 				Aliases: []string{"o"},
@@ -357,9 +364,26 @@ func render(text string) (string, error) {
 	return sb.String(), nil
 }
 
-func expand(input string) (string, error) {
+// renderStrings renders several strings in a single context. This makes it
+// possible to interact between several templates with variable declarations,
+// etc.
+func renderStrings(texts []string) ([]string, error) {
+	const SEP = "\x00pimp\x00"
+
+	joined := strings.Join(texts, SEP)
+
+	rendered, err := render(joined)
+	if err != nil {
+		return nil, err
+	}
+
+	return strings.Split(rendered, SEP), nil
+}
+
+func expandPath(input string) (string, error) {
+	input = strings.TrimSpace(input)
 	if len(input) == 0 {
-		return "", nil
+		return input, nil
 	}
 
 	expanded, err := homedir.Expand(input)
@@ -375,4 +399,14 @@ func expand(input string) (string, error) {
 		return "", err
 	}
 	return filepath.Join(wd, expanded), nil
+}
+
+func filterEmptyStrings(input []string) []string {
+	out := make([]string, 0, len(input))
+	for _, i := range input {
+		if trimmed := strings.TrimSpace(i); len(trimmed) > 0 {
+			out = append(out, trimmed)
+		}
+	}
+	return out
 }
