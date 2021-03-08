@@ -28,7 +28,7 @@ jobs:
 
       - name: Check the readme is up to date
         run: |
-          pimp --config=.pimprc generate-readme
+          pimp --config=Pimpfile generate-readme
           [ -z "$(git status --porcelain)" ] || exit 1
 
       - name: Run tests
