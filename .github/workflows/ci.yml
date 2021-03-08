@@ -9,15 +9,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v2
 
-      - name: Set up Go environment
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.16
+      - uses: actions/setup-go@v2
 
       - name: Check go.mod and go.sum are up to date
         run: |
@@ -38,33 +32,21 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-                - uses: actions/checkout@v2
-
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: latest
+      - uses: actions/checkout@v2
+      - uses: golangci/golangci-lint-action@v2
 
   release:
     needs: [test, lint]
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
-      - name: Set up Go environment
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.16
+      - uses: actions/setup-go@v2
 
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+      - uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
           args: release --rm-dist
