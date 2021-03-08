@@ -22,11 +22,15 @@ import (
 
 func main() {
 	app := &cli.App{
-		Name:        "pimp",
-		Usage:       "Command line expander",
-		UsageText:   "pimp [COMMAND] [OPTION]... [--] [BIN [ARG]...]",
-		Version:     "0.0.1", // TODO: use -ldflags to embed the git commit hash
-		Description: "Command expander. Shipped with a template engine, and more. Providing no COMMAND is the default and most common behavior, in this case BIN will be executed and given ARG as parameters.",
+		Name:      "pimp",
+		Usage:     "Command line expander",
+		UsageText: "pimp [COMMAND] [OPTION]... [--] [BIN [ARG]...]",
+		Version:   "0.0.1", // TODO: use -ldflags to embed the git commit hash
+		Description: strings.TrimSpace(`
+Command expander. Shipped with a template engine, and more. Providing no
+COMMAND is the default and most common behavior, in this case BIN will be
+executed and given ARG as parameters.
+    `),
 
 		Reader:               os.Stdin,
 		Writer:               os.Stdout,
