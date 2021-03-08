@@ -70,23 +70,25 @@ executed and given ARG as parameters.
 			if c.Bool("zsh-completion") {
 				word := os.Args[len(os.Args)-1]
 
-				fmt.Fprintln(c.App.Writer, "local -a flags")
-				for _, flag := range c.App.Flags {
-					for _, name := range flag.Names() {
-						var prefixedFlag string
-						if len(name) == 1 {
-							prefixedFlag = "-" + name
-						} else {
-							prefixedFlag = "--" + name
-						}
-						if strings.HasPrefix(prefixedFlag, word) && prefixedFlag != word {
-							fmt.Fprintf(c.App.Writer, "flags+=(%#v)\n", prefixedFlag)
+				if strings.HasPrefix(word, "-") {
+					fmt.Fprintln(c.App.Writer, "local -a flags")
+					for _, flag := range c.App.Flags {
+						for _, name := range flag.Names() {
+							var prefixedFlag string
+							if len(name) == 1 {
+								prefixedFlag = "-" + name
+							} else {
+								prefixedFlag = "--" + name
+							}
+							if strings.HasPrefix(prefixedFlag, word) && prefixedFlag != word {
+								fmt.Fprintf(c.App.Writer, "flags+=(%#v)\n", prefixedFlag)
+							}
 						}
 					}
+					fmt.Fprintln(c.App.Writer, "_describe flags flags")
+				} else {
+					fmt.Fprintln(c.App.Writer, "_path_commands")
 				}
-				fmt.Fprintln(c.App.Writer, "_describe flags flags")
-
-				fmt.Fprintln(c.App.Writer, "_files")
 
 				syscall.Exit(0)
 			}
