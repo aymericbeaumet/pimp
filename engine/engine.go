@@ -33,38 +33,30 @@ type Mapping struct {
 	Files   map[string]string `json:"files,omitempty"`
 }
 
-func NewFromFile(name string) (*Engine, error) {
-	file, err := os.Open(name)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	return NewFromReader(file)
-}
-
-func NewFromReader(r io.Reader) (*Engine, error) {
-	engine := &Engine{
+func New() *Engine {
+	return &Engine{
 		Mappings: map[string][]*Mapping{},
 	}
+}
 
+func (eng *Engine) Append(r io.Reader) error {
 	var config Config
 	if err := yaml.NewDecoder(r).Decode(&config); err != nil {
-		return nil, err
+		return err
 	}
 
 	for _, item := range config {
 		pattern, err := shellwords.Parse(item.Key.(string))
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		env, args, files, err := parseEnvArgs(item.Value)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		engine.Mappings[pattern[0]] = append(engine.Mappings[pattern[0]], &Mapping{
+		eng.Mappings[pattern[0]] = append(eng.Mappings[pattern[0]], &Mapping{
 			Pattern: pattern,
 			Env:     env,
 			Args:    args,
@@ -72,15 +64,15 @@ func NewFromReader(r io.Reader) (*Engine, error) {
 		})
 	}
 
-	return engine, nil
+	return nil
 }
 
-func (e *Engine) Map(env []string, args []string) ([]string, []string, map[string]string) {
+func (eng *Engine) Map(env []string, args []string) ([]string, []string, map[string]string) {
 	if len(args) == 0 {
 		return env, args, nil
 	}
 
-	mappings, ok := e.Mappings[args[0]]
+	mappings, ok := eng.Mappings[args[0]]
 	if !ok {
 		return env, args, nil
 	}
@@ -105,22 +97,22 @@ func (e *Engine) Map(env []string, args []string) ([]string, []string, map[strin
 	return env, args, nil
 }
 
-func (e *Engine) JSON(w io.Writer) error {
-	return json.NewEncoder(w).Encode(e)
+func (eng *Engine) JSON(w io.Writer) error {
+	return json.NewEncoder(w).Encode(eng)
 }
 
-func (e *Engine) Executables() []string {
-	if e.executables != nil {
-		return e.executables
+func (eng *Engine) Executables() []string {
+	if eng.executables != nil {
+		return eng.executables
 	}
 
-	out := make([]string, 0, len(e.Mappings))
-	for executable := range e.Mappings {
+	out := make([]string, 0, len(eng.Mappings))
+	for executable := range eng.Mappings {
 		out = append(out, executable)
 	}
 	sort.Strings(out)
 
-	e.executables = out
+	eng.executables = out
 	return out
 }
 

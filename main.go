@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"os/exec"
@@ -24,7 +25,7 @@ func main() {
 	app := &cli.App{
 		Name:      "pimp",
 		Usage:     "Command line expander",
-		UsageText: "pimp [OPTION]... [--] BIN [ARG]...\n   pimp [OPTION]... [COMMAND]",
+		UsageText: "pimp [OPTION]... [--] BIN [ARG]...\n   pimp [OPTION]... COMMAND [ARG]...",
 		Version:   "0.0.1", // TODO: use -ldflags to embed the git commit hash
 		Description: strings.TrimSpace(`
 Command expander. Shipped with a template engine, and more. Providing no
@@ -39,9 +40,9 @@ executed and given ARG as parameters.
 		EnableBashCompletion: true,
 
 		Before: func(c *cli.Context) error {
-			for _, flagName := range []string{"config", "input", "output"} {
+			for _, flagName := range []string{"config", "file", "input", "output"} {
 				if s := c.String(flagName); len(s) > 0 {
-					expanded, err := expandPath(s)
+					expanded, err := normalizePath(s)
 					if err != nil {
 						return fmt.Errorf("error for `%s` flag: %v", flagName, err)
 					}
@@ -86,7 +87,7 @@ executed and given ARG as parameters.
 		},
 
 		Action: func(c *cli.Context) error {
-			eng, err := engine.NewFromFile(c.String("config"))
+			eng, err := initializeEngine(c)
 			if err != nil {
 				return err
 			}
@@ -160,7 +161,7 @@ executed and given ARG as parameters.
 				Name:  "--dump",
 				Usage: "Dump the engine as JSON and exit",
 				Action: func(c *cli.Context) error {
-					eng, err := engine.NewFromFile(c.String("config"))
+					eng, err := initializeEngine(c)
 					if err != nil {
 						return err
 					}
@@ -177,7 +178,7 @@ executed and given ARG as parameters.
 						return errors.New("expect one parameter")
 					}
 
-					renderFilepath, err := expandPath(renderFilepath)
+					renderFilepath, err := normalizePath(renderFilepath)
 					if err != nil {
 						return err
 					}
@@ -215,7 +216,7 @@ executed and given ARG as parameters.
 				Name:  "--shell",
 				Usage: "Print the shell config and exit (aliases only)",
 				Action: func(c *cli.Context) error {
-					eng, err := engine.NewFromFile(c.String("config"))
+					eng, err := initializeEngine(c)
 					if err != nil {
 						return err
 					}
@@ -300,7 +301,7 @@ compdef _pimp pimp`)
 			&cli.StringFlag{
 				Name:    "config",
 				Aliases: []string{"c"},
-				Value:   "~/.pimprc",
+				Value:   "",
 				Usage:   "Provide a different config `FILE`",
 				EnvVars: []string{"PIMP_CONFIG"},
 			},
@@ -309,6 +310,13 @@ compdef _pimp pimp`)
 				Name:  "expand",
 				Value: false,
 				Usage: "Expand and print the command instead of running it",
+			},
+
+			&cli.StringFlag{
+				Name:    "file",
+				Aliases: []string{"f"},
+				Value:   "",
+				Usage:   "Read `FILE` as a pimpfile",
 			},
 
 			&cli.StringFlag{
@@ -370,7 +378,8 @@ func render(text string) (string, error) {
 
 // renderStrings renders several strings in a single context. This makes it
 // possible to interact between several templates with variable declarations,
-// etc.
+// etc. This could generate empty strings in the output that have to be dealt
+// with.
 func renderStrings(texts []string) ([]string, error) {
 	const SEP = "\x00pimp\x00"
 
@@ -384,7 +393,52 @@ func renderStrings(texts []string) ([]string, error) {
 	return strings.Split(rendered, SEP), nil
 }
 
-func expandPath(input string) (string, error) {
+func initializeEngine(c *cli.Context) (*engine.Engine, error) {
+	eng := engine.New()
+
+	for flagName, fallback := range map[string]string{
+		"file":   "./Pimpfile",
+		"config": "~/.pimprc",
+	} {
+		file, err := openFallback(c.String(flagName), fallback)
+		if err != nil {
+			return nil, err
+		}
+		if file != nil {
+			defer file.Close()
+			if err := eng.Append(file); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return eng, nil
+}
+
+func openFallback(filename, fallback string) (*os.File, error) {
+	allowOpenError := false
+
+	if len(filename) == 0 && len(fallback) > 0 {
+		allowOpenError = true
+		filename = fallback
+	}
+
+	filename, err := normalizePath(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	f, err := os.Open(filename)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) && allowOpenError {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return f, nil
+}
+
+func normalizePath(input string) (string, error) {
 	input = strings.TrimSpace(input)
 	if len(input) == 0 {
 		return input, nil
