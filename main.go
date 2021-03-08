@@ -278,7 +278,6 @@ executed and given ARG as parameters.
 			&cli.BoolFlag{Name: "dump", Value: false, Hidden: true},
 			&cli.StringFlag{Name: "render", Value: "", Hidden: true},
 			&cli.BoolFlag{Name: "shell", Value: false, Hidden: true},
-			&cli.BoolFlag{Name: "bash", Value: false, Hidden: true},
 			&cli.BoolFlag{Name: "zsh", Value: false, Hidden: true},
 			&cli.BoolFlag{Name: "zsh-completion", Value: false, Hidden: true},
 
