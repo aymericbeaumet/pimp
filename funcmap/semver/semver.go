@@ -37,7 +37,7 @@ func FuncMap() template.FuncMap {
 			if err != nil {
 				return nil, err
 			}
-			if err := v.IncrementMinor(); err != nil {
+			if err := v.IncrementPatch(); err != nil {
 				return nil, err
 			}
 			return v, nil
