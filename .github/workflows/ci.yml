@@ -5,6 +5,7 @@ on:
     branches: [master]
 
 jobs:
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -34,8 +35,22 @@ jobs:
       - name: Run tests
         run: go test -v ./...
 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+                - uses: actions/checkout@v2
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: latest
+
   release:
-    needs: test
+    needs: [test, lint]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
