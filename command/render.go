@@ -10,7 +10,7 @@ import (
 
 var renderCommand = &cli.Command{
 	Name:            "--render",
-	Usage:           "Render the template(s) and exit",
+	Usage:           "Render the template file(s) and exit",
 	SkipFlagParsing: true,
 	Action: func(c *cli.Context) error {
 		idx := -1
