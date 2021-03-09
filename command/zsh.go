@@ -27,6 +27,7 @@ var zshCommand = &cli.Command{
 	},
 }
 
+// Amazing resource: https://blog.kloetzl.info/how-to-write-a-zsh-completion/
 var zshCompletionCommand = &cli.Command{
 	Name:            "--zsh-completion",
 	Hidden:          true,
@@ -42,29 +43,47 @@ var zshCompletionCommand = &cli.Command{
 
 		lastArg := args[len(args)-1]
 
-		fmt.Fprintln(c.App.Writer, "local -a commands")
+		fmt.Fprintln(c.App.Writer, `
+local ret=1
+local -a options
+
+options+=(
+    `)
+
 		for _, command := range c.App.VisibleCommands() {
 			if strings.HasPrefix(command.Name, lastArg) {
-				fmt.Fprintf(c.App.Writer, "commands+=('%s')\n", command.Name+":"+command.Usage)
+				s := command.Name + "[" + command.Usage + "]"
+				fmt.Fprintf(c.App.Writer, "'%s'\n", s)
 			}
 		}
-		fmt.Fprintln(c.App.Writer, "_describe -t commands 'commands' commands")
 
-		fmt.Fprintln(c.App.Writer, "local -a flags")
 		for _, flag := range c.App.VisibleFlags() {
 			for _, name := range flag.Names() {
 				var prefixedFlag string
+				var suffix string
 				if len(name) == 1 {
 					prefixedFlag = "-" + name
+					suffix = "+"
 				} else {
 					prefixedFlag = "--" + name
+					suffix = "="
 				}
 				if strings.HasPrefix(prefixedFlag, lastArg) {
-					fmt.Fprintf(c.App.Writer, "flags+=('%s')\n", prefixedFlag+":"+getFlagUsage(flag))
+					s := prefixedFlag + suffix + "[" + getFlagUsage(flag) + "]"
+					if isFlagTakesFile(flag) {
+						s += ":file:_files:"
+					}
+					fmt.Fprintf(c.App.Writer, "'%s'\n", s)
 				}
 			}
 		}
-		fmt.Fprintln(c.App.Writer, "_describe -t flags 'flags' flags")
+
+		fmt.Fprintln(c.App.Writer, `
+)
+
+_arguments -w -s -S $options[@] && ret=0
+return ret
+    `)
 
 		return nil
 	},

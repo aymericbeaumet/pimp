@@ -219,3 +219,8 @@ func getFlagUsage(flag cli.Flag) string {
 		return ""
 	}
 }
+
+func isFlagTakesFile(flag cli.Flag) bool {
+	f, ok := flag.(*cli.StringFlag)
+	return ok && f.TakesFile
+}
