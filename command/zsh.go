@@ -9,8 +9,9 @@ import (
 )
 
 var zshCommand = &cli.Command{
-	Name:  "--zsh",
-	Usage: "Print the Zsh config and exit (aliases and completion)",
+	Name:            "--zsh",
+	Usage:           "Print the Zsh config and exit (aliases and completion)",
+	SkipFlagParsing: true,
 	Action: func(c *cli.Context) error {
 		if err := c.App.Command("--shell").Run(c); err != nil {
 			return err
@@ -27,49 +28,43 @@ var zshCommand = &cli.Command{
 }
 
 var zshCompletionCommand = &cli.Command{
-	Name:   "--zsh-completion",
-	Hidden: true,
+	Name:            "--zsh-completion",
+	Hidden:          true,
+	SkipFlagParsing: true,
 	Action: func(c *cli.Context) error {
-		dashdashIndex := -1
+		var args []string
 		for i, arg := range os.Args {
-			if dashdashIndex == -1 && arg == "--" {
-				dashdashIndex = i
+			if arg == "--" {
+				args = os.Args[i+1:]
 				break
 			}
 		}
 
-		args := os.Args[dashdashIndex+1:]
 		lastArg := args[len(args)-1]
 
-		var bin string
-		binIndex := dashdashIndex + 2
-		if binIndex < len(os.Args) { // ... -- pimp BIN
-			bin = os.Args[binIndex]
+		fmt.Fprintln(c.App.Writer, "local -a commands")
+		for _, command := range c.App.VisibleCommands() {
+			if strings.HasPrefix(command.Name, lastArg) {
+				fmt.Fprintf(c.App.Writer, "commands+=('%s')\n", command.Name+":"+command.Usage)
+			}
 		}
+		fmt.Fprintln(c.App.Writer, "_describe -t commands 'commands' commands")
 
-		if binIndex < len(os.Args)-1 { // if bin is present, but not the latest arg
-			fmt.Fprintf(c.App.Writer, "_%s\n", bin)
-		} else if len(lastArg) == 0 || strings.HasPrefix(lastArg, "-") {
-			fmt.Fprintln(c.App.Writer, "local -a flags")
-			for _, flag := range c.App.Flags {
-				for _, name := range flag.Names() {
-					var prefixedFlag string
-					if len(name) == 1 {
-						prefixedFlag = "-" + name
-					} else {
-						prefixedFlag = "--" + name
-					}
-					if strings.HasPrefix(prefixedFlag, lastArg) && prefixedFlag != lastArg {
-						fmt.Fprintf(c.App.Writer, "flags+=(%#v)\n", prefixedFlag)
-					}
+		fmt.Fprintln(c.App.Writer, "local -a flags")
+		for _, flag := range c.App.VisibleFlags() {
+			for _, name := range flag.Names() {
+				var prefixedFlag string
+				if len(name) == 1 {
+					prefixedFlag = "-" + name
+				} else {
+					prefixedFlag = "--" + name
+				}
+				if strings.HasPrefix(prefixedFlag, lastArg) {
+					fmt.Fprintf(c.App.Writer, "flags+=('%s')\n", prefixedFlag+":"+getFlagUsage(flag))
 				}
 			}
-			fmt.Fprintln(c.App.Writer, "_describe flags flags")
-		} else if len(bin) > 0 {
-			fmt.Fprintln(c.App.Writer, "_files")
-		} else if len(lastArg) >= 1 {
-			fmt.Fprintln(c.App.Writer, "_path_commands")
 		}
+		fmt.Fprintln(c.App.Writer, "_describe -t flags 'flags' flags")
 
 		return nil
 	},

@@ -9,8 +9,9 @@ import (
 )
 
 var renderCommand = &cli.Command{
-	Name:  "--render",
-	Usage: "Render the template(s) and exit",
+	Name:            "--render",
+	Usage:           "Render the template(s) and exit",
+	SkipFlagParsing: true,
 	Action: func(c *cli.Context) error {
 		idx := -1
 		for i, arg := range os.Args {

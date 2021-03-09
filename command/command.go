@@ -207,3 +207,14 @@ func filterEmptyStrings(input []string) []string {
 	}
 	return out
 }
+
+func getFlagUsage(flag cli.Flag) string {
+	switch flag := flag.(type) {
+	case *cli.BoolFlag:
+		return flag.Usage
+	case *cli.StringFlag:
+		return flag.Usage
+	default:
+		return ""
+	}
+}
