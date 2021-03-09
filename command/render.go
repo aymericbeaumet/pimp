@@ -12,18 +12,15 @@ var renderCommand = &cli.Command{
 	Name:  "--render",
 	Usage: "Render the template(s) and exit",
 	Action: func(c *cli.Context) error {
-		var templates []string
+		idx := len(os.Args)
 		for i := len(os.Args) - 1; i >= 0; i-- {
-			arg := os.Args[i]
-			if strings.HasPrefix(arg, "-") {
+			if strings.HasPrefix(os.Args[i], "-") {
 				break
 			}
-			templates = append(templates, arg)
+			idx = i
 		}
 
-		for i := len(templates) - 1; i >= 0; i-- {
-			renderFilepath := templates[i]
-
+		for _, renderFilepath := range os.Args[idx:] {
 			renderFilepath, err := normalize.Path(renderFilepath)
 			if err != nil {
 				return err
@@ -53,7 +50,6 @@ var renderCommand = &cli.Command{
 			if _, err := c.App.Writer.Write([]byte(rendered)); err != nil {
 				return err
 			}
-
 		}
 
 		return nil
