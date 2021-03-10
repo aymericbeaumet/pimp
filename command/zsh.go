@@ -8,9 +8,8 @@ import (
 )
 
 var zshCommand = &cli.Command{
-	Name:            "--zsh",
-	Usage:           "Print the Zsh config (aliases and completion)",
-	SkipFlagParsing: true,
+	Name:  "--zsh",
+	Usage: "Print the Zsh config (aliases and completion)",
 	Action: func(c *cli.Context) error {
 		eng, err := initializeEngine(c, true, false)
 		if err != nil {
@@ -39,9 +38,8 @@ compdef _pimp pimp
 // - https://blog.kloetzl.info/how-to-write-a-zsh-completion/
 // - https://stackoverflow.com/a/13547531/1071486
 var zshCompletionCommand = &cli.Command{
-	Name:            "--zsh-completion",
-	Hidden:          true,
-	SkipFlagParsing: true,
+	Name:   "--zsh-completion",
+	Hidden: true,
 	Action: func(c *cli.Context) error {
 		args := c.Args().Slice()
 

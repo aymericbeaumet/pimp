@@ -7,9 +7,8 @@ import (
 )
 
 var shellCommand = &cli.Command{
-	Name:            "--shell",
-	Usage:           "Print the shell config (aliases only)",
-	SkipFlagParsing: true,
+	Name:  "--shell",
+	Usage: "Print the shell config (aliases only)",
 	Action: func(c *cli.Context) error {
 		eng, err := initializeEngine(c, true, false)
 		if err != nil {

@@ -9,10 +9,9 @@ import (
 )
 
 var renderCommand = &cli.Command{
-	Name:            "--render",
-	ArgsUsage:       "[FILE]...",
-	Usage:           "Sequentially open and render the template FILES",
-	SkipFlagParsing: true,
+	Name:      "--render",
+	ArgsUsage: "[FILE]...",
+	Usage:     "Sequentially open and render the template FILES",
 	Action: func(c *cli.Context) error {
 		for _, renderFilepath := range c.Args().Slice() {
 			renderFilepath, err := normalize.Path(renderFilepath)
