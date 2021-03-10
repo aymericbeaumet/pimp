@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/urfave/cli/v2"
@@ -37,11 +38,33 @@ compdef _pimp pimp
 // resources that were very helpful:
 // - http://zsh.sourceforge.net/Doc/Release/Completion-System.html#Completion-System
 // - https://blog.kloetzl.info/how-to-write-a-zsh-completion/
+// - https://stackoverflow.com/a/13547531/1071486
 var zshCompletionCommand = &cli.Command{
 	Name:            "--zsh-completion",
 	Hidden:          true,
 	SkipFlagParsing: true,
 	Action: func(c *cli.Context) error {
+		var args []string
+		for i, arg := range os.Args {
+			if arg == "--" {
+				args = os.Args[i+1:]
+				break
+			}
+		}
+
+		if len(args) >= 2 && args[0] == "pimp" && !strings.HasPrefix(args[1], "-") {
+			// TODO: parse args + expannd BIN ARGS to provide accurate completion
+			if len(args) == 2 {
+				fmt.Fprintln(c.App.Writer, "_path_commands")
+			} else {
+				delta := 1
+				fmt.Fprintf(c.App.Writer, "shift %d words\n", delta)
+				fmt.Fprintf(c.App.Writer, "(( CURRENT -= %d ))\n", delta)
+				fmt.Fprintf(c.App.Writer, "_normal -p %#v\n", args[1])
+			}
+			return nil
+		}
+
 		sharedExclusionList := []string{"-h", "--help", "-v", "--version"}
 
 		fmt.Fprintln(c.App.Writer, `
@@ -107,7 +130,7 @@ options+=(
 		fmt.Fprintln(c.App.Writer, `
 )
 
-_arguments -S "$options[@]" && ret=0
+_arguments -S : "$options[@]" && ret=0
 return ret`)
 
 		return nil
