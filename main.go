@@ -25,7 +25,7 @@ func main() {
 		Description: strings.TrimSpace(`
 pimp is a command-line expander and template engine that increases your command
 line productivity.
-    `),
+		`),
 		Authors: []*cli.Author{
 			{
 				Name:  "Aymeric Beaumet",
