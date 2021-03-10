@@ -20,8 +20,8 @@ import (
 
 var Commands = []*cli.Command{
 	dumpCommand,
-	runCommand,
 	renderCommand,
+	runCommand,
 	shellCommand,
 	zshCommand,
 	zshCompletionCommand,
