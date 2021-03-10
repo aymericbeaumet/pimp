@@ -7,7 +7,7 @@ var dumpCommand = &cli.Command{
 	Usage:           "Dump the matching engine as JSON and exit",
 	SkipFlagParsing: true,
 	Action: func(c *cli.Context) error {
-		eng, err := initializeEngine(c)
+		eng, err := initializeEngine(c, true, true)
 		if err != nil {
 			return err
 		}

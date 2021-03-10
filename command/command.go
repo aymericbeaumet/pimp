@@ -40,7 +40,7 @@ func CommandsFlags() []cli.Flag {
 }
 
 func MainAction(c *cli.Context) error {
-	eng, err := initializeEngine(c)
+	eng, err := initializeEngine(c, true, true)
 	if err != nil {
 		return err
 	}
@@ -157,14 +157,26 @@ func renderStrings(texts []string) ([]string, error) {
 	return strings.Split(rendered, SEP), nil
 }
 
-func initializeEngine(c *cli.Context) (*engine.Engine, error) {
+func initializeEngine(c *cli.Context, loadConfig, loadPimpfile bool) (*engine.Engine, error) {
 	eng := engine.New()
 
-	for flagName, fallback := range map[string]string{
-		"file":   "./Pimpfile",
-		"config": "~/.pimprc",
-	} {
-		file, err := openFallback(c.String(flagName), fallback)
+	type source struct{ flagName, fallback string }
+	sources := []*source{}
+	if loadPimpfile {
+		sources = append(sources, &source{
+			flagName: "file",
+			fallback: "./Pimpfile",
+		})
+	}
+	if loadConfig {
+		sources = append(sources, &source{
+			flagName: "config",
+			fallback: "~/.pimprc",
+		})
+	}
+
+	for _, s := range sources {
+		file, err := openWithFallback(c.String(s.flagName), s.fallback)
 		if err != nil {
 			return nil, err
 		}
@@ -179,7 +191,7 @@ func initializeEngine(c *cli.Context) (*engine.Engine, error) {
 	return eng, nil
 }
 
-func openFallback(filename, fallback string) (*os.File, error) {
+func openWithFallback(filename, fallback string) (*os.File, error) {
 	allowErrNotExist := false
 
 	if len(filename) == 0 && len(fallback) > 0 {

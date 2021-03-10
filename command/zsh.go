@@ -13,7 +13,7 @@ var zshCommand = &cli.Command{
 	Usage:           "Print the Zsh config and exit (aliases and completion)",
 	SkipFlagParsing: true,
 	Action: func(c *cli.Context) error {
-		eng, err := initializeEngine(c)
+		eng, err := initializeEngine(c, true, false)
 		if err != nil {
 			return err
 		}

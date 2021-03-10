@@ -11,7 +11,7 @@ var shellCommand = &cli.Command{
 	Usage:           "Print the shell config and exit (aliases only)",
 	SkipFlagParsing: true,
 	Action: func(c *cli.Context) error {
-		eng, err := initializeEngine(c)
+		eng, err := initializeEngine(c, true, false)
 		if err != nil {
 			return err
 		}
