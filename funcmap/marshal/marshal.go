@@ -3,6 +3,8 @@ package marshal
 import (
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
+	"reflect"
 	"text/template"
 
 	"github.com/pelletier/go-toml"
@@ -41,6 +43,30 @@ func FuncMap() template.FuncMap {
 				return "", err
 			}
 			return string(out), nil
+		},
+
+		//
+
+		"Go": func(input interface{}) (string, error) {
+			return fmt.Sprintf("%#v", input), nil
+		},
+
+		"Shell": func(input interface{}) (string, error) {
+			switch input := input.(type) {
+			case string:
+				return fmt.Sprintf("%#v", input), nil
+			case []string:
+				var out string
+				for i, s := range input {
+					if i > 0 {
+						out += " "
+					}
+					out += fmt.Sprintf("%#v", s)
+				}
+				return out, nil
+			default:
+				return "", fmt.Errorf("unsupported type, received %#v", reflect.TypeOf(input))
+			}
 		},
 	}
 }
