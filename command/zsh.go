@@ -10,7 +10,7 @@ import (
 
 var zshCommand = &cli.Command{
 	Name:            "--zsh",
-	Usage:           "Print the Zsh config and exit (aliases and completion)",
+	Usage:           "Print the Zsh config (aliases and completion)",
 	SkipFlagParsing: true,
 	Action: func(c *cli.Context) error {
 		eng, err := initializeEngine(c, true, false)
