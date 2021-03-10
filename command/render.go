@@ -13,21 +13,7 @@ var renderCommand = &cli.Command{
 	Usage:           "Open and render ARGs files as templates and exit",
 	SkipFlagParsing: true,
 	Action: func(c *cli.Context) error {
-		idx := -1
-		for i, arg := range os.Args {
-			if arg == "--" {
-				idx = i + 1
-				break
-			}
-		}
-		if idx == -1 {
-			idx = len(os.Args)
-			for i := len(os.Args) - 1; i >= 0 && !strings.HasPrefix(os.Args[i], "-"); i-- {
-				idx = i
-			}
-		}
-
-		for _, renderFilepath := range os.Args[idx:] {
+		for _, renderFilepath := range c.Args().Slice() {
 			renderFilepath, err := normalize.Path(renderFilepath)
 			if err != nil {
 				return err

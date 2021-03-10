@@ -110,7 +110,7 @@ EXAMPLES:
 					if command == nil {
 						panic(fmt.Errorf("implementation error: command %s is missing", command.Name))
 					}
-					if err := command.Run(c); err != nil {
+					if err := command.Action(c); err != nil {
 						return fmt.Errorf("command %s failed: %w", command.Name, err)
 					}
 					syscall.Exit(0)
