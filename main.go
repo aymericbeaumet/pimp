@@ -44,22 +44,22 @@ line productivity.
 Project home page: {{index .Metadata "Website"}}
 
 USAGE:
-    pimp [OPTION]... COMMAND [ARG]...{{ "\t\t" }}Expand the command and its arguments, execute and exit
+    pimp [OPTION]... COMMAND [ARG]...{{ "\t\t" }}Expand the COMMAND and its ARGS and execute it
 {{ range .VisibleCommands}}
 {{- if not .HideHelp}}
-    pimp [OPTION]... {{ join .Names ", "}}{{ "\t"}}{{.Usage}}
+    pimp [OPTION]... {{.Name}} {{.ArgsUsage}}{{ "\t"}}{{.Usage}}
 {{- end}}
 {{- end}}
 
 OPTIONS:
 {{- range .VisibleFlags}}
-    {{ . -}}
+    {{.}}
 {{- end}}
 
 EXAMPLES:
     pimp git log{{ "\t\t" }}Expand and execute the 'git log' command
-    pimp --render readme.md.tmpl > readme.md{{ "\t\t" }}Render the readme template and write it to readme.md
-    pimp --run {{ "'{{GitBranches | JSON}}'" }}{{ "\t\t" }}Print the current git repository branches as JSON
+    pimp -o readme.md --render readme.md.tmpl{{ "\t\t" }}Render the file template and write it to readme.md
+    pimp --run {{ "'{{GitBranches | JSON}}'" }}{{ "\t\t" }}Render the args template and write to stdout
 `,
 
 		Reader:          os.Stdin,
@@ -134,7 +134,7 @@ EXAMPLES:
 				Name:      "config",
 				Aliases:   []string{"c"},
 				EnvVars:   []string{"PIMP_CONFIG"},
-				Usage:     "Provide a different config `FILE`",
+				Usage:     "Provide a different configuration `FILE`",
 				TakesFile: true,
 			},
 

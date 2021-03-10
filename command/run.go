@@ -9,7 +9,8 @@ import (
 
 var runCommand = &cli.Command{
 	Name:            "--run",
-	Usage:           "Run the ARGs as templates and exit",
+	ArgsUsage:       "[ARG]...",
+	Usage:           "Render the ARGS as a single template",
 	SkipFlagParsing: true,
 	Action: func(c *cli.Context) error {
 		out, err := render(strings.Join(c.Args().Slice(), " "))

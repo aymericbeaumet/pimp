@@ -10,7 +10,8 @@ import (
 
 var renderCommand = &cli.Command{
 	Name:            "--render",
-	Usage:           "Open and render ARGs files as templates and exit",
+	ArgsUsage:       "[FILE]...",
+	Usage:           "Sequentially open and render the template FILES",
 	SkipFlagParsing: true,
 	Action: func(c *cli.Context) error {
 		for _, renderFilepath := range c.Args().Slice() {
