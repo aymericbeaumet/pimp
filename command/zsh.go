@@ -2,7 +2,6 @@ package command
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/urfave/cli/v2"
@@ -44,13 +43,7 @@ var zshCompletionCommand = &cli.Command{
 	Hidden:          true,
 	SkipFlagParsing: true,
 	Action: func(c *cli.Context) error {
-		var args []string
-		for i, arg := range os.Args {
-			if arg == "--" {
-				args = os.Args[i+1:]
-				break
-			}
-		}
+		args := c.Args().Slice()
 
 		if len(args) >= 2 && args[0] == "pimp" && !strings.HasPrefix(args[1], "-") {
 			// TODO: parse args + expannd BIN ARGS to provide accurate completion
