@@ -10,7 +10,7 @@ import (
 
 var runCommand = &cli.Command{
 	Name:            "--run",
-	Usage:           "Run the arguments as a template and exit",
+	Usage:           "Run the ARGs as templates and exit",
 	SkipFlagParsing: true,
 	Action: func(c *cli.Context) error {
 		idx := -1

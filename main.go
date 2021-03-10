@@ -20,15 +20,47 @@ func init() {
 
 func main() {
 	app := &cli.App{
-		Name:      "pimp",
-		Usage:     "Command line expander",
-		UsageText: "pimp [OPTION]... [--] BIN [ARG]...\n   pimp [OPTION]... COMMAND [ARG]...",
-		Version:   "0.0.1", // TODO: use -ldflags to embed the git commit hash
+		Name:    "pimp",
+		Version: "0.0.1", // TODO: use -ldflags to embed the version and git commit hash
 		Description: strings.TrimSpace(`
-Command expander. Shipped with a template engine, and more. Providing no
-COMMAND is the default and most common behavior, in this case BIN will be
-executed and given ARG as parameters.
+pimp is a command-line expander and template engine that increases your command
+line productivity.
     `),
+		Authors: []*cli.Author{
+			{
+				Name:  "Aymeric Beaumet",
+				Email: "hi@aymericbeaumet.com",
+			},
+		},
+		Metadata: map[string]interface{}{
+			"Website": "https://github.com/aymericbeaumet/pimp",
+		},
+
+		CustomAppHelpTemplate: `{{.Name}} {{.Version}}
+{{with (index .Authors 0)}}{{.Name}} <{{.Email}}>{{end}}
+
+{{.Description}}
+
+Project home page: {{index .Metadata "Website"}}
+
+USAGE:
+    pimp [OPTION]... COMMAND [ARG]...{{ "\t\t" }}Expand the command and its arguments, execute and exit
+{{ range .VisibleCommands}}
+{{- if not .HideHelp}}
+    pimp [OPTION]... {{ join .Names ", "}}{{ "\t"}}{{.Usage}}
+{{- end}}
+{{- end}}
+
+OPTIONS:
+{{- range .VisibleFlags}}
+    {{ . -}}
+{{- end}}
+
+EXAMPLES:
+    pimp git log{{ "\t\t" }}Expand and execute the 'git log' command
+    pimp --render readme.md.tmpl > readme.md{{ "\t\t" }}Render the readme template and write it to readme.md
+    pimp --run {{ "'{{GitBranches | JSON}}'" }}{{ "\t\t" }}Print the current git repository branches as JSON
+`,
 
 		Reader:          os.Stdin,
 		Writer:          os.Stdout,
