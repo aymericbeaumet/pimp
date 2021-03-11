@@ -41,7 +41,7 @@ var zshCompletionCommand = &cli.Command{
 	Name:   "--zsh-completion",
 	Hidden: true,
 	Action: func(c *cli.Context) error {
-		if args := c.Args().Slice(); len(args) >= 2 { // pimp CMD [ARG]...
+		if args := c.Args().Slice(); len(args) >= 2 && !strings.HasPrefix(args[1], "-") { // pimp CMD [ARG]...
 			eng, err := initializeEngine(c, true, true)
 			if err != nil {
 				return err
