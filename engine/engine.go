@@ -22,8 +22,8 @@ type Config yaml.MapSlice
 type Engine struct {
 	Mappings map[string][]*Mapping `json:"mappings"`
 
-	// used to cache calls to the Executables() method
-	executables []string
+	// used to cache calls to the Commands() method
+	commands []string
 }
 
 type Mapping struct {
@@ -101,9 +101,9 @@ func (eng *Engine) JSON(w io.Writer) error {
 	return json.NewEncoder(w).Encode(eng)
 }
 
-func (eng *Engine) Executables() []string {
-	if eng.executables != nil {
-		return eng.executables
+func (eng *Engine) Commands() []string {
+	if eng.commands != nil {
+		return eng.commands
 	}
 
 	out := make([]string, 0, len(eng.Mappings))
@@ -112,7 +112,7 @@ func (eng *Engine) Executables() []string {
 	}
 	sort.Strings(out)
 
-	eng.executables = out
+	eng.commands = out
 	return out
 }
 

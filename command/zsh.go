@@ -16,8 +16,8 @@ var zshCommand = &cli.Command{
 			return err
 		}
 
-		for _, executable := range eng.Executables() {
-			fmt.Fprintf(c.App.Writer, "alias %#v=%#v\n", executable, "pimp "+executable)
+		for _, command := range eng.Commands() {
+			fmt.Fprintf(c.App.Writer, "alias %#v=%#v\n", command, "pimp "+command)
 		}
 
 		fmt.Fprintln(c.App.Writer, `

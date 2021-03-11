@@ -14,9 +14,9 @@ var shellCommand = &cli.Command{
 		if err != nil {
 			return err
 		}
-		for _, executable := range eng.Executables() {
+		for _, command := range eng.Commands() {
 			if _, err := fmt.Fprintf(
-				c.App.Writer, "alias %#v=%#v\n", executable, "pimp "+executable,
+				c.App.Writer, "alias %#v=%#v\n", command, "pimp "+command,
 			); err != nil {
 				return err
 			}
