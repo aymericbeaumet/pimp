@@ -1,6 +1,7 @@
 package command
 
 import (
+	"io"
 	"os"
 	"strings"
 
@@ -11,31 +12,46 @@ import (
 var renderCommand = &cli.Command{
 	Name:      "--render",
 	ArgsUsage: "[FILE]...",
-	Usage:     "Sequentially open and render the template FILES",
+	Usage:     "Sequentially open and render the template FILES (- for stdin)",
 	Action: func(c *cli.Context) error {
-		for _, renderFilepath := range c.Args().Slice() {
-			renderFilepath, err := normalize.Path(renderFilepath)
-			if err != nil {
-				return err
-			}
+		var readerCache []byte
 
-			data, err := os.ReadFile(renderFilepath)
-			if err != nil {
-				return err
-			}
+		for _, arg := range c.Args().Slice() {
+			var text string
 
-			s := string(data)
+			if arg == "-" {
+				if readerCache == nil {
+					bytes, err := io.ReadAll(c.App.Reader)
+					if err != nil {
+						return err
+					}
+					readerCache = bytes
+				}
+				text = string(readerCache)
+			} else {
+				renderFilepath, err := normalize.Path(arg)
+				if err != nil {
+					return err
+				}
+
+				data, err := os.ReadFile(renderFilepath)
+				if err != nil {
+					return err
+				}
+
+				text = string(data)
+			}
 
 			// strip shebang if found
-			if strings.HasPrefix(s, "#!") {
-				if newlineIndex := strings.IndexRune(s, '\n'); newlineIndex > -1 {
-					s = s[newlineIndex+1:]
+			if strings.HasPrefix(text, "#!") {
+				if newlineIndex := strings.IndexRune(text, '\n'); newlineIndex > -1 {
+					text = text[newlineIndex+1:]
 				} else {
-					s = ""
+					text = ""
 				}
 			}
 
-			rendered, err := render(s)
+			rendered, err := render(text)
 			if err != nil {
 				return err
 			}
