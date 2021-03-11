@@ -1,0 +1,37 @@
+release-major: pimp release {{GitTags | Major}}
+release-minor: pimp release {{GitTags | Minor}}
+release-patch: pimp release {{GitTags | Patch}}
+
+release:
+  - git tag -a {{$1}} -m {{$1}}
+  - git push origin {{$1}}
+
+generate: [pimp generate-readme]
+
+generate-readme: |
+  #!/usr/bin/env pimp --output=readme.md --render
+  {{ $repository := "aymericbeaumet/pimp" -}}
+  # pimp
+
+  [![test status](https://img.shields.io/github/workflow/status/{{$repository}}/Continuous%20Integration?style=flat-square&logo=github)](https://github.com/{{$repository}}/actions)
+  [![github](https://img.shields.io/github/issues/{{$repository}}?style=flat-square&logo=github)](https://github.com/{{$repository}}/issues)
+  [![Go.Dev reference](https://img.shields.io/badge/go.dev-reference-blue?style=flat-square&logo=go&logoColor=white)](https://pkg.go.dev/github.com/{{$repository}})
+
+  ## Development (local)
+
+  ```
+  go run . git co
+  go run . --dry-run git co
+  ```
+
+  ## Development (system-wide)
+
+  ```
+  go install .
+
+  # add to ~/.bashrc, ~/.zshrc or ~/.config/fish/config.fish
+  eval "$(pimp --shell)"
+
+  git co
+  pimp --dry-run git co
+  ```
