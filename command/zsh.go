@@ -41,32 +41,25 @@ var zshCompletionCommand = &cli.Command{
 	Name:   "--zsh-completion",
 	Hidden: true,
 	Action: func(c *cli.Context) error {
-		if args := c.Args().Slice(); len(args) >= 2 && !strings.HasPrefix(args[1], "-") { // pimp CMD [ARG]...
-			eng, err := initializeEngine(c, true, true)
-			if err != nil {
-				return err
-			}
+		eng, err := initializeEngine(c, true, true)
+		if err != nil {
+			return err
+		}
 
-			// todo: extract args of this pimp command via the flags parser
+		args := c.Args().Slice() // pimp CMD [ARG]...
 
-			if len(args) == 2 {
-				if cmds := eng.Commands(); len(cmds) > 0 {
-					fmt.Fprintln(c.App.Writer, "local -a pcmds; pcmds=(")
-					for _, cmd := range cmds {
-						fmt.Fprintf(c.App.Writer, "%#v\n", cmd)
-					}
-					fmt.Fprintln(c.App.Writer, ")")
-					fmt.Fprintln(c.App.Writer, "_describe 'pimp command' pcmds")
-				}
-				fmt.Fprintln(c.App.Writer, "_path_commands")
-				return nil
-			}
+		// TODO: use the flag parser to get CMD + ARGS
+		cmdargs := args[1:]
 
-			_, expandedArgs, _ := eng.Map(nil, args[1:])
+		// If a CMD is detected, delegate to the appropriate completion function
+		if len(cmdargs) > 0 {
+			_, expandedArgs, _ := eng.Map(nil, cmdargs)
+
 			if len(expandedArgs[len(expandedArgs)-1]) != 0 && len(args[len(args)-1]) == 0 {
 				expandedArgs = append(expandedArgs, "")
 			}
-			current := len(expandedArgs) // index starts at 1
+			current := len(expandedArgs) // $CURRENT counts from 1, so len is the index of the last element
+
 			fmt.Fprintln(c.App.Writer, "words=(")
 			for _, word := range expandedArgs {
 				fmt.Fprintf(c.App.Writer, "%#v\n", word)
@@ -77,6 +70,25 @@ var zshCompletionCommand = &cli.Command{
 
 			return nil
 		}
+
+		// If current arg is not an option, then offer to complete pimp commands +
+		// path commands
+		if !strings.HasPrefix(args[len(args)-1], "-") {
+			if cmds := eng.Commands(); len(cmds) > 0 {
+				fmt.Fprintln(c.App.Writer, "local -a pcmds; pcmds=(")
+				for _, cmd := range cmds {
+					fmt.Fprintf(c.App.Writer, "%#v\n", cmd)
+				}
+				fmt.Fprintln(c.App.Writer, ")")
+				fmt.Fprintln(c.App.Writer, "_describe 'pimp command' pcmds")
+			}
+
+			fmt.Fprintln(c.App.Writer, "_path_commands")
+
+			return nil
+		}
+
+		// By default we print completion for the options
 
 		sharedExclusionList := []string{"-h", "--help", "-v", "--version"}
 
