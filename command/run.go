@@ -10,7 +10,7 @@ import (
 var runCommand = &cli.Command{
 	Name:      "--run",
 	ArgsUsage: "[ARG]...",
-	Usage:     "Render the ARGS as a single template",
+	Usage:     "Render ARGS as a template",
 	Action: func(c *cli.Context) error {
 		out, err := render(strings.Join(c.Args().Slice(), " "))
 		if err != nil {
