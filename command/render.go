@@ -51,7 +51,7 @@ var renderCommand = &cli.Command{
 				}
 			}
 
-			rendered, err := render(text)
+			rendered, err := render(text, c.String("ldelim"), c.String("rdelim"))
 			if err != nil {
 				return err
 			}

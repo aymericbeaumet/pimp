@@ -99,7 +99,7 @@ EXAMPLES:
 
         $ pimp -o readme.md --render readme.md.tmpl{{"\t"}}# Overwrite the readme with the rendered template
 
-    It is also possible to render pimp templates from the command-line arguments:
+    It is also possible to render pimp templates from the command-line arguments.
 
         $ pimp --run {{"'{{GitRemotes | JSON}}'"}}
         ["origin"]
@@ -179,13 +179,6 @@ EXAMPLES:
 			TakesFile: true,
 		},
 
-		&cli.StringFlag{
-			Name:    "delims",
-			EnvVars: []string{"PIMP_DELIMS"},
-			Usage:   "Left and right template delimiters",
-			Value:   "{{ }}",
-		},
-
 		&cli.BoolFlag{
 			Name:  "expand",
 			Usage: "Expand and print the command without executing",
@@ -211,10 +204,22 @@ EXAMPLES:
 		},
 
 		&cli.StringFlag{
+			Name:  "ldelim",
+			Usage: "Left template delimiter",
+			Value: "{{",
+		},
+
+		&cli.StringFlag{
 			Name:      "output",
 			Aliases:   []string{"o"},
 			Usage:     "Write the output to `FILE` instead of stdout",
 			TakesFile: true,
+		},
+
+		&cli.StringFlag{
+			Name:  "rdelim",
+			Usage: "Right template delimiter",
+			Value: "}}",
 		},
 	)
 

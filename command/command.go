@@ -54,14 +54,14 @@ func MainAction(c *cli.Context) error {
 		return nil
 	}
 
-	args, err = renderStrings(args)
+	args, err = renderStrings(args, c.String("ldelim"), c.String("rdelim"))
 	if err != nil {
 		return err
 	}
 	args = filterEmptyStrings(args)
 
 	for filename, data := range files {
-		rendered, err := render(data)
+		rendered, err := render(data, c.String("ldelim"), c.String("rdelim"))
 		if err != nil {
 			return err
 		}
@@ -114,10 +114,10 @@ func MainAction(c *cli.Context) error {
 
 var fm = funcmap.FuncMap()
 
-func render(text string) (string, error) {
+func render(text string, ldelim, rdelim string) (string, error) {
 	var sb strings.Builder
 
-	t, err := template.New(text).Funcs(fm).Parse(text)
+	t, err := template.New(text).Funcs(fm).Delims(ldelim, rdelim).Parse(text)
 	if err != nil {
 		return "", err
 	}
@@ -147,12 +147,12 @@ func render(text string) (string, error) {
 // possible to interact between several templates with variable declarations,
 // etc. This could generate empty strings in the output that have to be dealt
 // with.
-func renderStrings(texts []string) ([]string, error) {
+func renderStrings(texts []string, ldelim, rdelim string) ([]string, error) {
 	const SEP = "\x00pimp\x00"
 
 	joined := strings.Join(texts, SEP)
 
-	rendered, err := render(joined)
+	rendered, err := render(joined, ldelim, rdelim)
 	if err != nil {
 		return nil, err
 	}

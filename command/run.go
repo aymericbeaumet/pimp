@@ -12,7 +12,9 @@ var runCommand = &cli.Command{
 	ArgsUsage: "[ARG]...",
 	Usage:     "Render ARGS as a template",
 	Action: func(c *cli.Context) error {
-		out, err := render(strings.Join(c.Args().Slice(), " "))
+		text := strings.Join(c.Args().Slice(), " ")
+
+		out, err := render(text, c.String("ldelim"), c.String("rdelim"))
 		if err != nil {
 			return err
 		}
