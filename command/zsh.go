@@ -177,38 +177,12 @@ return ret`)
 	},
 }
 
-// skipFlags uses a bruteforce based approach to skip all the arguments until
-// the first non-flag argument. Should still be quite efficient as small slices
-// are parsed (with a maximum len of 2).
 func skipFlags(flagSet *flag.FlagSet, args []string) []string {
 	if len(args) < 1 || args[0] != "pimp" {
 		return nil
 	}
-
-	i := 1
-	for i < len(args) {
-		if args[i] == "--" {
-			return args[i+1:]
-		}
-
-		if !strings.HasPrefix(args[i], "-") {
-			return args[i:]
-		}
-
-		// first try to parse the arg by itself
-		if err := flagSet.Parse(args[i : i+1]); err != nil {
-			// if it fails try to parse with the next arg
-			if err := flagSet.Parse(args[i : i+2]); err != nil {
-				// if it still fails, just abort
-				return nil
-			}
-			i += 2
-		} else {
-			i++
-		}
-	}
-
-	return nil
+	_ = flagSet.Parse(args[1:])
+	return flagSet.Args()
 }
 
 func contains(stack []string, needle string) bool {
