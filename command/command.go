@@ -21,7 +21,6 @@ import (
 var Commands = []*cli.Command{
 	// commands used frequently
 	renderCommand,
-	runCommand,
 	// commands only used during setup
 	shellCommand,
 	zshCommand,
