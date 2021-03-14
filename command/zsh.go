@@ -1,8 +1,11 @@
 package command
 
 import (
+	"flag"
 	"fmt"
+	"reflect"
 	"strings"
+	"unsafe"
 
 	"github.com/urfave/cli/v2"
 )
@@ -46,13 +49,25 @@ var zshCompletionCommand = &cli.Command{
 			return err
 		}
 
-		args := c.Args().Slice() // pimp CMD [ARG]...
+		args := c.Args().Slice() // pimp [OPTION]... CMD [ARG]...
 
-		// TODO: use the flag parser to get CMD + ARGS
-		cmdargs := args[1:]
+		// get the private flag.FlagSet field
+		// https://stackoverflow.com/a/43918797/1071486
+		flagSetField := reflect.ValueOf(c).Elem().FieldByName("flagSet")
+		flagSetValue := reflect.NewAt(flagSetField.Type(), unsafe.Pointer(flagSetField.UnsafeAddr())).Elem()
+		flagSet := flagSetValue.Interface().(*flag.FlagSet)
+
+		input := args
+		if args[len(args)-1] == "" {
+			input = args[:len(args)-1]
+		}
+		cmdargs := skipFlags(flagSet, input) // CMD [ARG]...
+		if args[len(args)-1] == "" {
+			cmdargs = append(cmdargs, "")
+		}
 
 		// If a CMD is detected, delegate to the appropriate completion function
-		if len(cmdargs) > 0 {
+		if len(cmdargs) > 1 {
 			_, expandedArgs, _ := eng.Map(nil, cmdargs)
 
 			if len(expandedArgs[len(expandedArgs)-1]) != 0 && len(args[len(args)-1]) == 0 {
@@ -160,6 +175,40 @@ return ret`)
 
 		return nil
 	},
+}
+
+// skipFlags uses a bruteforce based approach to skip all the arguments until
+// the first non-flag argument. Should still be quite efficient as small slices
+// are parsed (with a maximum len of 2).
+func skipFlags(flagSet *flag.FlagSet, args []string) []string {
+	if len(args) < 1 || args[0] != "pimp" {
+		return nil
+	}
+
+	i := 1
+	for i < len(args) {
+		if args[i] == "--" {
+			return args[i+1:]
+		}
+
+		if !strings.HasPrefix(args[i], "-") {
+			return args[i:]
+		}
+
+		// first try to parse the arg by itself
+		if err := flagSet.Parse(args[i : i+1]); err != nil {
+			// if it fails try to parse with the next arg
+			if err := flagSet.Parse(args[i : i+2]); err != nil {
+				// if it still fails, just abort
+				return nil
+			}
+			i += 2
+		} else {
+			i++
+		}
+	}
+
+	return nil
 }
 
 func contains(stack []string, needle string) bool {
