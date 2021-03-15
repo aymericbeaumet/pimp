@@ -50,21 +50,10 @@ var zshCompletionCommand = &cli.Command{
 		}
 
 		args := c.Args().Slice() // pimp [OPTION]... CMD [ARG]...
+		lastArgIndex := len(args) - 1
 
-		// get the private flag.FlagSet field
-		// https://stackoverflow.com/a/43918797/1071486
-		flagSetField := reflect.ValueOf(c).Elem().FieldByName("flagSet")
-		flagSetValue := reflect.NewAt(flagSetField.Type(), unsafe.Pointer(flagSetField.UnsafeAddr())).Elem()
-		flagSet := flagSetValue.Interface().(*flag.FlagSet)
-
-		input := args
-		if args[len(args)-1] == "" {
-			input = args[:len(args)-1]
-		}
-		cmdargs := skipFlags(flagSet, input) // CMD [ARG]...
-		if args[len(args)-1] == "" {
-			cmdargs = append(cmdargs, "")
-		}
+		cmdargs, pendingFlag := skipFlags(c, args[:lastArgIndex]) // CMD [ARG]...
+		cmdargs = append(cmdargs, args[lastArgIndex])
 
 		// If a CMD is detected, delegate to the appropriate completion function
 		if len(cmdargs) > 1 {
@@ -83,6 +72,14 @@ var zshCompletionCommand = &cli.Command{
 			fmt.Fprintf(c.App.Writer, "(( CURRENT = %d ))\n", current)
 			fmt.Fprintf(c.App.Writer, "_normal -p %#v\n", expandedArgs[0])
 
+			return nil
+		}
+
+		// If a flag is currently pending and expecting a parameter
+		if pendingFlag != nil {
+			if isFlagTakesFile(pendingFlag) {
+				fmt.Fprintln(c.App.Writer, "_files")
+			}
 			return nil
 		}
 
@@ -177,12 +174,36 @@ return ret`)
 	},
 }
 
-func skipFlags(flagSet *flag.FlagSet, args []string) []string {
+func skipFlags(c *cli.Context, args []string) ([]string, cli.Flag) {
+	// get the private flagSet field
+	// https://stackoverflow.com/a/43918797/1071486
+	flagSetField := reflect.ValueOf(c).Elem().FieldByName("flagSet")
+	flagSetValue := reflect.NewAt(flagSetField.Type(), unsafe.Pointer(flagSetField.UnsafeAddr())).Elem()
+	flagSet := flagSetValue.Interface().(*flag.FlagSet)
+
 	if len(args) < 1 || args[0] != "pimp" {
-		return nil
+		return nil, nil
 	}
-	_ = flagSet.Parse(args[1:])
-	return flagSet.Args()
+
+	if err := flagSet.Parse(args[1:]); err != nil {
+		errStr := err.Error()
+		if strings.HasPrefix(errStr, "flag needs an argument:") {
+			split := strings.Split(errStr, "-")
+			flagName := strings.TrimSpace(split[len(split)-1])
+
+			for _, flag := range c.App.Flags {
+				for _, name := range flag.Names() {
+					if name == flagName {
+						return nil, flag
+					}
+				}
+			}
+		}
+
+		return nil, nil
+	}
+
+	return flagSet.Args(), nil
 }
 
 func contains(stack []string, needle string) bool {
