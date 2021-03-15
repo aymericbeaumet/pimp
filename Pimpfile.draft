@@ -1,15 +1,13 @@
-release-major: pimp release {{GitTags | Major}}
-release-minor: pimp release {{GitTags | Minor}}
-release-patch: pimp release {{GitTags | Patch}}
+release-major: $PIMP release {{GitTags | Major}}
+release-minor: $PIMP release {{GitTags | Minor}}
+release-patch: $PIMP release {{GitTags | Patch}}
 
-release:
-  - git tag -a {{$1}} -m {{$1}}
-  - git push origin {{$1}}
-
-generate: [pimp generate-readme]
+release $version:
+  - git tag -a {{$version}} -m {{$version}}
+  - git push origin {{$version}}
 
 generate-readme: |
-  #!/usr/bin/env pimp --output=readme.md --render
+  #!$PIMP --output=readme.md --render
   {{ $repository := "aymericbeaumet/pimp" -}}
   # pimp
 
