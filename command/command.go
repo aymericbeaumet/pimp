@@ -228,6 +228,8 @@ func getFlagUsage(flag cli.Flag) string {
 		return flag.Usage
 	case *cli.StringFlag:
 		return flag.Usage
+	case *cli.StringSliceFlag:
+		return flag.Usage
 	default:
 		return ""
 	}
@@ -236,4 +238,9 @@ func getFlagUsage(flag cli.Flag) string {
 func isFlagTakesFile(flag cli.Flag) bool {
 	f, ok := flag.(*cli.StringFlag)
 	return ok && f.TakesFile
+}
+
+func isFlagAllowedMultipleTimes(flag cli.Flag) bool {
+	_, ok := flag.(*cli.StringSliceFlag)
+	return ok
 }

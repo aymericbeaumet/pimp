@@ -131,6 +131,8 @@ options+=(
 					flagName = "--" + name
 					if _, ok := flag.(*cli.StringFlag); ok {
 						suffix = "="
+					} else if _, ok := flag.(*cli.StringSliceFlag); ok {
+						suffix = "="
 					}
 				}
 
@@ -147,6 +149,9 @@ options+=(
 
 			if len(exclusionList) > 1 {
 				fmt.Fprint(c.App.Writer, `(`+strings.Join(exclusionList, " ")+`)`)
+				if isFlagAllowedMultipleTimes(flag) {
+					fmt.Fprint(c.App.Writer, `*`)
+				}
 			}
 
 			if len(flagList) > 1 {
