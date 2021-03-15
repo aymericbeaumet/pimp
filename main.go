@@ -118,6 +118,14 @@ EXAMPLES:
 			}
 		}
 
+		for _, s := range c.StringSlice("env") {
+			split := strings.SplitN(s, "=", 2)
+			if len(split) != 2 {
+				return fmt.Errorf("error for `env` flag: %#v should be of length 2", split)
+			}
+			os.Setenv(split[0], split[1])
+		}
+
 		if filename := c.String("input"); len(filename) > 0 {
 			f, err := os.Open(filename)
 			if err != nil {
@@ -203,6 +211,11 @@ EXAMPLES:
 			EnvVars:   []string{"PIMP_CONFIG"},
 			Usage:     "Load this configuration `FILE` (default: ~/.pimprc)",
 			TakesFile: true,
+		},
+
+		&cli.StringSliceFlag{
+			Name:  "env",
+			Usage: "Define env variables in the form `KEY=VALUE` (allowed multiple times)",
 		},
 
 		&cli.BoolFlag{
