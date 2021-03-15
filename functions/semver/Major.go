@@ -1,8 +1,6 @@
 package semver
 
-import "github.com/blang/semver/v4"
-
-func Major(input interface{}) (*semver.Version, error) {
+func Major(input interface{}) (*Version, error) {
 	v, err := getLatestVersion(input)
 	if err != nil {
 		return nil, err
