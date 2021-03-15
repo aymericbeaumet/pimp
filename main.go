@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"runtime/debug"
@@ -125,17 +127,43 @@ EXAMPLES:
 		}
 
 		if filename := c.String("output"); len(filename) > 0 {
-			flags := os.O_WRONLY | os.O_CREATE
-			if c.Bool("append") {
-				flags = flags | os.O_APPEND
+			var perm os.FileMode
+			var flag int
+
+			if c.Bool("frozen") {
+				perm = 0
+				flag |= os.O_RDONLY
 			} else {
-				flags = flags | os.O_TRUNC
+				perm = 0644
+				flag |= os.O_WRONLY | os.O_CREATE
+				if c.Bool("append") {
+					flag |= os.O_APPEND
+				} else {
+					flag |= os.O_TRUNC
+				}
 			}
-			f, err := os.OpenFile(filename, flags, 0644)
+
+			f, err := os.OpenFile(filename, flag, perm)
 			if err != nil {
 				return fmt.Errorf("error for `output` flag: %w", err)
 			}
-			c.App.Writer = f
+
+			if c.Bool("frozen") {
+				var out bytes.Buffer
+				c.App.Writer = &out
+				c.App.After = func(c *cli.Context) error {
+					truth, err := io.ReadAll(f)
+					if err != nil {
+						return err
+					}
+					if !bytes.Equal(truth, out.Bytes()) {
+						return fmt.Errorf("output differs for output %s", filename)
+					}
+					return nil
+				}
+			} else {
+				c.App.Writer = f
+			}
 		}
 
 		for _, command := range command.Commands {
@@ -145,7 +173,12 @@ EXAMPLES:
 					panic(fmt.Errorf("implementation error: command %s is missing", command.Name))
 				}
 				if err := command.Action(c); err != nil {
-					return fmt.Errorf("command %s failed: %w", command.Name, err)
+					return fmt.Errorf("%s failed: %w", command.Name, err)
+				}
+				if after := c.App.After; after != nil {
+					if err := after(c); err != nil {
+						return fmt.Errorf("%s failed: %w", command.Name, err)
+					}
 				}
 				syscall.Exit(0)
 			}
@@ -161,7 +194,7 @@ EXAMPLES:
 	app.Flags = append(command.CommandsFlags(),
 		&cli.BoolFlag{
 			Name:  "append",
-			Usage: "Append to the output file instead of truncating",
+			Usage: "Append to the --output file instead of truncating",
 		},
 
 		&cli.StringFlag{
@@ -183,6 +216,11 @@ EXAMPLES:
 			EnvVars:   []string{"PIMP_FILE"},
 			Usage:     "Load this pimpfile `FILE` (default: ./Pimpfile)",
 			TakesFile: true,
+		},
+
+		&cli.BoolFlag{
+			Name:  "frozen",
+			Usage: "Fail if the output differs from the --output file",
 		},
 
 		&cli.StringFlag{
