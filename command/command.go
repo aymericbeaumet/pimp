@@ -12,8 +12,8 @@ import (
 	"text/template"
 
 	"github.com/aymericbeaumet/pimp/engine"
-	"github.com/aymericbeaumet/pimp/funcmap"
-	fmerrors "github.com/aymericbeaumet/pimp/funcmap/errors"
+	perrors "github.com/aymericbeaumet/pimp/errors"
+	"github.com/aymericbeaumet/pimp/functions"
 	"github.com/aymericbeaumet/pimp/normalize"
 	"github.com/urfave/cli/v2"
 )
@@ -110,7 +110,7 @@ func DefaultCommand(c *cli.Context) error {
 	return nil
 }
 
-var fm = funcmap.FuncMap()
+var fm = functions.FuncMap()
 
 func render(text string, ldelim, rdelim string) (string, error) {
 	var sb strings.Builder
@@ -130,7 +130,7 @@ func render(text string, ldelim, rdelim string) (string, error) {
 			err = e.Unwrap()
 		}
 		switch e := err.(type) {
-		case *fmerrors.FatalError:
+		case *perrors.FatalError:
 			os.Stderr.WriteString(e.Error())
 			syscall.Exit(e.ExitCode())
 		default:

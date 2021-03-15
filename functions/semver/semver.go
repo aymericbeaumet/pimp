@@ -1,3 +1,4 @@
+// Package semver contains all the Semantic Versioning related functions (https://semver.org/)
 package semver
 
 import (
@@ -10,38 +11,9 @@ import (
 
 func FuncMap() template.FuncMap {
 	return template.FuncMap{
-		"Major": func(input interface{}) (*semver.Version, error) {
-			v, err := getLatestVersion(input)
-			if err != nil {
-				return nil, err
-			}
-			if err := v.IncrementMajor(); err != nil {
-				return nil, err
-			}
-			return v, nil
-		},
-
-		"Minor": func(input interface{}) (*semver.Version, error) {
-			v, err := getLatestVersion(input)
-			if err != nil {
-				return nil, err
-			}
-			if err := v.IncrementMinor(); err != nil {
-				return nil, err
-			}
-			return v, nil
-		},
-
-		"Patch": func(input interface{}) (*semver.Version, error) {
-			v, err := getLatestVersion(input)
-			if err != nil {
-				return nil, err
-			}
-			if err := v.IncrementPatch(); err != nil {
-				return nil, err
-			}
-			return v, nil
-		},
+		"Major": Major,
+		"Minor": Minor,
+		"Patch": Patch,
 	}
 }
 
