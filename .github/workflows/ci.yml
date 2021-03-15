@@ -1,9 +1,6 @@
 name: Continuous Integration
 
-on:
-  push:
-    branches: [master]
-    tags: '**'
+on: [push, pull_request]
 
 jobs:
 
