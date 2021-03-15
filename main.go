@@ -30,8 +30,8 @@ func main() {
 	app.Name = "pimp"
 	app.Version = version
 	app.Description = strings.TrimSpace(`
-pimp is a command-line expander with pattern matching and templating
-capabilities that increases your productivity.
+pimp is a shell-agnostic command-line expander and command runner with pattern
+matching and templating capabilities that increases your productivity.
 		`)
 	app.Authors = []*cli.Author{
 		{
@@ -87,22 +87,16 @@ EXAMPLES:
         $ pimp git co{{"\t"}}# executes "git checkout <branch>" with the branch name chosen in fzf
         $ pimp git co master{{"\t"}}# executes "git checkout master" ("master" is from the "...")
 
-    To make this more convenient, you can send all the "git" calls to pimp with
-    a shell alias (this is automatically done if you place $(pimp --shell) in
-    your shell configuration).
+    To make this more convenient, you can execute all the "git" calls through
+    the pimp binary with a shell alias.
 
         $ alias git='pimp git'
         $ git co{{"\t"}}# same as in the previous example
         $ git co master{{"\t"}}# same as in the previous example
 
-    You can also leverage pimp templating system to render arbitrary files.
+    You can also leverage the pimp templating system to render arbitrary files.
 
         $ pimp -o readme.md --render readme.md.tmpl{{"\t"}}# Overwrite the readme with the rendered template
-
-    It is also possible to render pimp templates from the command-line arguments.
-
-        $ pimp --run {{"'{{GitRemotes | JSON}}'"}}
-        ["origin"]
 
     See the project homepage for more advanced examples.
 `
