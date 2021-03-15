@@ -15,14 +15,8 @@ var renderCommand = &cli.Command{
 	Usage:     "Sequentially open and render the template FILES (- for stdin)",
 	Action: func(c *cli.Context) error {
 		var readerCache []byte
-		args := c.Args().Slice()
 
-		// if no arg is provided, read stdin by default
-		if len(args) == 0 {
-			args = []string{"-"}
-		}
-
-		for _, arg := range args {
+		for _, arg := range c.Args().Slice() {
 			var text string
 
 			if arg == "-" {
