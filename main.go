@@ -65,6 +65,8 @@ USAGE:
 {{- end}}
 {{- end}}
 
+    Execute pimp without arguments to start a REPL.
+
 OPTIONS:
 {{- range .VisibleFlags}}
     {{.}}
