@@ -19,14 +19,14 @@ import (
 )
 
 var Commands = []*cli.Command{
-	// commands used frequently
+	dumpCommand,
+	evalCommand,
 	renderCommand,
+	replCommand,
 	runCommand,
 	shellCommand,
 	zshCommand,
 	zshCompletionCommand,
-	// commands used for debug purpose
-	dumpCommand,
 }
 
 func CommandsFlags() []cli.Flag {
