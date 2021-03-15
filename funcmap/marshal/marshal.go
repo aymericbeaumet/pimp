@@ -21,6 +21,14 @@ func FuncMap() template.FuncMap {
 			return string(out), nil
 		},
 
+		"JSONIndent": func(input interface{}) (string, error) {
+			out, err := json.MarshalIndent(input, "", "  ")
+			if err != nil {
+				return "", err
+			}
+			return string(out), nil
+		},
+
 		"TOML": func(input interface{}) (string, error) {
 			out, err := toml.Marshal(input)
 			if err != nil {
@@ -31,6 +39,14 @@ func FuncMap() template.FuncMap {
 
 		"XML": func(input interface{}) (string, error) {
 			out, err := xml.Marshal(input)
+			if err != nil {
+				return "", err
+			}
+			return string(out), nil
+		},
+
+		"XMLIndent": func(input interface{}) (string, error) {
+			out, err := xml.MarshalIndent(input, "", "  ")
 			if err != nil {
 				return "", err
 			}
