@@ -41,7 +41,7 @@ func CommandsFlags() []cli.Flag {
 	return out
 }
 
-func MainAction(c *cli.Context) error {
+func DefaultCommand(c *cli.Context) error {
 	eng, err := initializeEngine(c, true, true)
 	if err != nil {
 		return err

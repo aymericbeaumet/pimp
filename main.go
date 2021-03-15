@@ -154,8 +154,7 @@ EXAMPLES:
 		return nil
 	}
 
-	app.Action = command.MainAction
-
+	app.Action = command.DefaultCommand
 	app.Commands = command.Commands
 	app.HideHelpCommand = true
 
