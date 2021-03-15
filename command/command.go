@@ -49,8 +49,7 @@ func DefaultCommand(c *cli.Context) error {
 
 	env, args, files := eng.Map(os.Environ(), c.Args().Slice())
 	if len(args) == 0 {
-		_ = cli.ShowAppHelp(c)
-		return nil
+		return c.App.Command("--repl").Run(c)
 	}
 
 	args, err = renderStrings(args, c.String("ldelim"), c.String("rdelim"))
