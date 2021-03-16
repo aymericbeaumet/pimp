@@ -1,7 +1,6 @@
 package command
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -14,7 +13,7 @@ import (
 
 	"github.com/aymericbeaumet/pimp/engine"
 	perrors "github.com/aymericbeaumet/pimp/errors"
-	"github.com/aymericbeaumet/pimp/functions"
+	"github.com/aymericbeaumet/pimp/funcs"
 	"github.com/aymericbeaumet/pimp/normalize"
 	"github.com/urfave/cli/v2"
 )
@@ -49,7 +48,7 @@ func DefaultCommand(c *cli.Context) error {
 
 	env, args, files := eng.Map(os.Environ(), c.Args().Slice())
 	if len(args) == 0 {
-		return replCommand(c)
+		return replCommand.Action(c)
 	}
 
 	args, err = renderStrings(args, c.String("ldelim"), c.String("rdelim"))
@@ -110,48 +109,7 @@ func DefaultCommand(c *cli.Context) error {
 	return nil
 }
 
-func replCommand(c *cli.Context) error {
-	const prompt = "pimp> "
-	var sb strings.Builder
-
-	fmt.Fprint(c.App.Writer, prompt)
-
-	scanner := bufio.NewScanner(c.App.Reader)
-	for scanner.Scan() {
-		text := strings.TrimSpace(scanner.Text())
-
-		if len(text) == 0 {
-			fmt.Fprint(c.App.Writer, prompt)
-			continue
-		}
-
-		sb.Reset()
-		sb.WriteString(c.String("ldelim"))
-		sb.WriteRune(' ')
-		sb.WriteString(scanner.Text())
-		sb.WriteRune(' ')
-		sb.WriteString(c.String("rdelim"))
-
-		rendered, err := render(sb.String(), c.String("ldelim"), c.String("rdelim"))
-		if err != nil {
-			fmt.Fprintln(c.App.ErrWriter, err)
-			fmt.Fprint(c.App.Writer, prompt)
-			continue
-		}
-
-		fmt.Fprint(c.App.Writer, rendered)
-
-		if !strings.HasSuffix(rendered, "\n") {
-			fmt.Fprint(c.App.Writer, "\n")
-		}
-
-		fmt.Fprint(c.App.Writer, prompt)
-	}
-
-	return scanner.Err()
-}
-
-var fm = functions.FuncMap()
+var fm = funcs.FuncMap()
 
 func render(text string, ldelim, rdelim string) (string, error) {
 	var sb strings.Builder
