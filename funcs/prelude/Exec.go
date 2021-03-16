@@ -1,4 +1,4 @@
-package os
+package prelude
 
 import (
 	"context"
@@ -9,18 +9,18 @@ import (
 	"time"
 )
 
-type OSExecRet struct {
-	Pid    int
-	Status int
-	Stdout string
-	Stderr string
+type ExecRet struct {
+	Pid    int    `json:"pid"`
+	Status int    `json:"status"`
+	Stdout string `json:"stdout"`
+	Stderr string `json:"stderr"`
 }
 
-func (ret OSExecRet) String() string {
+func (ret ExecRet) String() string {
 	return ret.Stdout
 }
 
-func OSExec(bin string, args ...string) (*OSExecRet, error) {
+func Exec(bin string, args ...string) (*ExecRet, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -64,7 +64,7 @@ func OSExec(bin string, args ...string) (*OSExecRet, error) {
 		return nil, err
 	}
 
-	return &OSExecRet{
+	return &ExecRet{
 		Pid:    state.Pid(),
 		Status: state.ExitCode(),
 		Stdout: string(outbytes),

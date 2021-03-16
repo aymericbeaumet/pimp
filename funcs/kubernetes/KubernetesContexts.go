@@ -1,15 +1,9 @@
 package kubernetes
 
-func KubernetesContexts() ([]string, error) {
-	_, config, err := createClientAndConfig()
+func KubernetesContexts() ([]*Context, error) {
+	k, err := KubernetesOpen()
 	if err != nil {
 		return nil, err
 	}
-
-	var out []string
-	for name := range config.Contexts {
-		out = append(out, name)
-	}
-
-	return out, nil
+	return k.Contexts()
 }

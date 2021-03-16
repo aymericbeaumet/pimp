@@ -5,7 +5,7 @@ func SemverMajor(input interface{}) (*Version, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := v.IncrementMajor(); err != nil {
+	if err := v.version.IncrementMajor(); err != nil {
 		return nil, err
 	}
 	return v, nil

@@ -14,10 +14,10 @@ import (
 	"github.com/aymericbeaumet/pimp/funcs/http"
 	"github.com/aymericbeaumet/pimp/funcs/kubernetes"
 	"github.com/aymericbeaumet/pimp/funcs/marshal"
-	"github.com/aymericbeaumet/pimp/funcs/os"
 	"github.com/aymericbeaumet/pimp/funcs/prelude"
 	"github.com/aymericbeaumet/pimp/funcs/semver"
 	"github.com/aymericbeaumet/pimp/funcs/sprig"
+	"github.com/aymericbeaumet/pimp/funcs/url"
 )
 
 // FuncMap returns a merged map with all the functions supported by Pimp. Refer
@@ -28,10 +28,10 @@ func FuncMap() template.FuncMap {
 		http.FuncMap(),
 		kubernetes.FuncMap(),
 		marshal.FuncMap(),
-		os.FuncMap(),
 		prelude.FuncMap(),
 		semver.FuncMap(),
 		sprig.FuncMap(),
+		url.FuncMap(),
 	)
 }
 

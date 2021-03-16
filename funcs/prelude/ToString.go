@@ -7,7 +7,9 @@ import (
 )
 
 func ToString(input interface{}) string {
-	if value := reflect.ValueOf(input); value.Kind() == reflect.Slice {
+	value := reflect.ValueOf(input)
+
+	if value.Kind() == reflect.Slice {
 		var sb strings.Builder
 		for i := 0; i < value.Len(); i++ {
 			if i > 0 {

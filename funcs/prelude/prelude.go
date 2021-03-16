@@ -7,10 +7,14 @@ import (
 
 func FuncMap() template.FuncMap {
 	return template.FuncMap{
+		"Exec":          Exec,
 		"FZF":           FZF,
 		"Head":          Head,
+		"Reverse":       Reverse,
+		"Sort":          Sort,
 		"Tail":          Tail,
 		"ToString":      ToString,
 		"ToStringSlice": ToStringSlice,
+		"Type":          Type,
 	}
 }

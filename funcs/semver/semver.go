@@ -21,12 +21,12 @@ func FuncMap() template.FuncMap {
 }
 
 type Version struct {
-	Prefix string
-	semver.Version
+	prefix  string
+	version semver.Version
 }
 
 func (v Version) String() string {
-	return v.Prefix + v.Version.String()
+	return v.prefix + v.version.String()
 }
 
 var prefixRegexp = regexp.MustCompile("^[^0-9]+")
@@ -44,7 +44,7 @@ func NewVersion(s string) (Version, error) {
 		return Version{}, err
 	}
 
-	return Version{Prefix: prefix, Version: v}, nil
+	return Version{prefix: prefix, version: v}, nil
 }
 
 func getLatestVersion(input interface{}) (*Version, error) {
@@ -74,11 +74,11 @@ func getLatestVersion(input interface{}) (*Version, error) {
 		versions = i
 
 	case semver.Version:
-		versions = append(versions, Version{Version: i})
+		versions = append(versions, Version{version: i})
 
 	case []semver.Version:
 		for _, v := range i {
-			versions = append(versions, Version{Version: v})
+			versions = append(versions, Version{version: v})
 		}
 
 	default:
@@ -86,7 +86,7 @@ func getLatestVersion(input interface{}) (*Version, error) {
 	}
 
 	sort.Slice(versions, func(i, j int) bool {
-		return versions[i].Version.LT(versions[j].Version)
+		return versions[i].version.LT(versions[j].version)
 	})
 
 	if len(versions) == 0 {

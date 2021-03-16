@@ -6,13 +6,20 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"strings"
 	"time"
 
 	perrors "github.com/aymericbeaumet/pimp/errors"
 )
 
-func FZF(input interface{}) (string, error) {
+type FZFRet struct {
+	Stdout string `json:"stdout"`
+}
+
+func (ret FZFRet) String() string {
+	return ret.Stdout
+}
+
+func FZF(input interface{}) (*FZFRet, error) {
 	s := ToString(input)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -22,12 +29,12 @@ func FZF(input interface{}) (string, error) {
 
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	cmd.Stderr = os.Stderr
@@ -36,7 +43,7 @@ func FZF(input interface{}) (string, error) {
 	signal.Notify(signalC)
 
 	if err := cmd.Start(); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	go func() {
@@ -46,25 +53,27 @@ func FZF(input interface{}) (string, error) {
 	}()
 
 	if _, err := stdin.Write([]byte(s)); err != nil {
-		return "", err
+		return nil, err
 	}
 	if _, err := stdin.Write([]byte{'\n'}); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	state, err := cmd.Process.Wait()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if ec := state.ExitCode(); ec != 0 {
-		return "", perrors.NewFatalError(ec, "")
+		return nil, perrors.NewFatalError(ec, "")
 	}
 
-	out, err := io.ReadAll(stdout)
+	outbytes, err := io.ReadAll(stdout)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return strings.TrimSpace(string(out)), nil
+	return &FZFRet{
+		Stdout: string(outbytes),
+	}, nil
 }

@@ -5,7 +5,7 @@ func SemverMinor(input interface{}) (*Version, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := v.IncrementMinor(); err != nil {
+	if err := v.version.IncrementMinor(); err != nil {
 		return nil, err
 	}
 	return v, nil
