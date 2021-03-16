@@ -10,11 +10,11 @@ import (
 var evalCommand = &cli.Command{
 	Name:      "--eval",
 	ArgsUsage: "STRING",
-	Usage:     "Evaluate STRING as PimpScript",
+	Usage:     "Evaluate the PimpScript STRING",
 	Action: func(c *cli.Context) error {
 		args := c.Args().Slice()
 		if len(args) != 1 {
-			return fmt.Errorf("--eval expects exactly one SCRIPT to run, got %d", len(args))
+			return fmt.Errorf("--eval expects exactly one STRING, got %d", len(args))
 		}
 
 		var sb strings.Builder
