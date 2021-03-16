@@ -17,7 +17,7 @@ var runCommand = &cli.Command{
 	Action: func(c *cli.Context) error {
 		args := c.Args().Slice()
 		if len(args) != 1 {
-			return fmt.Errorf("--run expects exactly one FILE to run, got %d", len(args))
+			return fmt.Errorf("--run expects exactly one FILE, got %d", len(args))
 		}
 
 		var sb strings.Builder
