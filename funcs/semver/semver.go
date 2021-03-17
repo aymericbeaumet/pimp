@@ -8,6 +8,7 @@ import (
 	"sort"
 	"text/template"
 
+	"github.com/aymericbeaumet/pimp/funcs/git"
 	"github.com/blang/semver/v4"
 )
 
@@ -79,6 +80,15 @@ func getLatestVersion(input interface{}) (*Version, error) {
 	case []semver.Version:
 		for _, v := range i {
 			versions = append(versions, Version{version: v})
+		}
+
+	case []*git.Tag:
+		for _, t := range i {
+			p, err := NewVersion(t.String())
+			if err != nil {
+				return nil, err
+			}
+			versions = append(versions, p)
 		}
 
 	default:
