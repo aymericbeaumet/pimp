@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"time"
 
-	perrors "github.com/aymericbeaumet/pimp/errors"
+	perrors "github.com/aymericbeaumet/pimp/pkg/errors"
 )
 
 type FZFRet struct {

@@ -1,6 +1,6 @@
 package prelude
 
-import "github.com/aymericbeaumet/pimp/errors"
+import "github.com/aymericbeaumet/pimp/pkg/errors"
 
 func Exit(code int, args ...interface{}) (interface{}, error) {
 	var message string

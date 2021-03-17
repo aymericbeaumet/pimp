@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/aymericbeaumet/pimp/funcs/prelude"
+	"github.com/aymericbeaumet/pimp/pkg/funcs/prelude"
 )
 
 func TestToStringSlice(t *testing.T) {

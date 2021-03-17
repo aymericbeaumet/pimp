@@ -10,10 +10,10 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/aymericbeaumet/pimp/engine"
-	"github.com/aymericbeaumet/pimp/funcs"
-	"github.com/aymericbeaumet/pimp/template"
-	"github.com/aymericbeaumet/pimp/util"
+	"github.com/aymericbeaumet/pimp/pkg/engine"
+	"github.com/aymericbeaumet/pimp/pkg/funcs"
+	"github.com/aymericbeaumet/pimp/pkg/template"
+	"github.com/aymericbeaumet/pimp/pkg/util"
 	"github.com/urfave/cli/v2"
 )
 

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"text/template"
 
-	ptemplate "github.com/aymericbeaumet/pimp/template"
+	ptemplate "github.com/aymericbeaumet/pimp/pkg/template"
 )
 
 func Transpile(w io.Writer, script, ldelim, rdelim string) error {

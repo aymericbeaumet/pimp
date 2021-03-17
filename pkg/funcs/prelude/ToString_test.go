@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/aymericbeaumet/pimp/funcs/prelude"
+	"github.com/aymericbeaumet/pimp/pkg/funcs/prelude"
 )
 
 func TestToString(t *testing.T) {

@@ -5,19 +5,19 @@ import (
 	"io"
 	"os"
 
-	"github.com/aymericbeaumet/pimp/script"
-	"github.com/aymericbeaumet/pimp/util"
+	"github.com/aymericbeaumet/pimp/pkg/script"
+	"github.com/aymericbeaumet/pimp/pkg/util"
 	"github.com/urfave/cli/v2"
 )
 
-var transpileCommand = &cli.Command{
-	Name:      "--transpile",
+var runCommand = &cli.Command{
+	Name:      "--run",
 	ArgsUsage: "FILE",
-	Usage:     "Transpile the PimpScript FILE (- for stdin)",
+	Usage:     "Run the PimpScript FILE (- for stdin)",
 	Action: func(c *cli.Context) error {
 		args := c.Args().Slice()
 		if len(args) != 1 {
-			return fmt.Errorf("--transpile expects exactly one FILE, got %d", len(args))
+			return fmt.Errorf("--run expects exactly one FILE, got %d", len(args))
 		}
 
 		var text string
@@ -41,6 +41,7 @@ var transpileCommand = &cli.Command{
 
 		text = util.StripShebang(text)
 
-		return script.Transpile(c.App.Writer, text, c.String("ldelim"), c.String("rdelim"))
+		// TODO: type check errors.FatalError and exit (when merged https://github.com/golang/go/issues/34201)
+		return script.Run(c.App.Writer, text, c.String("ldelim"), c.String("rdelim"), funcmap)
 	},
 }

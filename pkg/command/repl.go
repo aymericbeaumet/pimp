@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/aymericbeaumet/pimp/script"
+	"github.com/aymericbeaumet/pimp/pkg/script"
 	prompt "github.com/c-bata/go-prompt"
 	"github.com/sahilm/fuzzy"
 	"github.com/urfave/cli/v2"

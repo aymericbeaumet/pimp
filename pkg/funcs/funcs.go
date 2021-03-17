@@ -10,14 +10,14 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/aymericbeaumet/pimp/funcs/git"
-	"github.com/aymericbeaumet/pimp/funcs/http"
-	"github.com/aymericbeaumet/pimp/funcs/kubernetes"
-	"github.com/aymericbeaumet/pimp/funcs/marshal"
-	"github.com/aymericbeaumet/pimp/funcs/prelude"
-	"github.com/aymericbeaumet/pimp/funcs/semver"
-	"github.com/aymericbeaumet/pimp/funcs/sprig"
-	"github.com/aymericbeaumet/pimp/funcs/url"
+	"github.com/aymericbeaumet/pimp/pkg/funcs/git"
+	"github.com/aymericbeaumet/pimp/pkg/funcs/http"
+	"github.com/aymericbeaumet/pimp/pkg/funcs/kubernetes"
+	"github.com/aymericbeaumet/pimp/pkg/funcs/marshal"
+	"github.com/aymericbeaumet/pimp/pkg/funcs/prelude"
+	"github.com/aymericbeaumet/pimp/pkg/funcs/semver"
+	"github.com/aymericbeaumet/pimp/pkg/funcs/sprig"
+	"github.com/aymericbeaumet/pimp/pkg/funcs/url"
 )
 
 // FuncMap returns a merged map with all the functions supported by Pimp. Refer

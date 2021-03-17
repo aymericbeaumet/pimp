@@ -3,7 +3,7 @@ package semver_test
 import (
 	"testing"
 
-	"github.com/aymericbeaumet/pimp/funcs/semver"
+	"github.com/aymericbeaumet/pimp/pkg/funcs/semver"
 )
 
 func TestEmpty(t *testing.T) {

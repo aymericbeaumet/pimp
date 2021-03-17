@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aymericbeaumet/pimp/funcs"
-	"github.com/aymericbeaumet/pimp/script"
+	"github.com/aymericbeaumet/pimp/pkg/funcs"
+	"github.com/aymericbeaumet/pimp/pkg/script"
 )
 
 func TestTranspile(t *testing.T) {

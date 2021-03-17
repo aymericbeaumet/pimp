@@ -8,7 +8,7 @@ import (
 	"sort"
 	"text/template"
 
-	"github.com/aymericbeaumet/pimp/funcs/git"
+	"github.com/aymericbeaumet/pimp/pkg/funcs/git"
 	"github.com/blang/semver/v4"
 )
 

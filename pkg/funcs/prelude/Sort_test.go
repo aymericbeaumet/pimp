@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aymericbeaumet/pimp/funcs/prelude"
+	"github.com/aymericbeaumet/pimp/pkg/funcs/prelude"
 )
 
 type customSortableType struct {

@@ -1,6 +1,6 @@
 package semver
 
-import "github.com/aymericbeaumet/pimp/funcs/prelude"
+import "github.com/aymericbeaumet/pimp/pkg/funcs/prelude"
 
 func SemverParse(input interface{}) (*Version, error) {
 	v, err := NewVersion(prelude.ToString(input))

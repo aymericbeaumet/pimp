@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	perrors "github.com/aymericbeaumet/pimp/errors"
+	perrors "github.com/aymericbeaumet/pimp/pkg/errors"
 	"github.com/go-git/go-git/v5"
 )
 
