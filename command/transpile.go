@@ -5,19 +5,19 @@ import (
 	"io"
 	"os"
 
-	"github.com/aymericbeaumet/pimp/template"
+	"github.com/aymericbeaumet/pimp/script"
 	"github.com/aymericbeaumet/pimp/util"
 	"github.com/urfave/cli/v2"
 )
 
-var renderCommand = &cli.Command{
-	Name:      "--render",
+var transpileCommand = &cli.Command{
+	Name:      "--transpile",
 	ArgsUsage: "FILE",
-	Usage:     "Render the template FILE (- for stdin)",
+	Usage:     "Transpile the PimpScript FILE (- for stdin)",
 	Action: func(c *cli.Context) error {
 		args := c.Args().Slice()
 		if len(args) != 1 {
-			return fmt.Errorf("--render expects exactly one FILE, got %d", len(args))
+			return fmt.Errorf("--transpile expects exactly one FILE, got %d", len(args))
 		}
 
 		var text string
@@ -41,7 +41,6 @@ var renderCommand = &cli.Command{
 
 		text = util.StripShebang(text)
 
-		// TODO: type check errors.FatalError and exit (when merged https://github.com/golang/go/issues/34201)
-		return template.Render(c.App.Writer, text, c.String("ldelim"), c.String("rdelim"), funcmap)
+		return script.Transpile(c.App.Writer, text, c.String("ldelim"), c.String("rdelim"))
 	},
 }

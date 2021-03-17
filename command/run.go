@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
-	"github.com/aymericbeaumet/pimp/normalize"
+	"github.com/aymericbeaumet/pimp/script"
+	"github.com/aymericbeaumet/pimp/util"
 	"github.com/urfave/cli/v2"
 )
 
@@ -20,18 +20,15 @@ var runCommand = &cli.Command{
 			return fmt.Errorf("--run expects exactly one FILE, got %d", len(args))
 		}
 
-		var sb strings.Builder
-		sb.WriteString(c.String("ldelim"))
-		sb.WriteRune(' ')
-
+		var text string
 		if args[0] == "-" {
-			bytes, err := io.ReadAll(c.App.Reader)
+			data, err := io.ReadAll(c.App.Reader)
 			if err != nil {
 				return err
 			}
-			sb.Write(bytes)
+			text = string(data)
 		} else {
-			renderFilepath, err := normalize.Path(args[0])
+			renderFilepath, err := util.NormalizePath(args[0])
 			if err != nil {
 				return err
 			}
@@ -39,18 +36,12 @@ var runCommand = &cli.Command{
 			if err != nil {
 				return err
 			}
-			sb.Write(data)
+			text = string(data)
 		}
 
-		sb.WriteRune(' ')
-		sb.WriteString(c.String("rdelim"))
+		text = util.StripShebang(text)
 
-		rendered, err := render(sb.String(), c.String("ldelim"), c.String("rdelim"))
-		if err != nil {
-			return err
-		}
-
-		_, err = c.App.Writer.Write([]byte(rendered))
-		return err
+		// TODO: type check errors.FatalError and exit (when merged https://github.com/golang/go/issues/34201)
+		return script.Run(c.App.Writer, text, c.String("ldelim"), c.String("rdelim"), funcmap)
 	},
 }
