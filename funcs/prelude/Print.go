@@ -4,6 +4,6 @@ import (
 	"fmt"
 )
 
-func Print(args ...interface{}) (string, error) {
-	return fmt.Sprint(args...), nil
+func Print(args ...interface{}) string {
+	return fmt.Sprint(args...)
 }
