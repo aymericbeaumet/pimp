@@ -13,11 +13,12 @@ func FuncMap() template.FuncMap {
 	return template.FuncMap{
 		"GitBranches":       GitBranches,
 		"GitLocalBranches":  GitLocalBranches,
+		"GitOpen":           GitOpen,
 		"GitReferences":     GitReferences,
 		"GitRemoteBranches": GitRemoteBranches,
 		"GitRemotes":        GitRemotes,
+		"GitRoot":           GitRoot,
 		"GitTags":           GitTags,
-		"GitOpen":           GitOpen,
 	}
 }
 
@@ -143,6 +144,10 @@ func (r Repository) Remotes() ([]*Remote, error) {
 	}
 
 	return out, nil
+}
+
+func (r Repository) Root() string {
+	return r.path
 }
 
 func (r Repository) Tags() ([]*Tag, error) {
