@@ -8,6 +8,7 @@ require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/blang/semver/v4 v4.0.0
 	github.com/c-bata/go-prompt v0.2.6
+	github.com/fatih/color v1.10.0
 	github.com/go-git/go-git/v5 v5.2.0
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect

@@ -13,6 +13,7 @@ import (
 
 	"github.com/aymericbeaumet/pimp/command"
 	"github.com/aymericbeaumet/pimp/normalize"
+	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
 )
 
@@ -21,6 +22,8 @@ var version = "$version"
 var commit = "$commit"
 var date = "$date"
 var builtBy = "$builtBy"
+
+var colorExample = color.New(color.FgYellow).SprintFunc()
 
 func init() {
 	debug.SetGCPercent(-1)
@@ -77,7 +80,7 @@ EXAMPLES:
     Let's start with the classic "Hello, World!". This illustrates how pimp
     acts as a fancy command proxy. No expansion is performed here.
 
-        $ pimp echo 'Hello, World!'
+        $ ` + colorExample(`pimp echo 'Hello, World!'`) + `
         Hello, World!
 
     Let's make it a little bit more interesting by adding some mappings to the
@@ -85,22 +88,22 @@ EXAMPLES:
     Note how "..." enables us to catch variadic arguments which are
     automatically appended during the expansion process.
 
-        $ cat ~/.pimprc
+        $ ` + colorExample(`cat ~/.pimprc`) + `
         git co     : git checkout {{"{{GitLocalBranches | FZF}}"}}
         git co ... : git checkout
-        $ pimp git co{{"\t"}}# executes "git checkout <branch>" with the branch name chosen in fzf
-        $ pimp git co master{{"\t"}}# executes "git checkout master" ("master" is from the "...")
+        $ ` + colorExample(`pimp git co`) + `{{"\t"}}# executes "git checkout <branch>" with the branch name chosen in fzf
+        $ ` + colorExample(`pimp git co master`) + `{{"\t"}}# executes "git checkout master" ("master" is from the "...")
 
     To make this more convenient, you can execute all the "git" calls through
     the pimp binary with a shell alias.
 
-        $ alias git='pimp git'
-        $ git co{{"\t"}}# same as in the previous example
-        $ git co master{{"\t"}}# same as in the previous example
+        $ ` + colorExample(`alias git='pimp git'`) + `
+        $ ` + colorExample(`git co`) + `{{"\t"}}# same as in the previous example
+        $ ` + colorExample(`git co master`) + `{{"\t"}}# same as in the previous example
 
     You can also leverage the pimp templating system to render arbitrary files.
 
-        $ pimp -o readme.md --render readme.md.tmpl{{"\t"}}# Overwrite the readme with the rendered template
+        $ ` + colorExample(`pimp -o readme.md --render readme.md.tmpl`) + `{{"\t"}}# Overwrite the readme with the rendered template
 
     See the project homepage for more advanced examples.
 `
