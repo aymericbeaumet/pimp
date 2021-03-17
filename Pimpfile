@@ -18,28 +18,34 @@ patch: |
 
 generate-readme: |
   #!/usr/bin/env pimp --output=readme.md --render
-  {{ $repository := "aymericbeaumet/pimp" -}}
+  {{- $repository := "aymericbeaumet/pimp" }}
+  {{- $latest := GitTags | SemverLatest }}
   # pimp
 
-  [![test status](https://img.shields.io/github/workflow/status/{{ $repository }}/Continuous%20Integration?style=flat-square&logo=github)](https://github.com/{{ $repository }}/actions)
-  [![github](https://img.shields.io/github/issues/{{ $repository }}?style=flat-square&logo=github)](https://github.com/{{ $repository }}/issues)
-  [![Go.Dev reference](https://img.shields.io/badge/go.dev-reference-blue?style=flat-square&logo=go&logoColor=white)](https://pkg.go.dev/github.com/{{ $repository }})
+  [![test status](https://img.shields.io/github/workflow/status/{{$repository}}/Continuous%20Integration?style=flat-square&logo=github)](https://github.com/{{$repository}}/actions)
+  [![github](https://img.shields.io/github/issues/{{$repository}}?style=flat-square&logo=github)](https://github.com/{{$repository}}/issues)
+  [![go.dev](https://img.shields.io/github/v/tag/{{$repository}}?style=flat-square&logo=go&label=go.dev&logoColor=white)](https://pkg.go.dev/github.com/{{$repository}})
 
-  ## Development (local)
+  pimp is a shell-agnostic command-line expander and command runner with
+  pattern matching and templating capabilities that increases your
+  productivity.
+
+  ## Install
+
+  ### Pre-built binaries
+
+  Download the binary from the [latest
+  releases](https://github.com/aymericbeaumet/pimp/releases/tag/{{$latest}})
+  and install it where you see fit.
+
+  ### Using the Go toolchain
 
   ```
-  go run . git co
-  go run . --dry-run git co
+  go install github.com/aymericbeaumet/pimp@{{$latest}}
   ```
 
-  ## Development (system-wide)
+  ## Running tests
 
   ```
-  go install .
-
-  # add to ~/.bashrc, ~/.zshrc or ~/.config/fish/config.fish
-  eval "$(pimp --shell)"
-
-  git co
-  pimp --dry-run git co
+  go test -v ./...
   ```

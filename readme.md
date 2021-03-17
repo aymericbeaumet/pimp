@@ -2,23 +2,28 @@
 
 [![test status](https://img.shields.io/github/workflow/status/aymericbeaumet/pimp/Continuous%20Integration?style=flat-square&logo=github)](https://github.com/aymericbeaumet/pimp/actions)
 [![github](https://img.shields.io/github/issues/aymericbeaumet/pimp?style=flat-square&logo=github)](https://github.com/aymericbeaumet/pimp/issues)
-[![Go.Dev reference](https://img.shields.io/badge/go.dev-reference-blue?style=flat-square&logo=go&logoColor=white)](https://pkg.go.dev/github.com/aymericbeaumet/pimp)
+[![go.dev](https://img.shields.io/github/v/tag/aymericbeaumet/pimp?style=flat-square&logo=go&label=go.dev&logoColor=white)](https://pkg.go.dev/github.com/aymericbeaumet/pimp)
 
-## Development (local)
+pimp is a shell-agnostic command-line expander and command runner with
+pattern matching and templating capabilities that increases your
+productivity.
+
+## Install
+
+### Pre-built binaries
+
+Download the binary from the [latest
+releases](https://github.com/aymericbeaumet/pimp/releases/tag/v0.0.2)
+and install it where you see fit.
+
+### Using the Go toolchain
 
 ```
-go run . git co
-go run . --dry-run git co
+go install github.com/aymericbeaumet/pimp@v0.0.2
 ```
 
-## Development (system-wide)
+## Running tests
 
 ```
-go install .
-
-# add to ~/.bashrc, ~/.zshrc or ~/.config/fish/config.fish
-eval "$(pimp --shell)"
-
-git co
-pimp --dry-run git co
+go test -v ./...
 ```
