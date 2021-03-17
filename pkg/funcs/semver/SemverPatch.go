@@ -1,7 +1,7 @@
 package semver
 
 func SemverPatch(input interface{}) (*Version, error) {
-	v, err := getLatestVersion(input)
+	v, err := SemverLatest(input)
 	if err != nil {
 		return nil, err
 	}
