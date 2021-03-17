@@ -12,7 +12,7 @@ import (
 	"syscall"
 
 	"github.com/aymericbeaumet/pimp/command"
-	"github.com/aymericbeaumet/pimp/normalize"
+	"github.com/aymericbeaumet/pimp/util"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
 )
@@ -112,7 +112,7 @@ EXAMPLES:
 		for _, flag := range c.App.Flags {
 			if flag, ok := flag.(*cli.StringFlag); ok && flag.TakesFile {
 				if value := c.String(flag.Name); len(value) > 0 {
-					normalized, err := normalize.Path(value)
+					normalized, err := util.NormalizePath(value)
 					if err != nil {
 						return fmt.Errorf("error when normalizing `%s` flag: %w", flag.Name, err)
 					}
