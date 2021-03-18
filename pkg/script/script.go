@@ -8,21 +8,28 @@ import (
 	ptemplate "github.com/aymericbeaumet/pimp/pkg/template"
 )
 
+func Run(w io.Writer, script, ldelim, rdelim string, fm template.FuncMap) error {
+	var sb strings.Builder
+	if err := Transpile(&sb, script, ldelim, rdelim); err != nil {
+		return err
+	}
+	return ptemplate.Render(w, sb.String(), ldelim, rdelim, fm)
+}
+
 func Transpile(w io.Writer, script, ldelim, rdelim string) error {
-	for _, line := range strings.Split(script, "\n") {
-		line = strings.TrimSpace(line)
+	expressions, err := intoExpressions(script)
+	if err != nil {
+		return err
+	}
 
-		if len(line) == 0 {
-			continue
-		}
-
+	for _, expression := range expressions {
 		if _, err := w.Write([]byte(ldelim)); err != nil {
 			return nil
 		}
 		if _, err := w.Write([]byte{'-', ' '}); err != nil {
 			return err
 		}
-		if _, err := w.Write([]byte(line)); err != nil {
+		if _, err := w.Write([]byte(expression)); err != nil {
 			return err
 		}
 		if _, err := w.Write([]byte{' ', '-'}); err != nil {
@@ -39,10 +46,38 @@ func Transpile(w io.Writer, script, ldelim, rdelim string) error {
 	return nil
 }
 
-func Run(w io.Writer, script, ldelim, rdelim string, fm template.FuncMap) error {
+func intoExpressions(input string) ([]string, error) {
+	var out []string
 	var sb strings.Builder
-	if err := Transpile(&sb, script, ldelim, rdelim); err != nil {
-		return err
+	var isString, isEscaped bool
+
+	for _, r := range input {
+		if !isString && (r == ';' || r == '\n') {
+			out = appendNonEmpty(out, sb.String())
+			sb.Reset()
+			continue
+		}
+		sb.WriteRune(r)
+
+		if r == '\'' || r == '"' || r == '`' {
+			if !isString {
+				isString = true
+			} else if !isEscaped || r == '`' {
+				isString = false
+			}
+		}
+
+		isEscaped = isString && r == '\\'
 	}
-	return ptemplate.Render(w, sb.String(), ldelim, rdelim, fm)
+
+	out = appendNonEmpty(out, sb.String())
+
+	return out, nil
+}
+
+func appendNonEmpty(slice []string, element string) []string {
+	if trimmed := strings.TrimSpace(element); len(trimmed) > 0 {
+		return append(slice, trimmed)
+	}
+	return slice
 }
