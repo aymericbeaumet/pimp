@@ -8,6 +8,9 @@ package funcs
 
 import (
 	"fmt"
+	"reflect"
+	"sort"
+	"strings"
 	"text/template"
 
 	"github.com/aymericbeaumet/pimp/pkg/funcs/git"
@@ -22,7 +25,7 @@ import (
 // FuncMap returns a merged map with all the functions supported by Pimp. Refer
 // to the individual packages to read more about all the available functions.
 func FuncMap() template.FuncMap {
-	return merge(
+	out := merge(
 		git.FuncMap(),
 		http.FuncMap(),
 		kubernetes.FuncMap(),
@@ -31,6 +34,16 @@ func FuncMap() template.FuncMap {
 		sql.FuncMap(),
 		url.FuncMap(),
 	)
+
+	funcs := make([]string, 0, len(out)+1)
+	out["funcs"] = func() []string { return funcs }
+	for funcName, fn := range out {
+		name := "func " + funcName + strings.TrimPrefix(reflect.TypeOf(fn).String(), "func")
+		funcs = append(funcs, name)
+	}
+	sort.Strings(funcs)
+
+	return out
 }
 
 func merge(fms ...template.FuncMap) template.FuncMap {
