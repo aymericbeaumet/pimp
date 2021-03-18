@@ -1,7 +1,6 @@
 package template
 
 import (
-	"fmt"
 	"io"
 	"strings"
 	"text/template"
@@ -18,8 +17,7 @@ type afterFunc func(string) (string, error)
 var afters = map[string]afterFunc{
 	// ./pkg/funcs/markdown/MarkdownTOC.go
 	"\x00MarkdownTOC\x00": func(rendered string) (string, error) {
-		fmt.Println(rendered)
-		built, err := toc.Build([]byte(rendered), "Table of Contents", 0, 0, true)
+		built, err := toc.Build([]byte(rendered), "Table of Contents", 1, 0, true)
 		if err != nil {
 			return "", err
 		}
