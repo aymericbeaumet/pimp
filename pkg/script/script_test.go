@@ -13,14 +13,14 @@ func TestTranspile(t *testing.T) {
 	if err := script.Transpile(&out, `$a := 1
 $b := 2
 
-Println $a $b
+println $a $b
 `, "{{", "}}"); err != nil {
 		t.Error(err)
 	}
 
 	if out.String() != `{{- $a := 1 -}}
 {{- $b := 2 -}}
-{{- Println $a $b -}}
+{{- println $a $b -}}
 ` {
 		t.Errorf("prepared script differs from expected output, got %#v", out.String())
 	}
@@ -31,7 +31,7 @@ func TestRunFunctionCall(t *testing.T) {
 	if err := script.Run(&out, `$a := 1
 $b := 2
 
-Println $a $b
+println $a $b
 `, "{{", "}}", funcs.FuncMap()); err != nil {
 		t.Error(err)
 	}
