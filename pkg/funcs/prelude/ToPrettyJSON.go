@@ -1,8 +1,8 @@
-package marshal
+package prelude
 
 import "encoding/json"
 
-func MarshalJSONIndent(input interface{}) (string, error) {
+func ToPrettyJSON(input interface{}) (string, error) {
 	out, err := json.MarshalIndent(input, "", "  ")
 	if err != nil {
 		return "", err

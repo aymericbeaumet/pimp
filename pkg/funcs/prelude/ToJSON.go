@@ -1,8 +1,8 @@
-package marshal
+package prelude
 
 import "encoding/json"
 
-func MarshalJSON(input interface{}) (string, error) {
+func ToJSON(input interface{}) (string, error) {
 	out, err := json.Marshal(input)
 	if err != nil {
 		return "", err

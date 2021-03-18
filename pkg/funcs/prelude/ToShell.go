@@ -1,11 +1,11 @@
-package marshal
+package prelude
 
 import (
 	"fmt"
 	"reflect"
 )
 
-func MarshalShell(input interface{}) (string, error) {
+func ToShell(input interface{}) (string, error) {
 	switch input := input.(type) {
 	case string:
 		return fmt.Sprintf("%#v", input), nil

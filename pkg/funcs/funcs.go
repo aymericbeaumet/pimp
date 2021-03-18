@@ -13,7 +13,6 @@ import (
 	"github.com/aymericbeaumet/pimp/pkg/funcs/git"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/http"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/kubernetes"
-	"github.com/aymericbeaumet/pimp/pkg/funcs/marshal"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/prelude"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/semver"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/sprig"
@@ -27,7 +26,6 @@ func FuncMap() template.FuncMap {
 		git.FuncMap(),
 		http.FuncMap(),
 		kubernetes.FuncMap(),
-		marshal.FuncMap(),
 		prelude.FuncMap(),
 		semver.FuncMap(),
 		sprig.FuncMap(),
