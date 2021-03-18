@@ -15,7 +15,6 @@ import (
 	"github.com/aymericbeaumet/pimp/pkg/funcs/kubernetes"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/prelude"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/semver"
-	"github.com/aymericbeaumet/pimp/pkg/funcs/sprig"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/url"
 )
 
@@ -28,7 +27,6 @@ func FuncMap() template.FuncMap {
 		kubernetes.FuncMap(),
 		prelude.FuncMap(),
 		semver.FuncMap(),
-		sprig.FuncMap(),
 		url.FuncMap(),
 	)
 }

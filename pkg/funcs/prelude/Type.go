@@ -2,6 +2,6 @@ package prelude
 
 import "reflect"
 
-func Type(input interface{}) reflect.Type {
+func TypeOf(input interface{}) reflect.Type {
 	return reflect.TypeOf(input)
 }

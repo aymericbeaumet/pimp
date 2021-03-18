@@ -3,10 +3,21 @@ package prelude
 
 import (
 	"text/template"
+
+	"github.com/Masterminds/sprig"
 )
 
+var sprigIgnore = map[string]struct{}{
+	"reverse":      {},
+	"toJson":       {},
+	"toPrettyJson": {},
+	"toRawJson":    {},
+	"toString":     {},
+	"typeOf":       {},
+}
+
 func FuncMap() template.FuncMap {
-	return template.FuncMap{
+	out := template.FuncMap{
 		"exec":          Exec,
 		"exit":          Exit,
 		"fzf":           FZF,
@@ -27,6 +38,15 @@ func FuncMap() template.FuncMap {
 		"toTOML":        ToTOML,
 		"toXML":         ToXML,
 		"toYAML":        ToYAML,
-		"type":          Type,
+		"typeOf":        TypeOf,
 	}
+
+	for name, fn := range sprig.TxtFuncMap() {
+		if _, ok := sprigIgnore[name]; ok {
+			continue
+		}
+		out[name] = fn
+	}
+
+	return out
 }
