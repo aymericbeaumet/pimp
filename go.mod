@@ -15,6 +15,7 @@ require (
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/lib/pq v1.10.0
+	github.com/mattn/go-isatty v0.0.12
 	github.com/mattn/go-shellwords v1.0.11
 	github.com/mitchellh/copystructure v1.1.1 // indirect
 	github.com/mitchellh/go-homedir v1.1.0

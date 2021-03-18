@@ -69,6 +69,7 @@ USAGE:
 {{- end}}
 
     Execute pimp without arguments to start a REPL.
+    Pipe a script into pimp without arguments to execute it.
 
 OPTIONS:
 {{- range .VisibleFlags}}

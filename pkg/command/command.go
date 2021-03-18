@@ -14,6 +14,7 @@ import (
 	"github.com/aymericbeaumet/pimp/pkg/funcs"
 	"github.com/aymericbeaumet/pimp/pkg/template"
 	"github.com/aymericbeaumet/pimp/pkg/util"
+	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli/v2"
 )
 
@@ -49,6 +50,9 @@ func DefaultCommand(c *cli.Context) error {
 
 	env, args, files := eng.Map(os.Environ(), c.Args().Slice())
 	if len(args) == 0 {
+		if len(c.String("input")) == 0 && !isatty.IsTerminal(os.Stdin.Fd()) {
+			return runCommand.Action(c)
+		}
 		return replCommand.Action(c)
 	}
 
