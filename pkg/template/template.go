@@ -17,11 +17,14 @@ type afterFunc func(string) (string, error)
 var afters = map[string]afterFunc{
 	// ./pkg/funcs/markdown/MarkdownTOC.go
 	"\x00MarkdownTOC\x00": func(rendered string) (string, error) {
-		built, err := toc.Build([]byte(rendered), "Table of Contents", 1, 0, true)
+		built, err := toc.Build([]byte(rendered), "Table of Contents", 0, 1, true)
 		if err != nil {
 			return "", err
 		}
-		return "## " + strings.Join(built, "\n"), nil
+		for i, b := range built {
+			built[i] = strings.TrimPrefix(b, "   ")
+		}
+		return "## " + strings.Join(built[1:len(built)-1], "\n"), nil
 	},
 }
 
