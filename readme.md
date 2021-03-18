@@ -8,6 +8,13 @@ pimp is a shell-agnostic command-line expander and command runner with
 pattern matching and templating capabilities that increases your
 productivity.
 
+## Table of Contents
+
+1. [Install](#install)
+   1. [Pre-built binaries](#pre-built-binaries)
+   1. [Using the Go toolchain](#using-the-go-toolchain)
+1. [Testing](#testing)
+
 ## Install
 
 ### Pre-built binaries
@@ -22,7 +29,7 @@ and install it where you see fit.
 go install github.com/aymericbeaumet/pimp@latest
 ```
 
-## Running tests
+## Testing
 
 ```
 go test -v ./...

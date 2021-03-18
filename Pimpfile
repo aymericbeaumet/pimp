@@ -18,7 +18,7 @@ patch: |
 
 generate-readme: |
   #!/usr/bin/env pimp --output=readme.md --render
-  {{- $repository := "aymericbeaumet/pimp" }}
+  {{- $repository := "aymericbeaumet/pimp" -}}
   # pimp
 
   [![test status](https://img.shields.io/github/workflow/status/{{$repository}}/Continuous%20Integration?style=flat-square&logo=github)](https://github.com/{{$repository}}/actions)
@@ -28,6 +28,8 @@ generate-readme: |
   pimp is a shell-agnostic command-line expander and command runner with
   pattern matching and templating capabilities that increases your
   productivity.
+
+  {{MarkdownTOC}}
 
   ## Install
 
@@ -43,7 +45,7 @@ generate-readme: |
   go install github.com/aymericbeaumet/pimp@latest
   ```
 
-  ## Running tests
+  ## Testing
 
   ```
   go test -v ./...
