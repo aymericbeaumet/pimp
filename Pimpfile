@@ -19,7 +19,6 @@ patch: |
 generate-readme: |
   #!/usr/bin/env pimp --output=readme.md --render
   {{- $repository := "aymericbeaumet/pimp" }}
-  {{- $latest := GitTags | SemverLatest }}
   # pimp
 
   [![test status](https://img.shields.io/github/workflow/status/{{$repository}}/Continuous%20Integration?style=flat-square&logo=github)](https://github.com/{{$repository}}/actions)
@@ -41,7 +40,7 @@ generate-readme: |
   ### Using the Go toolchain
 
   ```
-  go install github.com/aymericbeaumet/pimp@{{$latest}}
+  go install github.com/aymericbeaumet/pimp@latest
   ```
 
   ## Running tests

@@ -19,7 +19,7 @@ and install it where you see fit.
 ### Using the Go toolchain
 
 ```
-go install github.com/aymericbeaumet/pimp@v0.0.2
+go install github.com/aymericbeaumet/pimp@latest
 ```
 
 ## Running tests
