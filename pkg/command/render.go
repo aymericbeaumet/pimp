@@ -13,7 +13,7 @@ import (
 var renderCommand = &cli.Command{
 	Name:      "--render",
 	ArgsUsage: "[FILE]",
-	Usage:     "Render the template FILE (for stdin: omit arg or use -)",
+	Usage:     "Render the template FILE (use - or omit arg for stdin)",
 	Action: func(c *cli.Context) error {
 		args := c.Args().Slice()
 		if len(args) > 1 {
@@ -21,7 +21,7 @@ var renderCommand = &cli.Command{
 		}
 
 		var text string
-		if args[0] == "-" {
+		if len(args) == 0 || args[0] == "-" {
 			data, err := io.ReadAll(c.App.Reader)
 			if err != nil {
 				return err

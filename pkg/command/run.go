@@ -13,7 +13,7 @@ import (
 var runCommand = &cli.Command{
 	Name:      "--run",
 	ArgsUsage: "[FILE]",
-	Usage:     "Run the PimpScript FILE (for stdin: omit arg or use -)",
+	Usage:     "Run the PimpScript FILE (use - or omit arg for stdin)",
 	Action: func(c *cli.Context) error {
 		args := c.Args().Slice()
 		if len(args) > 1 {
