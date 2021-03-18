@@ -12,12 +12,12 @@ import (
 
 var renderCommand = &cli.Command{
 	Name:      "--render",
-	ArgsUsage: "FILE",
-	Usage:     "Render the template FILE (- for stdin)",
+	ArgsUsage: "[FILE]",
+	Usage:     "Render the template FILE (for stdin: omit arg or use -)",
 	Action: func(c *cli.Context) error {
 		args := c.Args().Slice()
-		if len(args) != 1 {
-			return fmt.Errorf("--render expects exactly one FILE, got %d", len(args))
+		if len(args) > 1 {
+			return fmt.Errorf("--render expects at most one FILE, got %d", len(args))
 		}
 
 		var text string

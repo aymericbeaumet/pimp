@@ -12,16 +12,16 @@ import (
 
 var runCommand = &cli.Command{
 	Name:      "--run",
-	ArgsUsage: "FILE",
-	Usage:     "Run the PimpScript FILE (- for stdin)",
+	ArgsUsage: "[FILE]",
+	Usage:     "Run the PimpScript FILE (for stdin: omit arg or use -)",
 	Action: func(c *cli.Context) error {
 		args := c.Args().Slice()
-		if len(args) != 1 {
-			return fmt.Errorf("--run expects exactly one FILE, got %d", len(args))
+		if len(args) > 1 {
+			return fmt.Errorf("--run expects at most one FILE, got %d", len(args))
 		}
 
 		var text string
-		if args[0] == "-" {
+		if len(args) == 0 || args[0] == "-" {
 			data, err := io.ReadAll(c.App.Reader)
 			if err != nil {
 				return err
