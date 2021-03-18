@@ -21,6 +21,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pelletier/go-toml v1.8.1
 	github.com/sahilm/fuzzy v0.1.0
+	github.com/sebdah/markdown-toc v0.0.0-20171116085747-3bb461875c34
 	github.com/sijms/go-ora v0.0.0-20210313181832-b64036f0a8e4
 	github.com/urfave/cli/v2 v2.3.0
 	gopkg.in/yaml.v2 v2.4.0

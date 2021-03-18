@@ -1,17 +1,59 @@
 package template
 
 import (
+	"fmt"
 	"io"
 	"strings"
 	"text/template"
+
+	"github.com/sebdah/markdown-toc/toc"
 )
+
+type afterFunc func(string) (string, error)
+
+// afters contains functions that know how to deal with special placeholders
+// that have been placed by template functions. This is necessary as some
+// template functions need to perform actions but are missing context at the
+// time they are executed.
+var afters = map[string]afterFunc{
+	// ./pkg/funcs/markdown/MarkdownTOC.go
+	"\x00MarkdownTOC\x00": func(rendered string) (string, error) {
+		fmt.Println(rendered)
+		built, err := toc.Build([]byte(rendered), "Table of Contents", 0, 0, true)
+		if err != nil {
+			return "", err
+		}
+		return "## " + strings.Join(built, "\n"), nil
+	},
+}
 
 func Render(w io.Writer, text, ldelim, rdelim string, fm template.FuncMap) error {
 	t, err := template.New("").Funcs(fm).Delims(ldelim, rdelim).Parse(text)
 	if err != nil {
 		return err
 	}
-	return t.Execute(w, nil)
+
+	var sb strings.Builder
+	if err := t.Execute(&sb, nil); err != nil {
+		return err
+	}
+	out := sb.String()
+
+	if strings.ContainsRune(out, '\x00') {
+		for placeholder, afterFunc := range afters {
+			if !strings.Contains(out, placeholder) {
+				continue
+			}
+			replacement, err := afterFunc(out)
+			if err != nil {
+				return err
+			}
+			out = strings.ReplaceAll(out, placeholder, replacement)
+		}
+	}
+
+	_, err = w.Write([]byte(out))
+	return err
 }
 
 func RenderString(text, ldelim, rdelim string, fm template.FuncMap) (string, error) {

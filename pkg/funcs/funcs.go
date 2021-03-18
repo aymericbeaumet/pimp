@@ -16,6 +16,7 @@ import (
 	"github.com/aymericbeaumet/pimp/pkg/funcs/git"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/http"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/kubernetes"
+	"github.com/aymericbeaumet/pimp/pkg/funcs/markdown"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/prelude"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/semver"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/sql"
@@ -33,6 +34,7 @@ func FuncMap() template.FuncMap {
 		semver.FuncMap(),
 		sql.FuncMap(),
 		url.FuncMap(),
+		markdown.FuncMap(),
 	)
 
 	funcs := make([]string, 0, len(out)+1)
