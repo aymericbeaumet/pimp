@@ -36,7 +36,11 @@ var DefaultCommand = &cli.Command{
 		args = util.FilterEmptyStrings(args)
 
 		for filename, data := range files {
-			if err := os.WriteFile(filename, []byte(data), 0400); err != nil {
+			f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0400)
+			if err != nil {
+				return err
+			}
+			if err := template.Render(f, data, c.String("ldelim"), c.String("rdelim"), funcmap); err != nil {
 				return err
 			}
 			if !c.Bool("keep") {
