@@ -16,6 +16,10 @@ patch: |
   git tag -a {{$version}} -m {{$version}}
   git push origin {{$version}}
 
+build: go build -o pimp .
+
+test: go test -v ./...
+
 test-examples: |
   #!/bin/sh
   for example in ./examples/*; do
