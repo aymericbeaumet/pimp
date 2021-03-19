@@ -16,4 +16,21 @@ patch: |
   git tag -a {{$version}} -m {{$version}}
   git push origin {{$version}}
 
+test-examples: |
+  #!/bin/sh
+  for example in ./examples/*; do
+    [ -x "$example" ] || continue
+    out="$("$example")"
+    if [ "$?" != '0' ]; then
+      echo "❌ $example: unexpected status code $?"
+      exit 1
+    fi
+    expected="$(cat "$example.expected")"
+    if [ "$out" != "$expected" ]; then
+      echo "❌ $example: output differs from what's expected\n\n[[OUTPUT]]\n$out\n\n[[EXPECTED]]\n$expected"
+      exit 1
+    fi
+    echo "✅ $example"
+  done
+
 generate-readme: pimp --output={{GitRoot}}/readme.md --render {{GitRoot}}/docs/.readme.md.tmpl

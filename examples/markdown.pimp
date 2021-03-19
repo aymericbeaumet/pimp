@@ -1,0 +1,10 @@
+#!/usr/bin/env pimp --run
+
+$input := `
+# foobar
+
+- you have to do this
+- and this
+`
+
+MarkdownRender $input
