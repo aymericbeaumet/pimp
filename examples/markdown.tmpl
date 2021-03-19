@@ -1,0 +1,10 @@
+#!/usr/bin/env pimp --render
+
+{{- $input := `
+# foobar
+
+- you have to do this
+- and this
+` -}}
+
+{{- MarkdownRender $input -}}
