@@ -25,6 +25,7 @@ func FuncMap() template.FuncMap {
 		"exit":          Exit,
 		"fzf":           FZF,
 		"head":          Head,
+		"ls":            Ls,
 		"print":         Print,
 		"printf":        Printf,
 		"println":       Println,
@@ -54,4 +55,12 @@ func FuncMap() template.FuncMap {
 	}
 
 	return out
+}
+
+type File struct {
+	filename string
+}
+
+func (f File) String() string {
+	return f.filename
 }
