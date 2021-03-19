@@ -18,7 +18,9 @@ var sprigIgnore = map[string]struct{}{
 
 func FuncMap() template.FuncMap {
 	out := template.FuncMap{
+		"cat":           Cat,
 		"cd":            CD,
+		"echo":          Println,
 		"exec":          Exec,
 		"exit":          Exit,
 		"fzf":           FZF,
@@ -30,6 +32,7 @@ func FuncMap() template.FuncMap {
 		"reverse":       Reverse,
 		"sort":          Sort,
 		"tail":          Tail,
+		"tee":           Tee,
 		"toGo":          ToGo,
 		"toJSON":        ToJSON,
 		"toPrettyJSON":  ToPrettyJSON,
