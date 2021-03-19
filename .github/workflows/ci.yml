@@ -29,7 +29,10 @@ jobs:
           [ -z "$(git status --porcelain)" ] || exit 1
 
       - name: Run tests
-        run: go test -v ./...
+        run: pimp test
+
+      - name: Run examples
+        run: pimp test-examples
 
   lint:
     runs-on: ubuntu-latest
