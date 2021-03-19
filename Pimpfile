@@ -25,7 +25,7 @@ test-examples: |
   for example in ./examples/*; do
     [ -x "$example" ] || continue
     out="$("$example")"
-    if [ "$?" != '0' ]; then
+    if [ $? -ne 0 ]; then
       echo "❌ $example: unexpected status code $?"
       exit 1
     fi
