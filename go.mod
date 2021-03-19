@@ -24,6 +24,7 @@ require (
 	github.com/sebdah/markdown-toc v0.0.0-20171116085747-3bb461875c34
 	github.com/sijms/go-ora v0.0.0-20210313181832-b64036f0a8e4
 	github.com/urfave/cli/v2 v2.3.0
+	github.com/yuin/goldmark v1.2.1
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.20.4
 	k8s.io/apimachinery v0.20.4
