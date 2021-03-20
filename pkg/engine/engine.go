@@ -2,7 +2,6 @@ package engine
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -136,20 +135,21 @@ func parseEnvArgs(input interface{}) ([]string, []string, map[string]string, err
 		}
 
 	case string:
-		// multiline script (with shebang)
+		// multiline script
 		if newLineIndex := strings.IndexRune(input, '\n'); newLineIndex > -1 {
-			if !strings.HasPrefix(input, SHEBANG) {
-				return nil, nil, nil, errors.New("invalid shebang")
-			}
-
 			filename := filepath.Join(os.TempDir(), fmt.Sprintf("pimp-%d", time.Now().UTC().UnixNano()))
 
-			s, ph := doPlaceholders(input[len(SHEBANG):newLineIndex])
-			args, err = shellwords.Parse(s)
-			if err != nil {
-				return nil, nil, nil, err
+			// with shebang
+			if strings.HasPrefix(input, SHEBANG) {
+				shebang, ph := doPlaceholders(input[len(SHEBANG):newLineIndex])
+				shebangArgs, err := shellwords.Parse(shebang)
+				if err != nil {
+					return nil, nil, nil, err
+				}
+				args = append(undoPlaceholders(shebangArgs, ph), filename)
+			} else {
+				args = append(args, "pimp", "--run", filename)
 			}
-			args = append(undoPlaceholders(args, ph), filename)
 
 			files = map[string]string{}
 			files[filename] = input
