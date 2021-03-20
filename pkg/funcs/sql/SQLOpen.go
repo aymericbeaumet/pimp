@@ -6,7 +6,6 @@ import (
 	// https://github.com/golang/go/wiki/SQLDrivers
 	_ "github.com/go-sql-driver/mysql" // mysql driver
 	_ "github.com/lib/pq"              // postgres driver
-	_ "github.com/sijms/go-ora"        // oracle driver
 	_ "modernc.org/sqlite"             // sqlite driver
 )
 
