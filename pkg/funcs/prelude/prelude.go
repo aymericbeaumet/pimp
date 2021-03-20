@@ -26,6 +26,7 @@ func FuncMap() template.FuncMap {
 		"fzf":           FZF,
 		"head":          Head,
 		"ls":            Ls,
+		"mkdir":         Mkdir,
 		"print":         Print,
 		"printf":        Printf,
 		"println":       Println,
@@ -44,6 +45,7 @@ func FuncMap() template.FuncMap {
 		"toTOML":        ToTOML,
 		"toXML":         ToXML,
 		"toYAML":        ToYAML,
+		"touch":         Touch,
 		"typeOf":        TypeOf,
 	}
 
@@ -63,4 +65,12 @@ type File struct {
 
 func (f File) String() string {
 	return f.filename
+}
+
+type Directory struct {
+	dirname string
+}
+
+func (d Directory) String() string {
+	return d.dirname
 }
