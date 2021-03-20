@@ -20,6 +20,9 @@ build: go build -o pimp .
 
 test: go test -v ./...
 
+test-lint:
+  golangci-lint run
+
 test-examples: |
   #!/bin/sh
   for example in ./examples/*; do

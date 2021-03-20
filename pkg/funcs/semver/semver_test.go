@@ -8,9 +8,9 @@ import (
 
 func TestEmpty(t *testing.T) {
 	tt := []func(input interface{}) (*semver.Version, error){
-		semver.SemverMajor,
-		semver.SemverMinor,
-		semver.SemverPatch,
+		semver.Major,
+		semver.Minor,
+		semver.Patch,
 	}
 
 	for _, fn := range tt {
@@ -24,9 +24,9 @@ func TestEmpty(t *testing.T) {
 func TestBump(t *testing.T) {
 	const input = "0.0.0"
 	tt := map[string]func(input interface{}) (*semver.Version, error){
-		"1.0.0": semver.SemverMajor,
-		"0.1.0": semver.SemverMinor,
-		"0.0.1": semver.SemverPatch,
+		"1.0.0": semver.Major,
+		"0.1.0": semver.Minor,
+		"0.0.1": semver.Patch,
 	}
 
 	for expected, fn := range tt {
@@ -43,9 +43,9 @@ func TestBump(t *testing.T) {
 func TestBumpKeepVPrefix(t *testing.T) {
 	const input = "v0.0.0"
 	tt := map[string]func(input interface{}) (*semver.Version, error){
-		"v1.0.0": semver.SemverMajor,
-		"v0.1.0": semver.SemverMinor,
-		"v0.0.1": semver.SemverPatch,
+		"v1.0.0": semver.Major,
+		"v0.1.0": semver.Minor,
+		"v0.0.1": semver.Patch,
 	}
 
 	for expected, fn := range tt {
@@ -62,9 +62,9 @@ func TestBumpKeepVPrefix(t *testing.T) {
 func TestBumpKeepArbitraryPrefix(t *testing.T) {
 	const input = "foobar 0.0.0"
 	tt := map[string]func(input interface{}) (*semver.Version, error){
-		"foobar 1.0.0": semver.SemverMajor,
-		"foobar 0.1.0": semver.SemverMinor,
-		"foobar 0.0.1": semver.SemverPatch,
+		"foobar 1.0.0": semver.Major,
+		"foobar 0.1.0": semver.Minor,
+		"foobar 0.0.1": semver.Patch,
 	}
 
 	for expected, fn := range tt {
@@ -86,9 +86,9 @@ func TestUnsortedStringSlice(t *testing.T) {
 		"2.0.0",
 	}
 	tt := map[string]func(input interface{}) (*semver.Version, error){
-		"4.0.0": semver.SemverMajor,
-		"3.1.0": semver.SemverMinor,
-		"3.0.1": semver.SemverPatch,
+		"4.0.0": semver.Major,
+		"3.1.0": semver.Minor,
+		"3.0.1": semver.Patch,
 	}
 
 	for expected, fn := range tt {
