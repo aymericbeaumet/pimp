@@ -13,6 +13,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/aymericbeaumet/pimp/pkg/funcs/assert"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/git"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/http"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/kubernetes"
