@@ -9,7 +9,7 @@ import (
 	"github.com/blang/semver/v4"
 )
 
-func SemverLatest(input interface{}) (*Version, error) {
+func Latest(input interface{}) (*Version, error) {
 	var versions []Version
 
 	switch i := input.(type) {

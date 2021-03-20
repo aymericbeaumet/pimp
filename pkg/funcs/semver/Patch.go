@@ -1,7 +1,7 @@
 package semver
 
-func SemverPatch(input interface{}) (*Version, error) {
-	v, err := SemverLatest(input)
+func Patch(input interface{}) (*Version, error) {
+	v, err := Latest(input)
 	if err != nil {
 		return nil, err
 	}

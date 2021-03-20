@@ -1,7 +1,7 @@
 package semver
 
-func SemverMinor(input interface{}) (*Version, error) {
-	v, err := SemverLatest(input)
+func Minor(input interface{}) (*Version, error) {
+	v, err := Latest(input)
 	if err != nil {
 		return nil, err
 	}

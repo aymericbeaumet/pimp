@@ -10,11 +10,11 @@ import (
 
 func FuncMap() template.FuncMap {
 	return template.FuncMap{
-		"SemverLatest": SemverLatest,
-		"SemverMajor":  SemverMajor,
-		"SemverMinor":  SemverMinor,
-		"SemverParse":  SemverParse,
-		"SemverPatch":  SemverPatch,
+		"SemverLatest": Latest,
+		"SemverMajor":  Major,
+		"SemverMinor":  Minor,
+		"SemverParse":  Parse,
+		"SemverPatch":  Patch,
 	}
 }
 
