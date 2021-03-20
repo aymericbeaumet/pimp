@@ -10,7 +10,7 @@ var shellCommand = &cli.Command{
 	Name:  "--shell",
 	Usage: "Print the shell config (aliases only)",
 	Action: func(c *cli.Context) error {
-		eng, err := initializeEngine(c, true, false)
+		eng, err := initializeEngine(c)
 		if err != nil {
 			return err
 		}

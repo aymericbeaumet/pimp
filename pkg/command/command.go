@@ -37,58 +37,36 @@ func CommandsFlags() []cli.Flag {
 	return out
 }
 
-func initializeEngine(c *cli.Context, loadConfig, loadPimpfile bool) (*engine.Engine, error) {
+func initializeEngine(c *cli.Context) (*engine.Engine, error) {
 	eng := engine.New()
 
-	type source struct{ flagName, fallback string }
-	sources := []*source{}
-	if loadPimpfile {
-		sources = append(sources, &source{
-			flagName: "file",
-			fallback: "./Pimpfile",
-		})
-	}
-	if loadConfig {
-		sources = append(sources, &source{
-			flagName: "config",
-			fallback: "~/.pimprc",
-		})
+	allowErrNotExist := false
+	pimpfiles := c.StringSlice("file")
+	if len(pimpfiles) == 0 {
+		allowErrNotExist = true
+		pimpfiles = []string{"./Pimpfile.go", "./Pimpfile"}
 	}
 
-	for _, s := range sources {
-		file, err := openWithFallback(c.String(s.flagName), s.fallback)
+	for _, pimpfile := range pimpfiles {
+		normalized, err := util.NormalizePath(pimpfile)
 		if err != nil {
 			return nil, err
 		}
+
+		file, err := os.Open(normalized)
+		if err != nil && !(errors.Is(err, fs.ErrNotExist) && allowErrNotExist) {
+			return nil, err
+		}
+
 		if file != nil {
 			defer file.Close()
-			if err := eng.Append(file); err != nil {
+			if err := eng.LoadPimpfile(file); err != nil {
 				return nil, err
 			}
 		}
 	}
 
 	return eng, nil
-}
-
-func openWithFallback(filename, fallback string) (*os.File, error) {
-	allowErrNotExist := false
-
-	if len(filename) == 0 && len(fallback) > 0 {
-		allowErrNotExist = true
-		filename = fallback
-	}
-
-	filename, err := util.NormalizePath(filename)
-	if err != nil {
-		return nil, err
-	}
-
-	f, err := os.Open(filename)
-	if err != nil && errors.Is(err, fs.ErrNotExist) && allowErrNotExist {
-		return nil, nil
-	}
-	return f, err
 }
 
 func getFlagUsage(flag cli.Flag) string {
@@ -105,11 +83,21 @@ func getFlagUsage(flag cli.Flag) string {
 }
 
 func isFlagTakesFile(flag cli.Flag) bool {
-	f, ok := flag.(*cli.StringFlag)
-	return ok && f.TakesFile
+	switch f := flag.(type) {
+	case *cli.StringFlag:
+		return f.TakesFile
+	case *cli.StringSliceFlag:
+		return f.TakesFile
+	default:
+		return false
+	}
 }
 
 func isFlagAllowedMultipleTimes(flag cli.Flag) bool {
-	_, ok := flag.(*cli.StringSliceFlag)
-	return ok
+	switch flag.(type) {
+	case (*cli.StringSliceFlag):
+		return true
+	default:
+		return false
+	}
 }

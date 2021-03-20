@@ -61,7 +61,7 @@ Project homepage: {{index .Metadata "website"}}
 
 USAGE:
     pimp [OPTION]... COMMAND [ARG]...{{"\t"}}Match COMMAND and ARGS, expand, then execute
-                                     {{"\t"}}(priority: pimpfile, configuration file, $PATH commands)
+                                     {{"\t"}}(resolution order: Pimpfiles, $PATH commands)
 {{- range .VisibleCommands}}
 {{- if not .HideHelp}}
     pimp [OPTION]... {{.Name}} {{.ArgsUsage}}{{"\t"}}{{.Usage}}
@@ -84,29 +84,22 @@ EXAMPLES:
         $ ` + colorExample(`pimp echo 'Hello, World!'`) + `
         Hello, World!
 
-    Let's make it a little bit more interesting by adding some mappings to the
-    ~/.pimprc configuration file. Pimp stops after the first match is found.
-    Note how "..." enables us to catch variadic arguments which are
-    automatically appended during the expansion process.
+    Let's make it a little bit more interesting by adding some mappings to a
+    Pimpfile. Pimp stops as soon as a match is found. Note how "..." enables us
+    to catch variadic arguments which are automatically appended during the
+    expansion process.
 
-        $ ` + colorExample(`cat ~/.pimprc`) + `
+        $ ` + colorExample(`cat ./Pimpfile`) + `
         git co     : git checkout {{"{{GitLocalBranches | FZF}}"}}
         git co ... : git checkout
         $ ` + colorExample(`pimp git co`) + `{{"\t"}}# executes "git checkout <branch>" with the branch name chosen in fzf
         $ ` + colorExample(`pimp git co master`) + `{{"\t"}}# executes "git checkout master" ("master" is from the "...")
 
-    To make this more convenient, you can execute all the "git" calls through
-    the pimp binary with a shell alias.
-
-        $ ` + colorExample(`alias git='pimp git'`) + `
-        $ ` + colorExample(`git co`) + `{{"\t"}}# same as in the previous example
-        $ ` + colorExample(`git co master`) + `{{"\t"}}# same as in the previous example
-
     You can also leverage the pimp templating system to render arbitrary files.
 
         $ ` + colorExample(`pimp -o readme.md --render readme.md.tmpl`) + `{{"\t"}}# Overwrite the readme with the rendered template
 
-    See the project homepage for more advanced examples.
+    See the project homepage and documentation for more advanced examples.
 `
 
 	app.Before = func(c *cli.Context) error {
@@ -211,17 +204,10 @@ EXAMPLES:
 			Usage: "Append to the --output file instead of truncating",
 		},
 
-		&cli.StringFlag{
-			Name:      "config",
-			Aliases:   []string{"c"},
-			EnvVars:   []string{"PIMP_CONFIG"},
-			Usage:     "Load this configuration `FILE` (default: ~/.pimprc)",
-			TakesFile: true,
-		},
-
 		&cli.StringSliceFlag{
-			Name:  "env",
-			Usage: "Define env variables in the form `KEY=VALUE` (allowed multiple times)",
+			Name:    "env",
+			Aliases: []string{"e"},
+			Usage:   "Define one or more environment variables in the form `KEY=VALUE`",
 		},
 
 		&cli.BoolFlag{
@@ -229,11 +215,10 @@ EXAMPLES:
 			Usage: "Expand and print the command without executing",
 		},
 
-		&cli.StringFlag{
+		&cli.StringSliceFlag{
 			Name:      "file",
 			Aliases:   []string{"f"},
-			EnvVars:   []string{"PIMP_FILE"},
-			Usage:     "Load this pimpfile `FILE` (default: ./Pimpfile)",
+			Usage:     "Load one or more `PIMPFILE`S, bypassing the default resolution mecanism",
 			TakesFile: true,
 		},
 
@@ -255,7 +240,7 @@ EXAMPLES:
 
 		&cli.StringFlag{
 			Name:  "ldelim",
-			Usage: "Left template delimiter",
+			Usage: "Define the left template delimiter",
 			Value: "{{",
 		},
 
@@ -268,7 +253,7 @@ EXAMPLES:
 
 		&cli.StringFlag{
 			Name:  "rdelim",
-			Usage: "Right template delimiter",
+			Usage: "Define the right template delimiter",
 			Value: "}}",
 		},
 	)

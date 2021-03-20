@@ -14,22 +14,27 @@ var zshCommand = &cli.Command{
 	Name:  "--zsh",
 	Usage: "Print the Zsh config (aliases and completion)",
 	Action: func(c *cli.Context) error {
-		eng, err := initializeEngine(c, true, false)
+		eng, err := initializeEngine(c)
 		if err != nil {
 			return err
 		}
 
-		for _, command := range eng.Commands() {
-			fmt.Fprintf(c.App.Writer, "alias %#v=%#v\n", command, "pimp "+command)
+		var args strings.Builder
+		for _, file := range c.StringSlice("file") {
+			args.Write([]byte(fmt.Sprintf(" -f %#v", file)))
 		}
 
-		fmt.Fprintln(c.App.Writer, `
+		for _, command := range eng.Commands() {
+			fmt.Fprintf(c.App.Writer, "alias %#v=%#v\n", command, "pimp"+args.String()+" "+command)
+		}
+
+		fmt.Fprintf(c.App.Writer, `
 _pimp() {
-  eval "$(pimp --zsh-completion -- "${words[@]}")"
+  eval "$(pimp%s --zsh-completion -- "${words[@]}")"
 }
 
 compdef _pimp pimp
-    `)
+`, args.String())
 
 		return nil
 	},
@@ -44,7 +49,7 @@ var zshCompletionCommand = &cli.Command{
 	Name:   "--zsh-completion",
 	Hidden: true,
 	Action: func(c *cli.Context) error {
-		eng, err := initializeEngine(c, true, true)
+		eng, err := initializeEngine(c)
 		if err != nil {
 			return err
 		}

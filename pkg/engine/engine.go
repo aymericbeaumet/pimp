@@ -16,7 +16,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type Config yaml.MapSlice
+type Pimpfile yaml.MapSlice
 
 type Engine struct {
 	Mappings map[string][]*Mapping `json:"mappings"`
@@ -38,13 +38,13 @@ func New() *Engine {
 	}
 }
 
-func (eng *Engine) Append(r io.Reader) error {
-	var config Config
-	if err := yaml.NewDecoder(r).Decode(&config); err != nil {
+func (eng *Engine) LoadPimpfile(r io.Reader) error {
+	var pimpfile Pimpfile
+	if err := yaml.NewDecoder(r).Decode(&pimpfile); err != nil {
 		return err
 	}
 
-	for _, item := range config {
+	for _, item := range pimpfile {
 		pattern, err := shellwords.Parse(item.Key.(string))
 		if err != nil {
 			return err
