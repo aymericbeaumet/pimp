@@ -8,7 +8,7 @@ import (
 
 func FuncMap() template.FuncMap {
 	return template.FuncMap{
-		"SQLOpen": SQLOpen,
+		"SQLOpen": Open,
 	}
 }
 

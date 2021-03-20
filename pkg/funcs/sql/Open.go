@@ -11,7 +11,7 @@ import (
 
 // SQLOpen creates a new connection to an SQL database:
 //   - SQLite: (SQLOpen "sqlite" "/tmp/pimp.db").Query "..."
-func SQLOpen(driverName, dataSourceName string) (*Database, error) {
+func Open(driverName, dataSourceName string) (*Database, error) {
 	db, err := sql.Open(driverName, dataSourceName)
 	if err != nil {
 		return nil, err
