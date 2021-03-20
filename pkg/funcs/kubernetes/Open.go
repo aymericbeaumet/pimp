@@ -5,7 +5,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-func KubernetesOpen() (*Client, error) {
+func Open() (*Client, error) {
 	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 		clientcmd.NewDefaultClientConfigLoadingRules(),
 		&clientcmd.ConfigOverrides{},

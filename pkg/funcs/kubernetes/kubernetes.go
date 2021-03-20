@@ -13,9 +13,9 @@ import (
 
 func FuncMap() template.FuncMap {
 	return template.FuncMap{
-		"KubernetesContexts":   KubernetesContexts,
-		"KubernetesOpen":       KubernetesOpen,
-		"KubernetesNamespaces": KubernetesNamespaces,
+		"KubernetesContexts":   Contexts,
+		"KubernetesOpen":       Open,
+		"KubernetesNamespaces": Namespaces,
 	}
 }
 

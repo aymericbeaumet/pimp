@@ -1,7 +1,7 @@
 package kubernetes
 
-func KubernetesNamespaces() ([]*Namespace, error) {
-	k, err := KubernetesOpen()
+func Namespaces() ([]*Namespace, error) {
+	k, err := Open()
 	if err != nil {
 		return nil, err
 	}

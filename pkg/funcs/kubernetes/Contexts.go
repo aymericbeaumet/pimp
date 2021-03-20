@@ -1,7 +1,7 @@
 package kubernetes
 
-func KubernetesContexts() ([]*Context, error) {
-	k, err := KubernetesOpen()
+func Contexts() ([]*Context, error) {
+	k, err := Open()
 	if err != nil {
 		return nil, err
 	}
