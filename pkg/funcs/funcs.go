@@ -15,6 +15,7 @@ import (
 
 	"github.com/aymericbeaumet/pimp/pkg/funcs/assert"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/csv"
+	"github.com/aymericbeaumet/pimp/pkg/funcs/emoji"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/git"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/http"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/kubernetes"
@@ -31,14 +32,15 @@ func FuncMap() template.FuncMap {
 	out := merge(
 		assert.FuncMap(),
 		csv.FuncMap(),
+		emoji.FuncMap(),
 		git.FuncMap(),
 		http.FuncMap(),
 		kubernetes.FuncMap(),
+		markdown.FuncMap(),
 		prelude.FuncMap(),
 		semver.FuncMap(),
 		sql.FuncMap(),
 		url.FuncMap(),
-		markdown.FuncMap(),
 	)
 
 	funcs := make([]string, 0, len(out)+1)

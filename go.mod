@@ -14,6 +14,7 @@ require (
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
+	github.com/kyokomi/emoji/v2 v2.2.8
 	github.com/lib/pq v1.10.0
 	github.com/mattn/go-isatty v0.0.12
 	github.com/mattn/go-shellwords v1.0.11
