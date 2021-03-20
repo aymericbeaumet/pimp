@@ -14,6 +14,7 @@ import (
 	"text/template"
 
 	"github.com/aymericbeaumet/pimp/pkg/funcs/assert"
+	"github.com/aymericbeaumet/pimp/pkg/funcs/csv"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/git"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/http"
 	"github.com/aymericbeaumet/pimp/pkg/funcs/kubernetes"
@@ -29,6 +30,7 @@ import (
 func FuncMap() template.FuncMap {
 	out := merge(
 		assert.FuncMap(),
+		csv.FuncMap(),
 		git.FuncMap(),
 		http.FuncMap(),
 		kubernetes.FuncMap(),
