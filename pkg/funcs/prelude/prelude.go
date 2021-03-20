@@ -32,6 +32,7 @@ func FuncMap() template.FuncMap {
 		"pwd":           PWD,
 		"reverse":       Reverse,
 		"sort":          Sort,
+		"stdin":         Stdin,
 		"tail":          Tail,
 		"tee":           Tee,
 		"toGo":          ToGo,
