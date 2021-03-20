@@ -58,7 +58,7 @@ var zshCompletionCommand = &cli.Command{
 
 		// If a CMD is detected, delegate to the appropriate completion function
 		if len(cmdargs) > 1 {
-			_, expandedArgs, _ := eng.Map(nil, cmdargs)
+			_, expandedArgs, _, _ := eng.Map(nil, cmdargs)
 
 			if len(expandedArgs[len(expandedArgs)-1]) != 0 && len(args[len(args)-1]) == 0 {
 				expandedArgs = append(expandedArgs, "")

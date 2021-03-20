@@ -21,7 +21,7 @@ var DefaultCommand = &cli.Command{
 			return err
 		}
 
-		env, args, files := eng.Map(os.Environ(), c.Args().Slice())
+		env, args, files, cwd := eng.Map(os.Environ(), c.Args().Slice())
 		if len(args) == 0 {
 			if len(c.String("input")) == 0 && !isatty.IsTerminal(os.Stdin.Fd()) {
 				return runCommand.Action(c)
@@ -60,6 +60,7 @@ var DefaultCommand = &cli.Command{
 		}
 
 		cmd := exec.CommandContext(c.Context, args[0], args[1:]...)
+		cmd.Dir = cwd
 		cmd.Env = env
 		cmd.Stdin = c.App.Reader
 		cmd.Stdout = c.App.Writer

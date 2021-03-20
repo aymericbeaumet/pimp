@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aymericbeaumet/pimp/pkg/util"
 	"github.com/mattn/go-shellwords"
 	"gopkg.in/yaml.v2"
 )
@@ -26,6 +27,7 @@ type Engine struct {
 }
 
 type Mapping struct {
+	CWD     string            `json:"cwd,omitempty"`
 	Pattern []string          `json:"pattern"`
 	Env     []string          `json:"env,omitempty"`
 	Args    []string          `json:"args"`
@@ -38,9 +40,20 @@ func New() *Engine {
 	}
 }
 
-func (eng *Engine) LoadPimpfile(r io.Reader) error {
+func (eng *Engine) LoadPimpfile(filename string, setCWD bool) error {
+	normalized, err := util.NormalizePath(filename)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Open(normalized)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
 	var pimpfile Pimpfile
-	if err := yaml.NewDecoder(r).Decode(&pimpfile); err != nil {
+	if err := yaml.NewDecoder(f).Decode(&pimpfile); err != nil {
 		return err
 	}
 
@@ -55,7 +68,13 @@ func (eng *Engine) LoadPimpfile(r io.Reader) error {
 			return err
 		}
 
+		var cwd string
+		if setCWD {
+			cwd = filepath.Dir(normalized)
+		}
+
 		eng.Mappings[pattern[0]] = append(eng.Mappings[pattern[0]], &Mapping{
+			CWD:     cwd,
 			Pattern: pattern,
 			Env:     env,
 			Args:    args,
@@ -66,14 +85,14 @@ func (eng *Engine) LoadPimpfile(r io.Reader) error {
 	return nil
 }
 
-func (eng *Engine) Map(env []string, args []string) ([]string, []string, map[string]string) {
+func (eng *Engine) Map(env []string, args []string) ([]string, []string, map[string]string, string) {
 	if len(args) == 0 {
-		return env, args, nil
+		return env, args, nil, ""
 	}
 
 	mappings, ok := eng.Mappings[args[0]]
 	if !ok {
-		return env, args, nil
+		return env, args, nil, ""
 	}
 
 	for _, mapping := range mappings {
@@ -84,16 +103,16 @@ func (eng *Engine) Map(env []string, args []string) ([]string, []string, map[str
 				lim = len(args)
 			}
 			if reflect.DeepEqual(pattern, args[:lim]) {
-				return append(env[:], mapping.Env...), append(mapping.Args[:], args[lim:]...), mapping.Files
+				return append(env[:], mapping.Env...), append(mapping.Args[:], args[lim:]...), mapping.Files, mapping.CWD
 			}
 		}
 
 		if reflect.DeepEqual(mapping.Pattern, args) {
-			return append(env[:], mapping.Env...), mapping.Args, mapping.Files
+			return append(env[:], mapping.Env...), mapping.Args, mapping.Files, mapping.CWD
 		}
 	}
 
-	return env, args, nil
+	return env, args, nil, ""
 }
 
 func (eng *Engine) JSON(w io.Writer) error {

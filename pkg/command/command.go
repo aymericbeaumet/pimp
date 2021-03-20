@@ -8,7 +8,6 @@ import (
 
 	"github.com/aymericbeaumet/pimp/pkg/engine"
 	"github.com/aymericbeaumet/pimp/pkg/funcs"
-	"github.com/aymericbeaumet/pimp/pkg/util"
 	"github.com/urfave/cli/v2"
 )
 
@@ -40,9 +39,8 @@ func CommandsFlags() []cli.Flag {
 func initializeEngine(c *cli.Context) (*engine.Engine, error) {
 	eng := engine.New()
 
+	// Load the local Pimpfiles
 	var pimpfiles []string
-
-	// First load the local Pimpfiles
 	pimpfiles = append(pimpfiles, c.StringSlice("file")...)
 	if len(pimpfiles) == 0 { // if no Pimpfiles are defined, apply the default resolution mecanism
 		p, err := resolvePimpfiles()
@@ -51,22 +49,15 @@ func initializeEngine(c *cli.Context) (*engine.Engine, error) {
 		}
 		pimpfiles = p
 	}
-
-	// Add the global Pimpfiles (with lower priority)
-	pimpfiles = append(pimpfiles, c.StringSlice("global")...)
-
 	for _, pimpfile := range pimpfiles {
-		normalized, err := util.NormalizePath(pimpfile)
-		if err != nil {
+		if err := eng.LoadPimpfile(pimpfile, true); err != nil {
 			return nil, err
 		}
+	}
 
-		file, err := os.Open(normalized)
-		if err != nil {
-			return nil, err
-		}
-		defer file.Close()
-		if err := eng.LoadPimpfile(file); err != nil {
+	// Load the global Pimpfiles (with lower priority)
+	for _, pimpfile := range c.StringSlice("global") {
+		if err := eng.LoadPimpfile(pimpfile, false); err != nil {
 			return nil, err
 		}
 	}
