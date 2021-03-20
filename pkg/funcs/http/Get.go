@@ -8,17 +8,17 @@ import (
 	"time"
 )
 
-type HTTPGetRet struct {
+type GetRet struct {
 	StatusCode int         `json:"status_code"`
 	Header     http.Header `json:"header"`
 	Payload    string      `json:"payload"`
 }
 
-func (out HTTPGetRet) String() string {
+func (out GetRet) String() string {
 	return out.Payload
 }
 
-func HTTPGet(url string) (*HTTPGetRet, error) {
+func Get(url string) (*GetRet, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -42,7 +42,7 @@ func HTTPGet(url string) (*HTTPGetRet, error) {
 		return nil, err
 	}
 
-	return &HTTPGetRet{
+	return &GetRet{
 		StatusCode: res.StatusCode,
 		Header:     res.Header,
 		Payload:    string(payload),

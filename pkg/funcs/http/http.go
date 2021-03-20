@@ -10,6 +10,6 @@ var httpClient http.Client
 
 func FuncMap() template.FuncMap {
 	return template.FuncMap{
-		"HTTPGet": HTTPGet,
+		"HTTPGet": Get,
 	}
 }
