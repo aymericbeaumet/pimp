@@ -27,6 +27,7 @@ import (
 // to the individual packages to read more about all the available functions.
 func FuncMap() template.FuncMap {
 	out := merge(
+		assert.FuncMap(),
 		git.FuncMap(),
 		http.FuncMap(),
 		kubernetes.FuncMap(),
