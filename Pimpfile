@@ -18,7 +18,7 @@ patch: |
 
 build: go build -o pimp .
 
-test: go test -v ./...
+test-go: go test -v ./...
 
 test-lint:
   golangci-lint run

@@ -28,8 +28,8 @@ jobs:
           pimp generate-readme
           [ -z "$(git status --porcelain)" ] || exit 1
 
-      - name: Run tests
-        run: pimp test
+      - name: Run Go tests
+        run: pimp test-go
 
       - name: Run examples
         run: pimp test-examples
