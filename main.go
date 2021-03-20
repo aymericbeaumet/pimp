@@ -241,6 +241,12 @@ EXAMPLES:
 			Usage: "Fail if the output differs from the --output file",
 		},
 
+		&cli.StringSliceFlag{
+			Name:      "global",
+			Usage:     "Load one or more `PIMPFILE`S to make their commands available globally",
+			TakesFile: true,
+		},
+
 		&cli.StringFlag{
 			Name:      "input",
 			Usage:     "Read the input from `FILE` instead of stdin",

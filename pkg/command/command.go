@@ -40,16 +40,20 @@ func CommandsFlags() []cli.Flag {
 func initializeEngine(c *cli.Context) (*engine.Engine, error) {
 	eng := engine.New()
 
-	pimpfiles := c.StringSlice("file")
+	var pimpfiles []string
 
-	// if no Pimpfiles are defined, apply the default resolution mecanism
-	if len(pimpfiles) == 0 {
+	// First load the local Pimpfiles
+	pimpfiles = append(pimpfiles, c.StringSlice("file")...)
+	if len(pimpfiles) == 0 { // if no Pimpfiles are defined, apply the default resolution mecanism
 		p, err := resolvePimpfiles()
 		if err != nil {
 			return nil, err
 		}
 		pimpfiles = p
 	}
+
+	// Add the global Pimpfiles (with lower priority)
+	pimpfiles = append(pimpfiles, c.StringSlice("global")...)
 
 	for _, pimpfile := range pimpfiles {
 		normalized, err := util.NormalizePath(pimpfile)
@@ -152,6 +156,11 @@ func isFlagAllowedMultipleTimes(flag cli.Flag) bool {
 
 func printAliases(c *cli.Context, eng *engine.Engine) (string, error) {
 	var flags strings.Builder
+
+	for _, global := range c.StringSlice("global") {
+		flags.Write([]byte(fmt.Sprintf(" --global %#v", global)))
+	}
+
 	for _, file := range c.StringSlice("file") {
 		flags.Write([]byte(fmt.Sprintf(" -f %#v", file)))
 	}
