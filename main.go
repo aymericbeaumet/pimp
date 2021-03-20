@@ -104,14 +104,28 @@ EXAMPLES:
 
 	app.Before = func(c *cli.Context) error {
 		for _, flag := range c.App.Flags {
-			if flag, ok := flag.(*cli.StringFlag); ok && flag.TakesFile {
-				if value := c.String(flag.Name); len(value) > 0 {
-					normalized, err := util.NormalizePath(value)
-					if err != nil {
-						return fmt.Errorf("error when normalizing `%s` flag: %w", flag.Name, err)
+			switch flag := flag.(type) {
+			case *cli.StringFlag:
+				if flag.TakesFile {
+					if value := c.String(flag.Name); len(value) > 0 {
+						normalized, err := util.NormalizePath(value)
+						if err != nil {
+							return fmt.Errorf("error when normalizing `%s` flag: %w", flag.Name, err)
+						}
+						if err := c.Set(flag.Name, normalized); err != nil {
+							return fmt.Errorf("error when setting `%s` flag: %w", flag.Name, err)
+						}
 					}
-					if err := c.Set(flag.Name, normalized); err != nil {
-						return fmt.Errorf("error when setting `%s` flag: %w", flag.Name, err)
+				}
+			case *cli.StringSliceFlag:
+				if flag.TakesFile {
+					values := c.StringSlice(flag.Name)
+					for i := range values {
+						normalized, err := util.NormalizePath(values[i])
+						if err != nil {
+							return fmt.Errorf("error when normalizing `%s` flag: %w", flag.Name, err)
+						}
+						values[i] = normalized
 					}
 				}
 			}

@@ -1,9 +1,9 @@
 package command
 
 import (
-	"errors"
-	"io/fs"
+	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/aymericbeaumet/pimp/pkg/engine"
@@ -40,11 +40,15 @@ func CommandsFlags() []cli.Flag {
 func initializeEngine(c *cli.Context) (*engine.Engine, error) {
 	eng := engine.New()
 
-	allowErrNotExist := false
 	pimpfiles := c.StringSlice("file")
+
+	// if no Pimpfiles are defined, apply the default resolution mecanism
 	if len(pimpfiles) == 0 {
-		allowErrNotExist = true
-		pimpfiles = []string{"./Pimpfile.go", "./Pimpfile"}
+		p, err := resolvePimpfiles()
+		if err != nil {
+			return nil, err
+		}
+		pimpfiles = p
 	}
 
 	for _, pimpfile := range pimpfiles {
@@ -54,19 +58,63 @@ func initializeEngine(c *cli.Context) (*engine.Engine, error) {
 		}
 
 		file, err := os.Open(normalized)
-		if err != nil && !(errors.Is(err, fs.ErrNotExist) && allowErrNotExist) {
+		if err != nil {
 			return nil, err
 		}
-
-		if file != nil {
-			defer file.Close()
-			if err := eng.LoadPimpfile(file); err != nil {
-				return nil, err
-			}
+		defer file.Close()
+		if err := eng.LoadPimpfile(file); err != nil {
+			return nil, err
 		}
 	}
 
 	return eng, nil
+}
+
+var pimpfileCandidates = []string{"Pimpfile.go", "Pimpfile"}
+var rootMarkers = []string{".git"}
+
+func resolvePimpfiles() ([]string, error) {
+	var out []string
+
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	for {
+		// try to find as many pimpfiles as possible
+		for _, candidate := range pimpfileCandidates {
+			name := filepath.Join(currentDir, candidate)
+			if s, err := os.Stat(name); err == nil && !s.IsDir() {
+				out = append(out, name)
+			}
+		}
+
+		// stop here if a root marker is found
+		for _, rootMarker := range rootMarkers {
+			dirname := filepath.Join(currentDir, rootMarker)
+			if s, err := os.Stat(dirname); err == nil && s.IsDir() {
+				return out, nil
+			}
+		}
+
+		// we should not reach the root, discard everything found if that's the case
+		if len(strings.TrimRight(currentDir, "/")) == 0 {
+			break
+		}
+
+		// move up to the parent directory
+		currentDir = filepath.Dir(currentDir)
+	}
+
+	out = []string{}
+	for _, candidate := range pimpfileCandidates {
+		name := filepath.Join(currentDir, candidate)
+		if s, err := os.Stat(name); err == nil && !s.IsDir() {
+			out = append(out, name)
+		}
+	}
+	return out, nil
 }
 
 func getFlagUsage(flag cli.Flag) string {
@@ -100,4 +148,17 @@ func isFlagAllowedMultipleTimes(flag cli.Flag) bool {
 	default:
 		return false
 	}
+}
+
+func printAliases(c *cli.Context, eng *engine.Engine) (string, error) {
+	var flags strings.Builder
+	for _, file := range c.StringSlice("file") {
+		flags.Write([]byte(fmt.Sprintf(" -f %#v", file)))
+	}
+
+	for _, command := range eng.Commands() {
+		fmt.Fprintf(c.App.Writer, "alias %#v=%#v\n", command, "pimp"+flags.String()+" "+command)
+	}
+
+	return flags.String(), nil
 }

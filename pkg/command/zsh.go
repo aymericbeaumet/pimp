@@ -19,13 +19,9 @@ var zshCommand = &cli.Command{
 			return err
 		}
 
-		var args strings.Builder
-		for _, file := range c.StringSlice("file") {
-			args.Write([]byte(fmt.Sprintf(" -f %#v", file)))
-		}
-
-		for _, command := range eng.Commands() {
-			fmt.Fprintf(c.App.Writer, "alias %#v=%#v\n", command, "pimp"+args.String()+" "+command)
+		flags, err := printAliases(c, eng)
+		if err != nil {
+			return err
 		}
 
 		fmt.Fprintf(c.App.Writer, `
@@ -34,7 +30,7 @@ _pimp() {
 }
 
 compdef _pimp pimp
-`, args.String())
+`, flags)
 
 		return nil
 	},
