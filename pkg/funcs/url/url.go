@@ -8,8 +8,8 @@ import (
 
 func FuncMap() template.FuncMap {
 	return template.FuncMap{
-		"URLParse":      URLParse,
-		"URLParseQuery": URLParseQuery,
+		"URLParse":      Parse,
+		"URLParseQuery": ParseQuery,
 	}
 }
 

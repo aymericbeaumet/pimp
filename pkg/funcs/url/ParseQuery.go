@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func URLParseQuery(input string) (*QueryString, error) {
+func ParseQuery(input string) (*QueryString, error) {
 	input = strings.TrimLeft(input, "?")
 	qs, err := url.ParseQuery(input)
 	if err != nil {
