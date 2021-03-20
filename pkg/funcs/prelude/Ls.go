@@ -2,13 +2,20 @@ package prelude
 
 import "os"
 
-func Ls() ([]*File, error) {
-	cwd, err := PWD()
-	if err != nil {
-		return nil, err
+func Ls(path ...string) ([]*File, error) {
+	var name string
+
+	if len(path) == 0 {
+		cwd, err := PWD()
+		if err != nil {
+			return nil, err
+		}
+		name = cwd
+	} else {
+		name = path[0]
 	}
 
-	files, err := os.ReadDir(cwd)
+	files, err := os.ReadDir(name)
 	if err != nil {
 		return nil, err
 	}
