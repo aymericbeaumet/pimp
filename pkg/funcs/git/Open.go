@@ -10,7 +10,7 @@ import (
 	"github.com/go-git/go-git/v5"
 )
 
-func GitOpen(segments ...string) (*Repository, error) {
+func Open(segments ...string) (*Repository, error) {
 	wd, err := os.Getwd()
 	if err != nil {
 		return nil, err

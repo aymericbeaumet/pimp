@@ -11,14 +11,14 @@ import (
 
 func FuncMap() template.FuncMap {
 	return template.FuncMap{
-		"GitBranches":       GitBranches,
-		"GitLocalBranches":  GitLocalBranches,
-		"GitOpen":           GitOpen,
-		"GitReferences":     GitReferences,
-		"GitRemoteBranches": GitRemoteBranches,
-		"GitRemotes":        GitRemotes,
-		"GitRoot":           GitRoot,
-		"GitTags":           GitTags,
+		"GitBranches":       Branches,
+		"GitLocalBranches":  LocalBranches,
+		"GitOpen":           Open,
+		"GitReferences":     References,
+		"GitRemoteBranches": RemoteBranches,
+		"GitRemotes":        Remotes,
+		"GitRoot":           Root,
+		"GitTags":           Tags,
 	}
 }
 

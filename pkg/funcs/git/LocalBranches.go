@@ -1,7 +1,7 @@
 package git
 
-func GitLocalBranches() ([]*Reference, error) {
-	repo, err := GitOpen()
+func LocalBranches() ([]*Reference, error) {
+	repo, err := Open()
 	if err != nil {
 		return nil, err
 	}

@@ -1,7 +1,7 @@
 package git
 
-func GitRemotes() ([]*Remote, error) {
-	repo, err := GitOpen()
+func Remotes() ([]*Remote, error) {
+	repo, err := Open()
 	if err != nil {
 		return nil, err
 	}

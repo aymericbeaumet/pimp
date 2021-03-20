@@ -1,7 +1,7 @@
 package git
 
-func GitRoot() (string, error) {
-	repo, err := GitOpen()
+func Root() (string, error) {
+	repo, err := Open()
 	if err != nil {
 		return "", err
 	}

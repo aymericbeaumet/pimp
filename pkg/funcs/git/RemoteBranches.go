@@ -1,7 +1,7 @@
 package git
 
-func GitRemoteBranches() ([]*Reference, error) {
-	repo, err := GitOpen()
+func RemoteBranches() ([]*Reference, error) {
+	repo, err := Open()
 	if err != nil {
 		return nil, err
 	}

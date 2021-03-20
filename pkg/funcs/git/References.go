@@ -1,7 +1,7 @@
 package git
 
-func GitReferences() ([]*Reference, error) {
-	repo, err := GitOpen()
+func References() ([]*Reference, error) {
+	repo, err := Open()
 	if err != nil {
 		return nil, err
 	}
