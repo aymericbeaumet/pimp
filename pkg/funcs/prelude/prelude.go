@@ -24,6 +24,7 @@ func FuncMap() template.FuncMap {
 		"exec":          Exec,
 		"exit":          Exit,
 		"fzf":           FZF,
+		"glob":          Glob,
 		"head":          Head,
 		"ls":            Ls,
 		"mkdir":         Mkdir,
