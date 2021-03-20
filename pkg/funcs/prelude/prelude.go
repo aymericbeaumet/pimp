@@ -27,6 +27,7 @@ func FuncMap() template.FuncMap {
 		"glob":          Glob,
 		"head":          Head,
 		"ls":            Ls,
+		"make":          Make,
 		"mkdir":         Mkdir,
 		"printf":        Printf,
 		"pwd":           PWD,
