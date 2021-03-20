@@ -9,7 +9,7 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 )
 
-func MarkdownRender(source string) (string, error) {
+func Render(source string) (string, error) {
 	md := goldmark.New(
 		goldmark.WithExtensions(extension.GFM),
 		goldmark.WithParserOptions(

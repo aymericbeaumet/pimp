@@ -1,5 +1,5 @@
 package markdown
 
-func MarkdownTOC() string {
+func TOC() string {
 	return "\x00MarkdownTOC\x00"
 }
