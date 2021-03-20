@@ -20,7 +20,7 @@ func FuncMap() template.FuncMap {
 	out := template.FuncMap{
 		"cat":           Cat,
 		"cd":            CD,
-		"echo":          Println,
+		"echo":          Echo,
 		"exec":          Exec,
 		"exit":          Exit,
 		"fzf":           FZF,
@@ -28,9 +28,7 @@ func FuncMap() template.FuncMap {
 		"head":          Head,
 		"ls":            Ls,
 		"mkdir":         Mkdir,
-		"print":         Print,
 		"printf":        Printf,
-		"println":       Println,
 		"pwd":           PWD,
 		"reverse":       Reverse,
 		"sort":          Sort,

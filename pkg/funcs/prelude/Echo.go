@@ -4,6 +4,6 @@ import (
 	"fmt"
 )
 
-func Println(args ...interface{}) string {
+func Echo(args ...interface{}) string {
 	return fmt.Sprintln(args...)
 }
