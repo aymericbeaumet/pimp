@@ -13,7 +13,6 @@ import (
 
 	"github.com/aymericbeaumet/pimp/pkg/command"
 	"github.com/aymericbeaumet/pimp/pkg/util"
-	"github.com/fatih/color"
 	"github.com/mattn/go-shellwords"
 	"github.com/urfave/cli/v2"
 )
@@ -23,8 +22,6 @@ var version = "$version"
 var commit = "$commit"
 var date = "$date"
 var builtBy = "$builtBy"
-
-var colorExample = color.New(color.FgYellow).SprintFunc()
 
 func init() {
 	debug.SetGCPercent(-1)
@@ -36,8 +33,9 @@ func main() {
 	app.Name = "pimp"
 	app.Version = version
 	app.Description = strings.TrimSpace(`
-pimp is a shell-agnostic command-line expander and command runner with pattern
-matching and templating capabilities that increases your productivity.
+pimp is a shell-agnostic command expander and task runner with pattern
+matching, templating and scripting capabilities that increases your
+productivity.
 		`)
 	app.Authors = []*cli.Author{
 		{
@@ -77,30 +75,8 @@ OPTIONS:
     {{.}}
 {{- end}}
 
-EXAMPLES:
-
-    Let's start with the classic "Hello, World!". This illustrates how pimp
-    acts as a fancy command proxy. No expansion is performed here.
-
-        $ ` + colorExample(`pimp echo 'Hello, World!'`) + `
-        Hello, World!
-
-    Let's make it a little bit more interesting by adding some mappings to a
-    Pimpfile. Pimp stops as soon as a match is found. Note how "..." enables us
-    to catch variadic arguments which are automatically appended during the
-    expansion process.
-
-        $ ` + colorExample(`cat ./Pimpfile`) + `
-        git co     : git checkout {{"{{GitLocalBranches | FZF}}"}}
-        git co ... : git checkout
-        $ ` + colorExample(`pimp git co`) + `{{"\t"}}# executes "git checkout <branch>" with the branch name chosen in fzf
-        $ ` + colorExample(`pimp git co master`) + `{{"\t"}}# executes "git checkout master" ("master" is from the "...")
-
-    You can also leverage the pimp templating system to render arbitrary files.
-
-        $ ` + colorExample(`pimp -o readme.md --render readme.md.tmpl`) + `{{"\t"}}# Overwrite the readme with the rendered template
-
-    See the project homepage and documentation for more advanced examples.
+USAGE:
+    See the project homepage for usage, examples and documentation.
 `
 
 	app.Before = func(c *cli.Context) error {
