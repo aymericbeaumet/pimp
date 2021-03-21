@@ -18,24 +18,8 @@ patch: |
 
 build: go build -o pimp .
 
-test-go: go test -v ./...
+install: go install .
 
-test-lint:
-  golangci-lint run
+test: go test -v ./...
 
-test-examples: |
-  #!/bin/sh
-  for example in ./examples/*; do
-    [ -x "$example" ] || continue
-    out="$("$example")"
-    if [ $? -ne 0 ]; then
-      echo "❌ $example: unexpected status code $?"
-      exit 1
-    fi
-    expected="$(cat "$example.expected")"
-    if [ "$out" != "$expected" ]; then
-      echo "❌ $example: output differs from what's expected\n\n[[OUTPUT]]\n$out\n\n[[EXPECTED]]\n$expected"
-      exit 1
-    fi
-    echo "✅ $example"
-  done
+lint: golangci-lint run

@@ -21,13 +21,10 @@ jobs:
           [ -z "$(git status --porcelain)" ] || exit 1
 
       - name: Build and install pimp
-        run: go install .
+        run: pimp install
 
-      - name: Run Go tests
-        run: pimp test-go
-
-      - name: Run examples
-        run: pimp test-examples
+      - name: Run tests
+        run: pimp test
 
   lint:
     runs-on: ubuntu-latest
