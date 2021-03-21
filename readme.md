@@ -46,6 +46,9 @@ go install github.com/aymericbeaumet/pimp@latest
 
 ### Pimpfile
 
+Pimpfile are an important part of pimp. These YAML files allow you to configure
+command expansion and tasks with a simple and expressive syntax.
+
 Read more about [Pimpfiles](./docs/pimpfile.md) in the documentation.
 
 ### Command Expander
@@ -62,9 +65,9 @@ it is going to be expanded to `git <args>`.
 $ cat ~/.Pimpfile
 git: git status -sb
 git ...: git
-````
+```
 
-````
+```
 $ pimp git # equivalent to `git status -sb`
 $ pimp git log # equivalent to `git log`
 ```
