@@ -23,13 +23,12 @@ var zshCommand = &cli.Command{
 			return err
 		}
 
-		fmt.Fprintf(c.App.Writer, `
+		fmt.Fprintln(c.App.Writer, `
 _pimp() {
-  eval "$(pimp --config=%#v --zsh-completion -- "${words[@]}")"
+  eval "$(pimp --zsh-completion -- "${words[@]}")"
 }
 
-compdef _pimp pimp
-`, c.String("config"))
+compdef _pimp pimp`)
 
 		return nil
 	},
@@ -44,16 +43,16 @@ var zshCompletionCommand = &cli.Command{
 	Name:   "--zsh-completion",
 	Hidden: true,
 	Action: func(c *cli.Context) error {
-		_, eng, err := initializeConfigEngine(c)
-		if err != nil {
-			return err
-		}
-
 		args := c.Args().Slice() // pimp [OPTION]... CMD [ARG]...
 		lastArgIndex := len(args) - 1
 
-		cmdargs, pendingFlag := skipFlags(c, args[:lastArgIndex]) // CMD [ARG]...
+		pendingFlag, cmdargs := reparseOptions(c, args[:lastArgIndex])
 		cmdargs = append(cmdargs, args[lastArgIndex])
+
+		_, eng, err := initializeConfigEngine(c, true)
+		if err != nil {
+			return err
+		}
 
 		// If a CMD is detected, delegate to the appropriate completion function
 		if len(cmdargs) > 1 {
@@ -75,7 +74,7 @@ var zshCompletionCommand = &cli.Command{
 			return nil
 		}
 
-		// If a flag is currently pending and expecting a parameter
+		// If a flag is currently pending and expecting a file parameter
 		if pendingFlag != nil {
 			if isFlagTakesFile(pendingFlag) {
 				fmt.Fprintln(c.App.Writer, "_files")
@@ -100,7 +99,7 @@ var zshCompletionCommand = &cli.Command{
 			return nil
 		}
 
-		// By default we print completion for the options
+		// By default we offer to complete the options
 
 		sharedExclusionList := []string{"-h", "--help", "-v", "--version"}
 
@@ -179,7 +178,7 @@ return ret`)
 	},
 }
 
-func skipFlags(c *cli.Context, args []string) ([]string, cli.Flag) {
+func reparseOptions(c *cli.Context, args []string) (cli.Flag, []string) {
 	// get the private flagSet field
 	// https://stackoverflow.com/a/43918797/1071486
 	flagSetField := reflect.ValueOf(c).Elem().FieldByName("flagSet")
@@ -199,7 +198,7 @@ func skipFlags(c *cli.Context, args []string) ([]string, cli.Flag) {
 			for _, flag := range c.App.Flags {
 				for _, name := range flag.Names() {
 					if name == flagName {
-						return nil, flag
+						return flag, nil
 					}
 				}
 			}
@@ -208,7 +207,7 @@ func skipFlags(c *cli.Context, args []string) ([]string, cli.Flag) {
 		return nil, nil
 	}
 
-	return flagSet.Args(), nil
+	return nil, flagSet.Args()
 }
 
 func contains(stack []string, needle string) bool {
