@@ -4,9 +4,8 @@
 [![github](https://img.shields.io/github/issues/aymericbeaumet/pimp?style=flat-square&logo=github)](https://github.com/aymericbeaumet/pimp/issues)
 [![go.dev](https://img.shields.io/github/v/release/aymericbeaumet/pimp?style=flat-square&logo=go&label=go.dev&logoColor=white)](https://pkg.go.dev/github.com/aymericbeaumet/pimp)
 
-pimp is a shell-agnostic command-line expander and command runner with
-pattern matching and templating capabilities that increases your
-productivity.
+pimp is a shell-agnostic command expander and task runner with pattern matching
+and templating capabilities that increases your productivity.
 
 ## Table of Contents
 
@@ -19,12 +18,13 @@ productivity.
    1. [Task Runner](#task-runner)
    1. [Template Engine](#template-engine)
    1. [Script Engine](#script-engine)
-   1. [Go library](#go-library)
+   1. [Go Library](#go-library)
 1. [Documentation](#documentation)
 1. [Examples](#examples)
 1. [Development](#development)
    1. [Building](#building)
    1. [Testing](#testing)
+   1. [Releasing](#releasing)
 
 ## Installation
 
@@ -107,9 +107,9 @@ $ pimp --run script.pimp
 
 Read more about how to use pimp as a [script engine](./docs/script-engine.md) in the documentation.
 
-### Go library
+### Go Library
 
-Read more about how to import pimp as a [go library](./docs/go-library.md) in the documentation.
+Read more about how to import pimp as a [Go library](./docs/go-library.md) in the documentation.
 
 ## Documentation
 
@@ -123,10 +123,10 @@ pimp.
 
 ## Development
 
-### Building
-
 The [Go toolchain](https://golang.org/doc/install) is required to work on this
 project.
+
+### Building
 
 ```
 go build -o pimp .
@@ -136,4 +136,16 @@ go build -o pimp .
 
 ```
 go test -v ./...
+```
+
+
+### Releasing
+
+Pimp tasks are defined to release new version. The release process is entirely
+automated and is being taken care of by the CI.
+
+```
+pimp major
+pimp minor
+pimp patch
 ```
