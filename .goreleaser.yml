@@ -33,6 +33,7 @@ changelog:
   sort: asc
   filters:
     exclude:
+      - '^GitBook:'
       - '^chore:'
       - '^docs:'
       - '^style:'
