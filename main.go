@@ -14,6 +14,7 @@ import (
 	"github.com/aymericbeaumet/pimp/pkg/command"
 	"github.com/aymericbeaumet/pimp/pkg/util"
 	"github.com/fatih/color"
+	"github.com/mattn/go-shellwords"
 	"github.com/urfave/cli/v2"
 )
 
@@ -69,7 +70,7 @@ USAGE:
 {{- end}}
 
     Execute pimp without arguments to start a REPL.
-    Pipe a script into pimp without arguments to execute it.
+    Pipe a script into pimp without arguments to evaluate it.
 
 OPTIONS:
 {{- range .VisibleFlags}}
@@ -218,6 +219,14 @@ EXAMPLES:
 			Usage: "Append to the --output file instead of truncating",
 		},
 
+		&cli.StringFlag{
+			Name:      "config",
+			Aliases:   []string{"c"},
+			EnvVars:   []string{"PIMP_CONFIG"},
+			Usage:     "Load this configuration `FILE` (default: ~/.pimprc)",
+			TakesFile: true,
+		},
+
 		&cli.StringSliceFlag{
 			Name:    "env",
 			Aliases: []string{"e"},
@@ -239,12 +248,6 @@ EXAMPLES:
 		&cli.BoolFlag{
 			Name:  "frozen",
 			Usage: "Fail if the output differs from the --output file",
-		},
-
-		&cli.StringSliceFlag{
-			Name:      "global",
-			Usage:     "Load one or more `PIMPFILE`S to make their commands available globally",
-			TakesFile: true,
 		},
 
 		&cli.StringFlag{
@@ -278,7 +281,16 @@ EXAMPLES:
 		},
 	)
 
-	if err := app.RunContext(context.Background(), os.Args); err != nil {
+	defaultOpts, err := shellwords.Parse(os.Getenv("PIMP_DEFAULT_OPTS"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	args := make([]string, 0, len(os.Args)+len(defaultOpts))
+	args = append(args, os.Args[0])
+	args = append(args, defaultOpts...)
+	args = append(args, os.Args[1:]...)
+
+	if err := app.RunContext(context.Background(), args); err != nil {
 		log.Fatal(err)
 	}
 }

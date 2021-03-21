@@ -1,11 +1,13 @@
 package command
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/aymericbeaumet/pimp/pkg/config"
 	"github.com/aymericbeaumet/pimp/pkg/engine"
 	"github.com/aymericbeaumet/pimp/pkg/funcs"
 	"github.com/urfave/cli/v2"
@@ -36,33 +38,44 @@ func CommandsFlags() []cli.Flag {
 	return out
 }
 
-func initializeEngine(c *cli.Context) (*engine.Engine, error) {
+func initializeConfigEngine(c *cli.Context) (*config.Config, *engine.Engine, error) {
 	eng := engine.New()
 
+	// Load configuration
+	conf, err := config.Load(c.String("config"))
+	if err != nil {
+		return nil, nil, err
+	}
+	defer conf.Close()
+
 	// Load the local Pimpfiles
-	var pimpfiles []string
-	pimpfiles = append(pimpfiles, c.StringSlice("file")...)
+	pimpfiles := append([]string{}, c.StringSlice("file")...)
 	if len(pimpfiles) == 0 { // if no Pimpfiles are defined, apply the default resolution mecanism
 		p, err := resolvePimpfiles()
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		pimpfiles = p
 	}
 	for _, pimpfile := range pimpfiles {
-		if err := eng.LoadPimpfile(pimpfile, true); err != nil {
-			return nil, err
+		f, err := os.Open(pimpfile)
+		if err != nil {
+			return nil, nil, err
+		}
+		defer f.Close()
+		if err := eng.LoadPimpfile(f, true); err != nil {
+			return nil, nil, err
 		}
 	}
 
 	// Load the global Pimpfiles (with lower priority)
-	for _, pimpfile := range c.StringSlice("global") {
+	for _, pimpfile := range conf.Pimpfiles {
 		if err := eng.LoadPimpfile(pimpfile, false); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 
-	return eng, nil
+	return conf, eng, nil
 }
 
 var pimpfileCandidates = []string{"Pimpfile.go", "Pimpfile"}
@@ -102,6 +115,8 @@ func resolvePimpfiles() ([]string, error) {
 		currentDir = filepath.Dir(currentDir)
 	}
 
+	// if the root directory as been reached (/), then just resolve candidates in
+	// the cwd
 	out = []string{}
 	for _, candidate := range pimpfileCandidates {
 		name := filepath.Join(currentDir, candidate)
@@ -145,20 +160,17 @@ func isFlagAllowedMultipleTimes(flag cli.Flag) bool {
 	}
 }
 
-func printAliases(c *cli.Context, eng *engine.Engine) (string, error) {
-	var flags strings.Builder
-
-	for _, global := range c.StringSlice("global") {
-		flags.Write([]byte(fmt.Sprintf(" --global %#v", global)))
-	}
-
-	for _, file := range c.StringSlice("file") {
-		flags.Write([]byte(fmt.Sprintf(" -f %#v", file)))
+func printShellAliases(c *cli.Context, eng *engine.Engine) error {
+	if len(c.StringSlice("file")) > 0 {
+		return errors.New("flag --file is not compatible with this command")
 	}
 
 	for _, command := range eng.Commands() {
-		fmt.Fprintf(c.App.Writer, "alias %#v=%#v\n", command, "pimp"+flags.String()+" "+command)
+		fmt.Fprintf(
+			c.App.Writer,
+			"alias %#v=%#v\n", command, fmt.Sprintf("pimp --config=%#v %s", c.String("config"), command),
+		)
 	}
 
-	return flags.String(), nil
+	return nil
 }

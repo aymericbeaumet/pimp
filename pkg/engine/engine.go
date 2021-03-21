@@ -1,9 +1,7 @@
 package engine
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -12,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aymericbeaumet/pimp/pkg/util"
 	"github.com/mattn/go-shellwords"
 	"gopkg.in/yaml.v2"
 )
@@ -27,11 +24,12 @@ type Engine struct {
 }
 
 type Mapping struct {
-	CWD     string            `json:"cwd,omitempty"`
-	Pattern []string          `json:"pattern"`
-	Env     []string          `json:"env,omitempty"`
-	Args    []string          `json:"args"`
-	Files   map[string]string `json:"files,omitempty"`
+	Pattern []string `json:"pattern"`
+	//
+	CWD   string            `json:"cwd,omitempty"`
+	Env   []string          `json:"env,omitempty"`
+	Args  []string          `json:"args"`
+	Files map[string]string `json:"files,omitempty"`
 }
 
 func New() *Engine {
@@ -40,20 +38,9 @@ func New() *Engine {
 	}
 }
 
-func (eng *Engine) LoadPimpfile(filename string, setCWD bool) error {
-	normalized, err := util.NormalizePath(filename)
-	if err != nil {
-		return err
-	}
-
-	f, err := os.Open(normalized)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
+func (eng *Engine) LoadPimpfile(file *os.File, setCWD bool) error {
 	var pimpfile Pimpfile
-	if err := yaml.NewDecoder(f).Decode(&pimpfile); err != nil {
+	if err := yaml.NewDecoder(file).Decode(&pimpfile); err != nil {
 		return err
 	}
 
@@ -68,18 +55,18 @@ func (eng *Engine) LoadPimpfile(filename string, setCWD bool) error {
 			return err
 		}
 
-		var cwd string
-		if setCWD {
-			cwd = filepath.Dir(normalized)
-		}
-
-		eng.Mappings[pattern[0]] = append(eng.Mappings[pattern[0]], &Mapping{
-			CWD:     cwd,
+		mapping := &Mapping{
 			Pattern: pattern,
 			Env:     env,
 			Args:    args,
 			Files:   files,
-		})
+		}
+
+		if setCWD {
+			mapping.CWD = filepath.Dir(file.Name())
+		}
+
+		eng.Mappings[pattern[0]] = append(eng.Mappings[pattern[0]], mapping)
 	}
 
 	return nil
@@ -113,10 +100,6 @@ func (eng *Engine) Map(env []string, args []string) ([]string, []string, map[str
 	}
 
 	return env, args, nil, ""
-}
-
-func (eng *Engine) JSON(w io.Writer) error {
-	return json.NewEncoder(w).Encode(eng)
 }
 
 func (eng *Engine) Commands() []string {

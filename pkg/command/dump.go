@@ -1,15 +1,22 @@
 package command
 
-import "github.com/urfave/cli/v2"
+import (
+	"encoding/json"
+
+	"github.com/urfave/cli/v2"
+)
 
 var dumpCommand = &cli.Command{
 	Name:  "--dump",
-	Usage: "Dump the engine in JSON format",
+	Usage: "Dump the config and engine in JSON format",
 	Action: func(c *cli.Context) error {
-		eng, err := initializeEngine(c)
+		conf, eng, err := initializeConfigEngine(c)
 		if err != nil {
 			return err
 		}
-		return eng.JSON(c.App.Writer)
+		return json.NewEncoder(c.App.Writer).Encode(map[string]interface{}{
+			"CONFIG": conf,
+			"ENGINE": eng,
+		})
 	},
 }
