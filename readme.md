@@ -24,6 +24,7 @@ productivity.
 1. [Examples](#examples)
 1. [Development](#development)
    1. [Building](#building)
+   1. [Installing](#installing)
    1. [Testing](#testing)
    1. [Releasing](#releasing)
 
@@ -38,6 +39,9 @@ where you see fit.
 _Note: the macOS binaries are not signed yet, you will have to open them through the GUI first._
 
 ### Via the Go toolchain
+
+If you have the [Go toolchain](https://golang.org/doc/install) on your machine,
+you install the latest pimp release with the following command:
 
 ```
 go install github.com/aymericbeaumet/pimp@latest
@@ -133,17 +137,22 @@ project.
 go build -o pimp .
 ```
 
+### Installing
+
+```
+go install .
+```
+
 ### Testing
 
 ```
 go test -v ./...
 ```
 
-
 ### Releasing
 
-Pimp tasks are defined to release new version. The release process is entirely
-automated and is being taken care of by the CI.
+Pimp tasks are defined in the [./Pimpfile](./Pimpfile) to release new versions.
+The release process is entirely automated and is being taken care of by the CI.
 
 ```
 pimp major
