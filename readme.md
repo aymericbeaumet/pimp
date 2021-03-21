@@ -18,7 +18,7 @@ productivity.
    1. [Command Expander](#command-expander)
    1. [Task Runner](#task-runner)
    1. [Template Engine](#template-engine)
-   1. [Script Engine](#script-engine)
+   1. [Script Engine (PimpScript)](#script-engine-pimpscript)
    1. [Go Library](#go-library)
 1. [Documentation](#documentation)
 1. [Examples](#examples)
@@ -100,7 +100,7 @@ $ pimp --render template.tmpl
 Read more about how to use pimp as a stand-alone [template
 engine](./docs/template-engine.md) in the documentation.
 
-### Script Engine
+### Script Engine (PimpScript)
 
 ```
 $ pimp --run script.pimp
