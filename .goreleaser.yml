@@ -35,4 +35,5 @@ changelog:
     exclude:
       - '^chore:'
       - '^docs:'
+      - '^style:'
       - '^test:'
