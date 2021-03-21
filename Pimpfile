@@ -39,5 +39,3 @@ test-examples: |
     fi
     echo "✅ $example"
   done
-
-generate-readme: pimp --output={{GitRoot}}/readme.md --render {{GitRoot}}/docs/.readme.md.tmpl
