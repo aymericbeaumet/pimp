@@ -14,10 +14,12 @@ productivity.
    1. [Pre-built binaries](#pre-built-binaries)
    1. [Using the Go toolchain](#using-the-go-toolchain)
 1. [Usage](#usage)
-   1. [Command expander](#command-expander)
-   1. [Command runner](#command-runner)
-   1. [Template engine](#template-engine)
-   1. [Script engine](#script-engine)
+   1. [Pimpfile](#pimpfile)
+   1. [Command Expander](#command-expander)
+   1. [Task Runner](#task-runner)
+   1. [Template Engine](#template-engine)
+   1. [Script Engine](#script-engine)
+   1. [Go library](#go-library)
 1. [Documentation](#documentation)
 1. [Examples](#examples)
 1. [Development](#development)
@@ -42,21 +44,69 @@ go install github.com/aymericbeaumet/pimp@latest
 
 ## Usage
 
-### Command expander
+### Pimpfile
 
-[Read more](./command-expander.md) in the documentation.
+Read more about [Pimpfiles](./docs/pimpfile.md) in the documentation.
 
-### Command runner
+### Command Expander
 
-[Read more](./command-runner.md) in the documentation.
+When pimp is used as a command expander, it's going to try to match the command
+and args it is being given with the patterns you have defined in your
+`~/.Pimpfile`.
 
-### Template engine
+For example in this case, when `git` is passed (with no extra arguments), it is
+going to be expanded into `git status -sb`. If some arguments are passed, then
+it is going to be expanded to `git <args>`.
 
-[Read more](./template-engine.md) in the documentation.
+```
+$ cat ~/.Pimpfile
+git: git status -sb
+git ...: git
+````
 
-### Script engine
+````
+$ pimp git # equivalent to `git status -sb`
+$ pimp git log # equivalent to `git log`
+```
 
-[Read more](./script-engine.md) in the documentation.
+Read more about [command expansion](./docs/command-expander.md) in the documentation.
+
+### Task Runner
+
+Following the same concept as command expansion (see above), you can also
+leverage pimp to behave as a task runner for your project. The Pimpfile in your
+local directory always has the highest priority.
+
+For example this is how you would do if you wanted to define a
+
+```
+$ cat ./Pimpfile
+test: go test ./...
+$ pimp test
+```
+
+Read more about [running tasks](./docs/task-runner.md) in the documentation.
+
+### Template Engine
+
+```
+$ pimp --render template.tmpl
+```
+
+Read more about how to use pimp as a stand-alone [template
+engine](./docs/template-engine.md) in the documentation.
+
+### Script Engine
+
+```
+$ pimp --run script.pimp
+```
+
+Read more about how to use pimp as a [script engine](./docs/script-engine.md) in the documentation.
+
+### Go library
+
+Read more about how to import pimp as a [go library](./docs/go-library.md) in the documentation.
 
 ## Documentation
 
