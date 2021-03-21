@@ -23,11 +23,6 @@ jobs:
       - name: Build and install pimp
         run: go install .
 
-      - name: Check the readme is up to date
-        run: |
-          pimp generate-readme
-          [ -z "$(git status --porcelain)" ] || exit 1
-
       - name: Run Go tests
         run: pimp test-go
 
