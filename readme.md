@@ -12,7 +12,7 @@ productivity.
 
 1. [Installation](#installation)
    1. [Pre-built binaries](#pre-built-binaries)
-   1. [Using the Go toolchain](#using-the-go-toolchain)
+   1. [Via the Go toolchain](#via-the-go-toolchain)
 1. [Usage](#usage)
    1. [Pimpfile](#pimpfile)
    1. [Command Expander](#command-expander)
@@ -37,7 +37,7 @@ where you see fit.
 
 _Note: the macOS binaries are not signed yet, you will have to open them through the GUI first._
 
-### Using the Go toolchain
+### Via the Go toolchain
 
 ```
 go install github.com/aymericbeaumet/pimp@latest
