@@ -166,10 +166,13 @@ func printShellAliases(c *cli.Context, eng *engine.Engine) error {
 	}
 
 	for _, command := range eng.Commands() {
-		fmt.Fprintf(
-			c.App.Writer,
-			"alias %#v=%#v\n", command, fmt.Sprintf("pimp --config=%#v %s", c.String("config"), command),
-		)
+		var alias string
+		if config := c.String("config"); len(config) > 0 {
+			alias = fmt.Sprintf("pimp --config=%#v %s", config, command)
+		} else {
+			alias = fmt.Sprintf("pimp %s", command)
+		}
+		fmt.Fprintf(c.App.Writer, "alias %#v=%#v\n", command, alias)
 	}
 
 	return nil
