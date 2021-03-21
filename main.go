@@ -36,7 +36,7 @@ func main() {
 pimp is a shell-agnostic command expander and task runner with pattern
 matching, templating and scripting capabilities that increases your
 productivity.
-		`)
+  `)
 	app.Authors = []*cli.Author{
 		{
 			Name:  "Aymeric Beaumet",
