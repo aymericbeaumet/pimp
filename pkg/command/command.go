@@ -38,7 +38,7 @@ func CommandsFlags() []cli.Flag {
 	return out
 }
 
-func initializeConfigEngine(c *cli.Context) (*config.Config, *engine.Engine, error) {
+func initializeConfigEngine(c *cli.Context, withLocalPimpfiles bool) (*config.Config, *engine.Engine, error) {
 	eng := engine.New()
 
 	// Load configuration
@@ -49,22 +49,24 @@ func initializeConfigEngine(c *cli.Context) (*config.Config, *engine.Engine, err
 	defer conf.Close()
 
 	// Load the local Pimpfiles
-	pimpfiles := append([]string{}, c.StringSlice("file")...)
-	if len(pimpfiles) == 0 { // if no Pimpfiles are defined, apply the default resolution mecanism
-		p, err := resolvePimpfiles()
-		if err != nil {
-			return nil, nil, err
+	if withLocalPimpfiles {
+		pimpfiles := append([]string{}, c.StringSlice("file")...)
+		if len(pimpfiles) == 0 { // if no Pimpfiles are defined, apply the default resolution mecanism
+			p, err := resolvePimpfiles()
+			if err != nil {
+				return nil, nil, err
+			}
+			pimpfiles = p
 		}
-		pimpfiles = p
-	}
-	for _, pimpfile := range pimpfiles {
-		f, err := os.Open(pimpfile)
-		if err != nil {
-			return nil, nil, err
-		}
-		defer f.Close()
-		if err := eng.LoadPimpfile(f, true); err != nil {
-			return nil, nil, err
+		for _, pimpfile := range pimpfiles {
+			f, err := os.Open(pimpfile)
+			if err != nil {
+				return nil, nil, err
+			}
+			defer f.Close()
+			if err := eng.LoadPimpfile(f, true); err != nil {
+				return nil, nil, err
+			}
 		}
 	}
 

@@ -16,7 +16,7 @@ import (
 var DefaultCommand = &cli.Command{
 	Hidden: true,
 	Action: func(c *cli.Context) error {
-		_, eng, err := initializeConfigEngine(c)
+		_, eng, err := initializeConfigEngine(c, true)
 		if err != nil {
 			return err
 		}

@@ -10,7 +10,7 @@ var dumpCommand = &cli.Command{
 	Name:  "--dump",
 	Usage: "Dump the config and engine in JSON format",
 	Action: func(c *cli.Context) error {
-		conf, eng, err := initializeConfigEngine(c)
+		conf, eng, err := initializeConfigEngine(c, true)
 		if err != nil {
 			return err
 		}

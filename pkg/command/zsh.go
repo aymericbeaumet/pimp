@@ -14,7 +14,7 @@ var zshCommand = &cli.Command{
 	Name:  "--zsh",
 	Usage: "Print the Zsh config (aliases and completion)",
 	Action: func(c *cli.Context) error {
-		_, eng, err := initializeConfigEngine(c)
+		_, eng, err := initializeConfigEngine(c, false)
 		if err != nil {
 			return err
 		}
