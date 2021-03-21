@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Initial page](README.md)
+* [Pimp](README.md)
 * [Documentation](docs/README.md)
   * [Pimp as a Task Runner](docs/task-runner.md)
   * [Pimp as a Template Engine](docs/template-engine.md)
