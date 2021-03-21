@@ -4,8 +4,9 @@
 [![github](https://img.shields.io/github/issues/aymericbeaumet/pimp?style=flat-square&logo=github)](https://github.com/aymericbeaumet/pimp/issues)
 [![go.dev](https://img.shields.io/github/v/release/aymericbeaumet/pimp?style=flat-square&logo=go&label=go.dev&logoColor=white)](https://pkg.go.dev/github.com/aymericbeaumet/pimp)
 
-pimp is a shell-agnostic command expander and task runner with pattern matching
-and templating capabilities that increases your productivity.
+pimp is a shell-agnostic command expander and task runner with pattern
+matching, templating and scripting capabilities that increases your
+productivity.
 
 ## Table of Contents
 
