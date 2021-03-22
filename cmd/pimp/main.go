@@ -44,10 +44,10 @@ productivity.
 		},
 	}
 	app.Metadata = map[string]interface{}{
-		"builtBy": builtBy,
-		"commit":  commit,
-		"date":    date,
-		"website": "https://github.com/aymericbeaumet/pimp",
+		"builtBy":  builtBy,
+		"commit":   commit,
+		"date":     date,
+		"homepage": "https://pimp.dev",
 	}
 
 	app.CustomAppHelpTemplate = `{{.Name}} {{.Version}}
@@ -56,7 +56,7 @@ productivity.
 
 {{.Description}}
 
-Project homepage: {{index .Metadata "website"}}
+Project homepage: {{index .Metadata "homepage"}}
 
 USAGE:
     pimp [OPTION]... COMMAND [ARG]...{{"\t"}}Match COMMAND and ARGS, expand, then execute
