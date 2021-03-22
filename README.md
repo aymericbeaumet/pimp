@@ -16,8 +16,8 @@ _Note: the macOS binaries are not signed yet, you will have to open them through
 
 If you have the [Go toolchain](https://golang.org/doc/install) on your machine, you can install the latest pimp release with the following command:
 
-```text
-go install github.com/aymericbeaumet/pimp@latest
+```
+go install github.com/aymericbeaumet/pimp/cmd/pimp@latest
 ```
 
 ## Usage
@@ -120,4 +120,3 @@ pimp major
 pimp minor
 pimp patch
 ```
-
