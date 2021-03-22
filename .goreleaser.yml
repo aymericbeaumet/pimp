@@ -58,8 +58,6 @@ dockers:
   - image_templates:
       - "aymericbeaumet/{{.ProjectName}}:latest"
       - "aymericbeaumet/{{.ProjectName}}:{{.Tag}}"
-      - "ghcr.io/aymericbeaumet/{{.ProjectName}}:latest"
-      - "ghcr.io/aymericbeaumet/{{.ProjectName}}:{{.Tag}}"
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
