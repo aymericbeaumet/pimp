@@ -47,7 +47,8 @@ brews:
   - tap:
       owner: aymericbeaumet
       name: homebrew-tap
-      token: "{{.Env.GORELEASER_HOMEBREW_TAP_GITHUB_TOKEN}}"
+      token: "{{.Env.HOMEBREW_TAP_GITHUB_TOKEN}}"
+    folder: Formula
     homepage: "{{.Env.PIMP_HOMEPAGE}}"
     description: "{{.Env.PIMP_DESCRIPTION}}"
     license: "{{.Env.PIMP_LICENSE}}"
