@@ -4,7 +4,9 @@ install: go install ./cmd/pimp
 
 test: go test -v ./...
 
-lint: golangci-lint run
+test-lint: golangci-lint run
+
+test-release: goreleaser release --rm-dist --snapshot --skip-publish --skip-sign --skip-validate
 
 major: |
   #!/bin/sh
