@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"testing"
 )
 
@@ -22,7 +21,9 @@ func TestExamples(t *testing.T) {
 	}
 
 	for _, m := range matches {
-		if strings.HasSuffix(m, ".go") || strings.HasSuffix(m, ".expected") {
+		if s, err := os.Stat(m); err != nil {
+			t.Error(err)
+		} else if (s.Mode() & 0100) == 0 { // if non executable by the user
 			continue
 		}
 

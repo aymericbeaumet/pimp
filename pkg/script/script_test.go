@@ -8,9 +8,9 @@ import (
 	"github.com/aymericbeaumet/pimp/pkg/script"
 )
 
-func TestRunFunctionCall(t *testing.T) {
+func TestExecute(t *testing.T) {
 	var out strings.Builder
-	if err := script.Run(&out, `$a := 1
+	if err := script.Execute(&out, `$a := 1
 $b := 2
 
 println $a $b
@@ -23,7 +23,7 @@ println $a $b
 	}
 }
 
-func TestCompile(t *testing.T) {
+func TestTranspile(t *testing.T) {
 	var out strings.Builder
 	if err := script.Transpile(&out, `$a := 1
 $b := 2
@@ -41,7 +41,7 @@ println $a $b
 	}
 }
 
-func TestCompileMultiline(t *testing.T) {
+func TestTranspileMultiline(t *testing.T) {
 	var out strings.Builder
 	if err := script.Transpile(&out, `$a := "foo\";bar"; println $a
 $b := `+"`b\\`"+`; println $b

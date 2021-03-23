@@ -1,4 +1,4 @@
-#!/usr/bin/env -S pimp --run
+#!/usr/bin/env -S pimp --exec
 
 $input := `
 # foobar
