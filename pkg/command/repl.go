@@ -53,7 +53,7 @@ var replCommand = &cli.Command{
 			}
 
 			var out strings.Builder
-			if err := script.Run(&out, input, c.String("ldelim"), c.String("rdelim"), funcmap); err != nil {
+			if err := script.Execute(&out, input, c.String("ldelim"), c.String("rdelim"), funcmap); err != nil {
 				fmt.Fprintln(c.App.ErrWriter, err)
 				return
 			}

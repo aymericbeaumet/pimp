@@ -17,6 +17,6 @@ var evalCommand = &cli.Command{
 			return fmt.Errorf("--eval expects exactly one STRING, got %d", len(args))
 		}
 
-		return script.Run(c.App.Writer, args[0], c.String("ldelim"), c.String("rdelim"), funcmap)
+		return script.Execute(c.App.Writer, args[0], c.String("ldelim"), c.String("rdelim"), funcmap)
 	},
 }

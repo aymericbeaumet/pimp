@@ -8,7 +8,7 @@ import (
 	ptemplate "github.com/aymericbeaumet/pimp/pkg/template"
 )
 
-func Run(w io.Writer, script, ldelim, rdelim string, fm template.FuncMap) error {
+func Execute(w io.Writer, script, ldelim, rdelim string, fm template.FuncMap) error {
 	var sb strings.Builder
 	if err := Transpile(&sb, script, ldelim, rdelim); err != nil {
 		return err

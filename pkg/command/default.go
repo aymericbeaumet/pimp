@@ -24,7 +24,7 @@ var DefaultCommand = &cli.Command{
 		env, args, files, cwd := eng.Map(os.Environ(), c.Args().Slice())
 		if len(args) == 0 {
 			if len(c.String("input")) == 0 && !isatty.IsTerminal(os.Stdin.Fd()) {
-				return runCommand.Action(c)
+				return execCommand.Action(c)
 			}
 			return replCommand.Action(c)
 		}

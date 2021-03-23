@@ -18,8 +18,8 @@ var funcmap = funcs.FuncMap()
 var Commands = []*cli.Command{
 	dumpCommand,
 	evalCommand,
+	execCommand,
 	renderCommand,
-	runCommand,
 	shellCommand,
 	transpileCommand,
 	zshCommand,

@@ -10,14 +10,14 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var runCommand = &cli.Command{
-	Name:      "--run",
+var execCommand = &cli.Command{
+	Name:      "--exec",
 	ArgsUsage: "[FILE]",
-	Usage:     "Run the PimpScript FILE (use - or omit arg for stdin)",
+	Usage:     "Execute the PimpScript FILE (use - or omit arg for stdin)",
 	Action: func(c *cli.Context) error {
 		args := c.Args().Slice()
 		if len(args) > 1 {
-			return fmt.Errorf("--run expects at most one FILE, got %d", len(args))
+			return fmt.Errorf("--exec expects at most one FILE, got %d", len(args))
 		}
 
 		var text string
@@ -42,6 +42,6 @@ var runCommand = &cli.Command{
 		text = util.StripShebang(text)
 
 		// TODO: type check errors.FatalError and exit (when merged https://github.com/golang/go/issues/34201)
-		return script.Run(c.App.Writer, text, c.String("ldelim"), c.String("rdelim"), funcmap)
+		return script.Execute(c.App.Writer, text, c.String("ldelim"), c.String("rdelim"), funcmap)
 	},
 }
