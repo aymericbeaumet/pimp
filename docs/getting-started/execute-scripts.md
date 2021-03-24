@@ -11,7 +11,7 @@ range GitBranches
 end
 ```
 
-Read more about the [Script Engine](../user-guide/script-engine.md) in the documentation.
+Read more about the [Script Engine](../user-guide-1/script-engine.md) in the documentation.
 
 Let's finally see the next steps you can follow to learn more about pimp.
 
