@@ -7,17 +7,14 @@ pimp is a shell-agnostic command expander and task runner with pattern matching,
 Pros:
 
 * Fast
-* Elegant yet powerful [configuration syntax](user-guide/pimpfile.md)
-* Rich [template functions library](user-guide/template-engine.md#functions) supporting git, http, kubernetes, sql, and more
+* Elegant yet powerful [configuration syntax](./docs/user-guide/pimpfile.md)
+* Rich [template functions library](./docs/user-guide/template-engine.md#functions) supporting git, http, kubernetes, sql, and more
 
-The [documentation](https://www.pimp.dev/) should help you make the most out of the tool. Some quick links:
+The [documentation](./docs) should help you make the most out of the tool. Some quick links:
 
-* [Installation](installation.md)
-* [Getting Started](getting-started/welcome.md)
-* [User Guide](user-guide/pimpfile.md)
-* [Frequently Asked Questions](faq.md)
+* [Installation](./docs/installation.md)
+* [Getting Started](./docs/getting-started/welcome.md)
+* [User Guide](./docs/user-guide/pimpfile.md)
+* [Frequently Asked Questions](./docs/faq.md)
 
-The [examples](https://github.com/aymericbeaumet/pimp/tree/master/examples) also show you what's possible to do.
-
-
-
+The [examples](./examples) also show you what's possible to do.
