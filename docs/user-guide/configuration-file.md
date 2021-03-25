@@ -1,6 +1,10 @@
 # Configuration File
 
-The default location for the configuration file is `~/.pimprc` . You can configure this via the `--config` CLI flag or the `PIMP_CONFIG` environment variable. If the configuration file or a specific configuration key is missing, then the corresponding default value as shown below will be used.
+The default location for the configuration file is `~/.pimprc` . You can configure this via the `--config` CLI flag or the `PIMP_CONFIG` environment variable.
+
+The pimp configuration file is used to configure global configuration.
+
+If the configuration file or a specific configuration key is missing, then the corresponding default value as shown below will be used:
 
 ```yaml
 # ~/.pimprc (with default values)

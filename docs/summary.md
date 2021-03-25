@@ -27,3 +27,4 @@
 ## Integrations
 
 * [Bash, Zsh, Fish](integrations/bash-zsh-fish.md)
+

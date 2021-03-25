@@ -7,7 +7,7 @@ description: >-
 
 # Bash, Zsh, Fish
 
-## Bash, Fish, etc
+### Bash, Fish, etc
 
 This integration provides aliases for all the commands defined in your global Pimpfile. Add this to your shell configuration file:
 
@@ -15,7 +15,7 @@ This integration provides aliases for all the commands defined in your global Pi
 eval $(pimp --shell)
 ```
 
-## Zsh
+### Zsh
 
 The Zsh integration is more evolved. It support aliases, but also brings a more advanced completion mecanism system. Add this to your `~/.zshrc`:
 

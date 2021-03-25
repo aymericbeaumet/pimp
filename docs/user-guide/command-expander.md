@@ -1,6 +1,8 @@
 # Command Expander
 
-When pimp is used as a command expander, it's going to try to match the command and args it is being given with the patterns you have defined in your `~/.Pimpfile`.
+When pimp is used as a command expander, it's going to try to match the command and args it is being given with the patterns you have defined in your Pimpfiles.
+
+### Syntax
 
 For example in this case, when `git` is passed \(with no extra arguments\), it is going to be expanded into `git status -sb`. If some arguments are passed, then it is going to be expanded to `git <args>`.
 
