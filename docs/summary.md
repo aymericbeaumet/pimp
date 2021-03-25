@@ -1,8 +1,7 @@
 # Table of contents
 
-* [Home](readme.md)
+* [Introduction](readme.md)
 * [Installation](installation.md)
-* [Contributing](contributing.md)
 * [FAQ](faq.md)
 
 ## Getting Started
@@ -16,7 +15,6 @@
 
 ## User Guide
 
-* [Introduction](user-guide/introduction.md)
 * [Pimpfile](user-guide/pimpfile.md)
 * [Configuration File](user-guide/configuration-file.md)
 * [Command Expander](user-guide/command-expander.md)
@@ -29,3 +27,4 @@
 ## Integrations
 
 * [Bash, Zsh, Fish](integrations/bash-zsh-fish.md)
+
