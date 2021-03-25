@@ -26,3 +26,6 @@
 * [Script Engine \(PimpScript\)](user-guide/script-engine.md)
 * [Go Library](user-guide/go-library.md)
 
+## Integrations
+
+* [Bash, Zsh, Fish](integrations/bash-zsh-fish.md)
