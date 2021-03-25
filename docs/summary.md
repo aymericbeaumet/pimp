@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Introduction](readme.md)
+* [Pimp](readme.md)
 * [Installation](installation.md)
 * [FAQ](faq.md)
 
@@ -27,4 +27,3 @@
 ## Integrations
 
 * [Bash, Zsh, Fish](integrations/bash-zsh-fish.md)
-
