@@ -15,5 +15,5 @@ $ pimp git     # equivalent to `git status -sb`
 $ pimp git log # equivalent to `git log`
 ```
 
-It is tedious to type `pimp git` instead of `git`, look at the [shell integration](../integrations/bash-zsh-fish.md) to make your life easier.
+It is tedious to type `pimp git` instead of `git`, look at the [shell integration](https://github.com/aymericbeaumet/pimp/tree/060207933e60cc983a58d90dd5520e56e2c543aa/docs/integrations/bash-zsh-fish.md) to make your life easier.
 

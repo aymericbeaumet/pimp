@@ -46,7 +46,7 @@ You are in position 2
 You are in position 3
 ```
 
-### REPL
+## REPL
 
 pimp comes with an REPL with history, autocompletion, etc. It's a good way to experiment short scripts:
 

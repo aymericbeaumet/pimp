@@ -1,2 +1,4 @@
-# README
+# Home
+
+Welcome to the documentation!
 
