@@ -1,3 +1,4 @@
-# Home
+# Pimp
 
 Welcome to the documentation.
+

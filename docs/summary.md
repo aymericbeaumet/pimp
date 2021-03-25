@@ -19,11 +19,12 @@
 * [Configuration File](user-guide/configuration-file.md)
 * [Command Expander](user-guide/command-expander.md)
 * [Task Runner](user-guide/task-runner.md)
-* [Template Engine](user-guide/template-engine.md)
-* [Template Functions](user-guide/template-functions.md)
+* [Template Engine](user-guide/template-engine/README.md)
+  * [Functions](user-guide/template-engine/functions.md)
 * [Script Engine \(PimpScript\)](user-guide/script-engine.md)
 * [Go Library](user-guide/go-library.md)
 
 ## Integrations
 
 * [Bash, Zsh, Fish](integrations/bash-zsh-fish.md)
+

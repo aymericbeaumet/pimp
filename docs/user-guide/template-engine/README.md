@@ -1,6 +1,6 @@
 # Template Engine
 
-```text
+```bash
 $ pimp --render template.tmpl
 ```
 
