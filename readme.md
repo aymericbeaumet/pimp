@@ -8,7 +8,7 @@ Pros:
 
 * Fast
 * Elegant yet powerful [configuration syntax](https://www.pimp.dev/user-guide/pimpfile)
-* Rich [template functions library](https://www.pimp.dev/user-guide/template-engine) supporting git, http, kubernetes, sql, and more
+* Rich [template functions library](https://www.pimp.dev/user-guide/template-engine/functions) supporting git, http, kubernetes, sql, and more
 
 The [documentation](https://www.pimp.dev/) should help you make the most out of the tool. Some quick links:
 
